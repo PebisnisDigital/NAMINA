@@ -106,6 +106,7 @@ export function ViniCinematic({
   assetUrls,
   introStartedAt,
   fallbackOriginal,
+  presentation = "original",
   previewMode = false,
   editorMode = false,
   editorMenu,
@@ -117,6 +118,7 @@ export function ViniCinematic({
   assetUrls: AssetUrls;
   introStartedAt?: number;
   fallbackOriginal?: OriginalProfile;
+  presentation?: "original" | "doctor";
   previewMode?: boolean;
   editorMode?: boolean;
   editorMenu?: MenuKey;
@@ -430,7 +432,7 @@ export function ViniCinematic({
   };
 
   return (
-    <main style={styleVariables} className={`vini-cinema${showLoader ? " vini-cinema--loading" : ""}${activeGallery ? " vini-cinema--gallery" : ""}${customStyle ? " vini-cinema--styled" : ""}${customStyle?.layoutPreset ? ` vini-cinema--layout-${customStyle.layoutPreset}` : ""}${customStyle?.buttonVariant === "outline" ? " vini-cinema--button-outline" : ""}${editorMode && pageSize === 1 && phoneVideoHealth.height > phoneVideoHealth.width ? " vini-cinema--studio-portrait-video" : ""}`}>
+    <main style={styleVariables} className={`vini-cinema${showLoader ? " vini-cinema--loading" : ""}${activeGallery ? " vini-cinema--gallery" : ""}${customStyle ? " vini-cinema--styled" : ""}${presentation === "doctor" ? " vini-cinema--medical" : ""}${customStyle?.layoutPreset ? ` vini-cinema--layout-${customStyle.layoutPreset}` : ""}${customStyle?.buttonVariant === "outline" ? " vini-cinema--button-outline" : ""}${editorMode && pageSize === 1 && phoneVideoHealth.height > phoneVideoHealth.width ? " vini-cinema--studio-portrait-video" : ""}`}>
       <div className="vini-cinema__stage" aria-hidden="true">
         {videoSrc && (
           <video

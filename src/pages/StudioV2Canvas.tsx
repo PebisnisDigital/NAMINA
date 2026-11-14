@@ -1,6 +1,5 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { ViniCinematic } from "../components/ViniCinematic";
-import { DoctorSite } from "./DoctorSite";
 import { siteDocumentSchema, type SiteDocument } from "../static/sites";
 import type { AssetUrls } from "../domain/content";
 import "../studio-v2-canvas.css";
@@ -51,10 +50,6 @@ export function StudioV2Canvas() {
     notify({ type: "NAMINA_V2_READY" });
     return () => window.removeEventListener("message", receive);
   }, []);
-
-  useEffect(() => {
-    if (data?.site.presentation === "doctor") document.getElementById(activeMenu.toLowerCase())?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeMenu, data?.site.presentation]);
 
   useEffect(() => {
     document.querySelectorAll<HTMLElement>("[data-v2-edit]").forEach((element) =>
@@ -122,7 +117,8 @@ export function StudioV2Canvas() {
 
   return <main className="studio-v2-canvas">
     {data ? <div className="studio-v2-canvas__interact" onClickCapture={selectElement}>
-      {data.site.presentation === "doctor" ? <DoctorSite site={data.site} editorMode /> : <ViniCinematic
+      <ViniCinematic
+        presentation={data.site.presentation}
         content={data.site.content}
         assetUrls={data.assets}
         previewMode
@@ -134,7 +130,7 @@ export function StudioV2Canvas() {
         }}
         onEditorAddCard={(section) => notify({ type: "NAMINA_V2_ADD_CARD", section })}
         onEditorAddFact={(section) => notify({ type: "NAMINA_V2_ADD_FACT", section })}
-      />}
+      />
     </div> : <div className="studio-v2-canvas__loading">Memuat tampilan website asli…</div>}
     {inline && <div className="studio-v2-canvas__inline" style={{
       position: "fixed", top: inline.y, left: inline.x,

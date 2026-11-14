@@ -134,8 +134,8 @@ export function BusinessAdmin() {
   async function extend(id: string) {
     if (!businessClient || !allowed) return;
     const days = Number(durations[id] || "30");
-    if (!Number.isInteger(days) || days < 1 || days > 3650) {
-      setError("Isi penambahan durasi antara 1 sampai 3650 hari."); return;
+    if (!Number.isInteger(days) || days < 1 || days > 365) {
+      setError("Isi penambahan durasi antara 1 sampai 365 hari."); return;
     }
     if (!window.confirm("Pembayaran melalui WA sudah diperiksa? Tambahkan " + days + " hari masa pembuatan website baru?")) return;
     setWorking(id); setMessage(""); setError("");
@@ -209,7 +209,7 @@ export function BusinessAdmin() {
             </form>
             <p className="business__fineprint">
               Link berlaku terus selama belum dicabut atau diganti. Setelah pembayaran WA
-              dikonfirmasi, aktifkan masa 30 hari melalui tombol perpanjangan di bawah.
+              dikonfirmasi, atur masa aktif 1–365 hari melalui tombol perpanjangan di bawah.
             </p>
           </section>
           {issued && <section className="business__issued" role="status">
@@ -262,7 +262,7 @@ export function BusinessAdmin() {
                     </div>
                     <div className="business__renew-controls">
                       <label>Tambah durasi (hari)
-                        <input type="number" min="1" max="3650" step="1" inputMode="numeric"
+                        <input type="number" min="1" max="365" step="1" inputMode="numeric"
                           value={durations[partner.id] ?? "30"}
                           onChange={(e) => setDurations((prev) => ({ ...prev, [partner.id]: e.target.value }))} />
                       </label>
@@ -277,7 +277,7 @@ export function BusinessAdmin() {
           </section>
           <p className="business__fineprint">
             Memperpanjang akses tidak menerima pembayaran otomatis. Pastikan pembayaran Rp87.000/bulan
-            sudah Teh cek di WhatsApp sebelum menambahkan 30 hari. Durasi bisa diubah secara manual.
+            sudah Teh cek di WhatsApp sebelum memperpanjang akses. Durasi dapat diatur 1–365 hari per perpanjangan.
           </p>
         </>}
       {user && <p className="business__fineprint">Akun admin: {user.email}</p>}

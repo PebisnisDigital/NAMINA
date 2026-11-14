@@ -133,7 +133,7 @@ export function BusinessAdmin() {
 
   async function extend(id: string) {
     if (!businessClient || !allowed) return;
-    const days = Number(durations[id] || "30");
+    const days = Number(durations[id] || "365");
     if (!Number.isInteger(days) || days < 1 || days > 365) {
       setError("Isi penambahan durasi antara 1 sampai 365 hari."); return;
     }
@@ -209,7 +209,7 @@ export function BusinessAdmin() {
             </form>
             <p className="business__fineprint">
               Link berlaku terus selama belum dicabut atau diganti. Setelah pembayaran WA
-              dikonfirmasi, atur masa aktif 1–365 hari melalui tombol perpanjangan di bawah.
+              dikonfirmasi, aktifkan masa 365 hari (default) melalui tombol perpanjangan di bawah. Admin dapat memilih 1–365 hari.
             </p>
           </section>
           {issued && <section className="business__issued" role="status">
@@ -263,7 +263,7 @@ export function BusinessAdmin() {
                     <div className="business__renew-controls">
                       <label>Tambah durasi (hari)
                         <input type="number" min="1" max="365" step="1" inputMode="numeric"
-                          value={durations[partner.id] ?? "30"}
+                          value={durations[partner.id] ?? "365"}
                           onChange={(e) => setDurations((prev) => ({ ...prev, [partner.id]: e.target.value }))} />
                       </label>
                       <button type="button" className="business__primary" disabled={!!working}
@@ -276,8 +276,8 @@ export function BusinessAdmin() {
               </div>}
           </section>
           <p className="business__fineprint">
-            Memperpanjang akses tidak menerima pembayaran otomatis. Pastikan pembayaran Rp87.000/bulan
-            sudah Teh cek di WhatsApp sebelum memperpanjang akses. Durasi dapat diatur 1–365 hari per perpanjangan.
+            Memperpanjang akses tidak menerima pembayaran otomatis. Pastikan pembayaran sudah
+            Teh cek di WhatsApp sebelum memperpanjang akses. Durasi default 365 hari dan dapat diatur 1–365 hari per perpanjangan. Batas pembuatan 100 website per mitra.
           </p>
         </>}
       {user && <p className="business__fineprint">Akun admin: {user.email}</p>}

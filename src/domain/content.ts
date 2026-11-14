@@ -24,6 +24,7 @@ export const reservedSlugs = new Set([
   "gaya",
   "templates",
   "formulir",
+  "dokter",
   "mitra",
   "daftar",
   "akses",

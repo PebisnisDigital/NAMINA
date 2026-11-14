@@ -18,6 +18,7 @@ const mediaUrl = z.string().max(2000).refine((value) => {
 
 export const siteDocumentSchema = z.object({
   slug: slugSchema,
+  presentation: z.enum(["original", "doctor"]).optional(),
   content: contentSchema,
   media: z.object({
     desktopVideo: mediaUrl,

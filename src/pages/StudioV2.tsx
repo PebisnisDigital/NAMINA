@@ -4,7 +4,7 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { createDoctorTemplate, setDoctorAppearance } from "../static/doctorTemplate";
+import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance } from "../static/doctorTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -342,14 +342,7 @@ export function StudioV2() {
   const setAppearance = (presentation: "original" | "doctor") => {
     if (!site || slug === "vini") return;
     change((next) => {
-      if (presentation === "doctor") Object.assign(next, setDoctorAppearance(next));
-      else {
-        next.presentation = "original";
-        if (next.content.original) next.content.original.style = {
-          ...originalStyleDefaults, backgroundColor:"#08080c", textColor:"#fff5ed",
-          accentColor:"#f34b53", buttonColor:"#b5232b", buttonTextColor:"#ffffff", borderColor:"#b67b78",
-        };
-      }
+      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : setOriginalAppearance(next));
     });
   };
 
@@ -513,7 +506,7 @@ export function StudioV2() {
       return <>
         <div className="studio-v2__template-reset">
           <strong>Pilih template tampilan</strong>
-          <p>Ganti gaya website tanpa menghapus nama, media, karya, produk, dan kontak klien.</p>
+          <p>Layout tetap sama seperti /vini. Pilihan Dokter hanya mengganti warna, font, dan tombol tanpa menghapus konten.</p>
           <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation!=="doctor"} onClick={() => setAppearance("original")}>Original NAMINA</button>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>

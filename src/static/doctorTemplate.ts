@@ -1,24 +1,43 @@
 import { siteDocumentSchema, cloneViniTemplate, type SiteDocument } from "./sites";
+import { originalStyleDefaults } from "./originalStyle";
 
-const medicalPalette = {
-  backgroundColor: "#ffffff", textColor: "#0b233d", accentColor: "#078e8d",
-  buttonColor: "#078e8d", buttonTextColor: "#ffffff", borderColor: "#c9e7e8",
+/** Appearance tokens only. The /vini layout, content and media never change. */
+const medicalSkin = {
+  backgroundColor: "#f4fbfc",
+  textColor: "#153248",
+  accentColor: "#078d91",
+  buttonColor: "#058e90",
+  buttonTextColor: "#ffffff",
+  borderColor: "#a5dadd",
+  fontFamily: "poppins",
+  buttonRadius: 24,
+  buttonVariant: "solid",
 } as const;
-
-/** Layout-only switch: preserve all client copy, video, gallery and contact information. */
-export function setDoctorAppearance(document: SiteDocument): SiteDocument {
+const originalSkin = {
+  backgroundColor: originalStyleDefaults.backgroundColor,
+  textColor: originalStyleDefaults.textColor,
+  accentColor: originalStyleDefaults.accentColor,
+  buttonColor: originalStyleDefaults.buttonColor,
+  buttonTextColor: originalStyleDefaults.buttonTextColor,
+  borderColor: originalStyleDefaults.borderColor,
+  fontFamily: originalStyleDefaults.fontFamily,
+  buttonRadius: originalStyleDefaults.buttonRadius,
+  buttonVariant: originalStyleDefaults.buttonVariant,
+};
+function changeSkin(document: SiteDocument, presentation: "original" | "doctor"): SiteDocument {
   const next = structuredClone(document);
-  next.presentation = "doctor";
-  const original = next.content.original;
-  if (original) original.style = {
-    fontFamily: "poppins", titleScale: 1, bodyScale: 1, roleScale: 1,
-    menuScale: 1, layoutPreset: "original", contentMargin: 72,
-    topSpacing: 20, factColumns: 3, galleryColumns: 3, cardGap: 18,
-    buttonRadius: 24, borderWidth: 1, buttonVariant: "solid", shadow: "soft",
-    ...original.style, ...medicalPalette,
-  };
+  next.presentation = presentation;
+  if (next.content.original) {
+    next.content.original.style = {
+      ...originalStyleDefaults,
+      ...next.content.original.style,
+      ...(presentation === "doctor" ? medicalSkin : originalSkin),
+    };
+  }
   return siteDocumentSchema.parse(next);
 }
+export const setDoctorAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "doctor");
+export const setOriginalAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "original");
 
 /** Fictitious sample for /dokter and new medical client sites. */
 export function createDoctorTemplate(slug: string): SiteDocument {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { businessClient } from "../business/client";
 import { slugSchema } from "../domain/content";
 import { ViniCinematic } from "../components/ViniCinematic";
+import { DoctorSite } from "./DoctorSite";
 import { NaminaIntroStage } from "../components/NaminaLogo";
 import { createNaminaIntroSound } from "../components/naminaIntroSound";
 import { normalizeSite, resolveMedia, siteDocumentSchema, viniSeed, type SiteDocument } from "../static/sites";
@@ -80,6 +81,9 @@ export function StaticSite({ slug }: { slug: string }) {
     document.title = `${state.document.content.identity.displayName} | NamiNa`;
   }, [state]);
 
+  if (state.status === "ready" && state.document.presentation === "doctor") {
+    return <DoctorSite key={slug} site={state.document} />;
+  }
   if (state.status === "ready") {
     return <ViniCinematic key={slug} content={state.document.content} assetUrls={resolveMedia(state.document)} introStartedAt={introStart ?? undefined} fallbackOriginal={slug === "vini" ? viniOriginal : undefined} />;
   }

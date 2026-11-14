@@ -40,6 +40,7 @@ export const originalFontFamilies: Record<OriginalStyle["fontFamily"], string> =
   georgia: 'Georgia, "Times New Roman", serif',
   system: 'system-ui, -apple-system, "Segoe UI", sans-serif',
   poppins: '"Poppins", Arial, sans-serif',
+  fredoka: '"Fredoka", "Trebuchet MS", system-ui, sans-serif',
   cormorant: '"Cormorant Garamond", Georgia, serif',
 };
 

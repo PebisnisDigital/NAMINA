@@ -1176,3 +1176,70 @@
     border-color: transparent;
   }
 }
+
+
+/* CHIBI NAMINA: a pastel, toy-like skin over the exact original cinematic layout.
+   No changes to section order, positioning, responsive grid, or video framing. */
+.vini-cinema--chibi .vini-cinema__hello {
+  background: color-mix(in srgb, var(--namina-accent) 12%, var(--namina-bg));
+  border-color: var(--namina-line);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--namina-accent) 30%, transparent);
+  font-weight: 650;
+}
+.vini-cinema--chibi .vini-cinema__intro h1 span {
+  text-shadow: 1px 3px 0 color-mix(in srgb, var(--namina-accent) 18%, transparent);
+}
+.vini-cinema--chibi .vini-cinema__nav button:hover,
+.vini-cinema--chibi .vini-cinema__nav button.is-active {
+  color: var(--namina-accent);
+  background: color-mix(in srgb, var(--namina-accent) 14%, var(--namina-bg));
+  border-color: var(--namina-line);
+  border-radius: 999px;
+}
+.vini-cinema--chibi .vini-cinema__contact-top,
+.vini-cinema--chibi .vini-cinema__detail-link {
+  color: var(--namina-button-ink);
+  border: 2px solid color-mix(in srgb, var(--namina-button-bg) 62%, white);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffc3e1 0%, var(--namina-button-bg) 68%, #eaa6ff 100%);
+  box-shadow: 0 5px 0 #d994c8, 0 12px 25px #ef58a933;
+  font-weight: 750;
+}
+.vini-cinema--chibi .vini-cinema__contact-top:hover,
+.vini-cinema--chibi .vini-cinema__detail-link:hover {
+  background: linear-gradient(135deg, #ffdbef, #fd9ccc);
+}
+.vini-cinema--chibi .vini-cinema__visual-card {
+  border: 2px solid var(--namina-line);
+  border-radius: 25px;
+  box-shadow: 0 5px 0 #eab4e0, 0 15px 24px #bb70a02b;
+}
+.vini-cinema--chibi .vini-cinema__highlight-track .vini-cinema__highlight {
+  border-color: var(--namina-line);
+  background: color-mix(in srgb, var(--namina-bg) 86%, white);
+}
+.vini-cinema--chibi .vini-cinema__highlight-track .vini-cinema__highlight img {
+  filter: hue-rotate(35deg) saturate(1.18);
+}
+.vini-cinema--chibi .vini-cinema__bio,
+.vini-cinema--chibi .vini-cinema__empty {
+  color: color-mix(in srgb, var(--namina-ink) 75%, var(--namina-bg));
+}
+.vini-cinema--chibi .vini-cinema__playback button {
+  color: var(--namina-ink);
+  border-color: var(--namina-line);
+  background: color-mix(in srgb, var(--namina-bg) 80%, var(--namina-accent));
+  border-radius: 999px;
+}
+.vini-cinema--chibi .vini-cinema__modal-copy h2,
+.vini-cinema--chibi .vini-cinema__modal-close {
+  color: var(--namina-ink);
+}
+@media (max-width: 700px) {
+  .vini-cinema--chibi .vini-cinema__nav,
+  .vini-cinema--chibi .vini-cinema__nav--open {
+    background: color-mix(in srgb, var(--namina-bg) 91%, #ffe2f3);
+    border-top-color: var(--namina-line);
+  }
+  .vini-cinema--chibi .vini-cinema__nav button.is-active { border-color: transparent; }
+}

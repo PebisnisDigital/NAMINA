@@ -13,6 +13,18 @@ const medicalSkin = {
   buttonRadius: 24,
   buttonVariant: "solid",
 } as const;
+const chibiSkin = {
+  backgroundColor: "#fff3fc",
+  textColor: "#492b5b",
+  accentColor: "#ef58a9",
+  buttonColor: "#fa75bb",
+  buttonTextColor: "#421c4d",
+  borderColor: "#edb9e4",
+  fontFamily: "fredoka",
+  buttonRadius: 32,
+  buttonVariant: "solid",
+} as const;
+
 const originalSkin = {
   backgroundColor: originalStyleDefaults.backgroundColor,
   textColor: originalStyleDefaults.textColor,
@@ -24,19 +36,20 @@ const originalSkin = {
   buttonRadius: originalStyleDefaults.buttonRadius,
   buttonVariant: originalStyleDefaults.buttonVariant,
 };
-function changeSkin(document: SiteDocument, presentation: "original" | "doctor"): SiteDocument {
+function changeSkin(document: SiteDocument, presentation: "original" | "doctor" | "chibi"): SiteDocument {
   const next = structuredClone(document);
   next.presentation = presentation;
   if (next.content.original) {
     next.content.original.style = {
       ...originalStyleDefaults,
       ...next.content.original.style,
-      ...(presentation === "doctor" ? medicalSkin : originalSkin),
+      ...(presentation === "doctor" ? medicalSkin : presentation === "chibi" ? chibiSkin : originalSkin),
     };
   }
   return siteDocumentSchema.parse(next);
 }
 export const setDoctorAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "doctor");
+export const setChibiAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "chibi");
 export const setOriginalAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "original");
 
 /** Fictitious sample for /dokter and new medical client sites. */

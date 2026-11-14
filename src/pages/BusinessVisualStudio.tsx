@@ -4,7 +4,7 @@ import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { setDoctorAppearance, setOriginalAppearance } from "../static/doctorTemplate";
+import { setDoctorAppearance, setOriginalAppearance, setChibiAppearance } from "../static/doctorTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -238,10 +238,11 @@ export function BusinessVisualStudio() {
         <strong>Pilih template tampilan</strong>
         <p>Semua template memakai layout /vini. Hanya warna, font dan gaya tombol yang berbeda.</p>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation !== "doctor"} onClick={()=>change(next=>Object.assign(next,setOriginalAppearance(next)))}>Original NAMINA</button>
+          <button type="button" className="studio-v2__ghost" aria-pressed={!site.presentation || site.presentation === "original"} onClick={()=>change(next=>Object.assign(next,setOriginalAppearance(next)))}>Original NAMINA</button>
           <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "doctor"} onClick={()=>change(next=>Object.assign(next,setDoctorAppearance(next)))}>Dokter • Medical Teal</button>
+          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "chibi"} onClick={()=>change(next=>Object.assign(next,setChibiAppearance(next)))}>Chibi • Candy Pastel</button>
         </div>
-        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Lihat contoh Dokter ↗</a></p>
+        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a></p>
       </div>
       <div className="studio-v2__template-reset">
         <strong>Isi dari Template /vini</strong>
@@ -264,7 +265,7 @@ export function BusinessVisualStudio() {
           <label key={k}><span>{k}</span><input type="color" value={style[k]} onChange={e=>updateStyle(k,e.target.value)}/><code>{style[k]}</code></label>)}
       </div>
       <label className="studio-v2__field"><span>Jenis font</span><select value={style.fontFamily} onChange={e=>updateStyle("fontFamily",e.target.value as OriginalStyle["fontFamily"])}>
-        {["montserrat","poppins","space","cormorant","georgia","system"].map(f=><option key={f} value={f}>{f}</option>)}
+        {["montserrat","poppins","fredoka","space","cormorant","georgia","system"].map(f=><option key={f} value={f}>{f}</option>)}
       </select></label>
       {(["titleScale","bodyScale","roleScale","menuScale"] as const).map(k=>
         <label className="studio-v2__slider" key={k}><span>{k} · {(style[k]??1).toFixed(2)}</span>

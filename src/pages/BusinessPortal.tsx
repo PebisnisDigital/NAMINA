@@ -4,6 +4,7 @@ import { Link } from "./BusinessUi";
 import { businessClient, type BusinessSiteRow, type BusinessWorkspace } from "../business/client";
 import { loadViniTemplate, siteDocumentSchema } from "../static/sites";
 import { createDoctorTemplate } from "../static/doctorTemplate";
+import { createChibiTemplate } from "../static/chibiTemplate";
 import { slugSchema } from "../domain/content";
 import "../business.css";
 
@@ -23,7 +24,7 @@ export function BusinessPortal() {
   const [workspace, setWorkspace] = useState<BusinessWorkspace | null>(null);
   const [sites, setSites] = useState<BusinessSiteRow[]>([]);
   const [newSlug, setNewSlug] = useState("");
-  const [newTemplate, setNewTemplate] = useState<"original" | "doctor">("original");
+  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi">("original");
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const canCreate = !!workspace && workspace.subscription_status === "active" && !!workspace.current_period_end && new Date(workspace.current_period_end).getTime() > Date.now();
@@ -112,7 +113,7 @@ export function BusinessPortal() {
     }
     setBusy(true);
     try {
-      const draft = siteDocumentSchema.parse(newTemplate === "doctor" ? createDoctorTemplate(slug) : await loadViniTemplate(slug));
+      const draft = siteDocumentSchema.parse(newTemplate === "doctor" ? createDoctorTemplate(slug) : newTemplate === "chibi" ? createChibiTemplate(slug) : await loadViniTemplate(slug));
       const response = await businessClient.from("namina_business_sites").insert({
         workspace_id: workspace.id, slug, document: draft,
       }).select("id").single();
@@ -191,14 +192,14 @@ export function BusinessPortal() {
           </section>}
           <section className="business__section">
             <h2>+ Buat website baru</h2>
-            <p className="business__fineprint">Pilih gaya Original atau Dokter. Semua data contoh dapat diedit sebelum dipublikasikan.</p>
+            <p className="business__fineprint">Pilih gaya Original, Dokter, atau Chibi. Semua data contoh dapat diedit sebelum dipublikasikan.</p>
             <form className="business__create" onSubmit={(event) => void createSite(event)}>
               <label>Nama link website klien
                 <input required maxLength={48} value={newSlug} placeholder="contoh: klien-siti" onChange={(event) => setNewSlug(event.target.value)} />
               </label>
               <label>Template website
-                  <select aria-label="Pilih template website" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor")}>
-                    <option value="original">Original /vini</option><option value="doctor">Dokter • Medical Teal</option>
+                  <select aria-label="Pilih template website" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi")}>
+                    <option value="original">Original /vini</option><option value="doctor">Dokter • Medical Teal</option><option value="chibi">Chibi • Candy Pastel</option>
                   </select>
                 </label>
                 <button className="business__primary" type="submit" disabled={busy || sites.length >= workspace.max_sites || !canCreate}>Buat Website</button>

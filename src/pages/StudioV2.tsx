@@ -4,7 +4,8 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance } from "../static/doctorTemplate";
+import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance, setChibiAppearance } from "../static/doctorTemplate";
+import { createChibiTemplate } from "../static/chibiTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -101,7 +102,7 @@ export function StudioV2() {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [slug, setSlug] = useState("vini");
   const [newSlug, setNewSlug] = useState("");
-  const [newTemplate, setNewTemplate] = useState<"original" | "doctor">("original");
+  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi">("original");
   const [site, setSite] = useState<SiteDocument | null>(null);
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
@@ -308,7 +309,7 @@ export function StudioV2() {
     try {
       // A fresh, independent copy of the live /vini demo, including its
       // video, animated-icon data, Karya, and Produk collections.
-      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : await loadViniTemplate(normalized);
+      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : newTemplate === "chibi" ? createChibiTemplate(normalized) : await loadViniTemplate(normalized);
       setSite(template);
       setSlug(normalized);
       setSha(null);
@@ -339,10 +340,10 @@ export function StudioV2() {
     } finally { setWorking(false); }
   };
 
-  const setAppearance = (presentation: "original" | "doctor") => {
+  const setAppearance = (presentation: "original" | "doctor" | "chibi") => {
     if (!site || slug === "vini") return;
     change((next) => {
-      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : setOriginalAppearance(next));
+      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : presentation === "chibi" ? setChibiAppearance(next) : setOriginalAppearance(next));
     });
   };
 
@@ -500,18 +501,19 @@ export function StudioV2() {
     if (showDesign) {
       const colorFields = [
         ["backgroundColor", "Latar belakang"], ["textColor", "Warna teks"],
-        ["accentColor", "Aksen merah"], ["buttonColor", "Warna tombol"],
+        ["accentColor", "Warna aksen"], ["buttonColor", "Warna tombol"],
         ["buttonTextColor", "Teks tombol"], ["borderColor", "Garis & border"],
       ] as const;
       return <>
         <div className="studio-v2__template-reset">
           <strong>Pilih template tampilan</strong>
-          <p>Layout tetap sama seperti /vini. Pilihan Dokter hanya mengganti warna, font, dan tombol tanpa menghapus konten.</p>
+          <p>Semua pilihan memakai layout /vini. Dokter dan Chibi hanya mengganti warna, font, serta gaya tombol tanpa menghapus konten.</p>
           <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
-            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation!=="doctor"} onClick={() => setAppearance("original")}>Original NAMINA</button>
+            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={!site.presentation || site.presentation==="original"} onClick={() => setAppearance("original")}>Original NAMINA</button>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>
+            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="chibi"} onClick={() => setAppearance("chibi")}>Chibi • Candy Pastel</button>
           </div>
-          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Lihat contoh /dokter ↗</a></p>
+          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a></p>
         </div>
         <p className="studio-v2__inspector-hint">Semua pengaturan langsung terlihat pada layar HP. Tidak mengubah template asli klien lain.</p>
         {slug !== "vini" && <div className="studio-v2__template-reset">
@@ -537,7 +539,7 @@ export function StudioV2() {
         </div>
         <label className="studio-v2__field"><span>Jenis font</span><select value={style.fontFamily}
           onChange={(event) => updateStyle("fontFamily", event.target.value as OriginalStyle["fontFamily"])}>
-          <option value="montserrat">Montserrat</option><option value="poppins">Poppins</option>
+          <option value="montserrat">Montserrat</option><option value="poppins">Poppins</option><option value="fredoka">Fredoka (Chibi)</option>
           <option value="space">Space Grotesk</option><option value="cormorant">Cormorant Garamond</option>
           <option value="georgia">Georgia</option><option value="system">Font sistem</option>
         </select></label>
@@ -742,9 +744,10 @@ export function StudioV2() {
           <summary title="Buat website baru">+ Klien</summary>
           <div><input aria-label="Nama link klien baru" placeholder="nama-klien"
             value={newSlug} onChange={(event) => setNewSlug(event.target.value)} />
-            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor")}>
+            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi")}>
               <option value="original">Original /vini</option>
               <option value="doctor">Dokter • Medical Teal</option>
+              <option value="chibi">Chibi • Candy Pastel</option>
             </select>
             <button type="button" disabled={working} onClick={() => void createClient()}>{working ? "Menyiapkan…" : "Buat Website"}</button>
           </div>

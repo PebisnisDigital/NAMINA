@@ -12,6 +12,7 @@ import { BusinessVisualStudio } from "./pages/BusinessVisualStudio";
 import { ClientForm } from "./pages/ClientForm";
 import { StaticSite } from "./pages/StaticSite";
 import { DoctorSite } from "./pages/DoctorSite";
+import { ChibiSite } from "./pages/ChibiSite";
 import { ThemeDemo, ThemeGallery } from "./pages/ThemeDemos";
 import { getDemoTheme } from "./themes/catalog";
 import "./namana.css";
@@ -27,6 +28,7 @@ function App() {
   let page;
   if (path === "/") page = <IntroLanding />;
   else if (path === "/dokter") page = <DoctorSite />;
+  else if (path === "/chibi") page = <ChibiSite />;
   else if (path === "/formulir") page = <ClientForm />;
   else if (["/mitra","/daftar"].includes(path)) page = <BusinessPortal />;
   else if (path === "/akses") page = <BusinessMagicAccess />;

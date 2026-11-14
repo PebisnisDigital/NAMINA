@@ -11,6 +11,7 @@ import { BusinessAdmin } from "./pages/BusinessAdmin";
 import { BusinessVisualStudio } from "./pages/BusinessVisualStudio";
 import { ClientForm } from "./pages/ClientForm";
 import { StaticSite } from "./pages/StaticSite";
+import { DoctorSite } from "./pages/DoctorSite";
 import { ThemeDemo, ThemeGallery } from "./pages/ThemeDemos";
 import { getDemoTheme } from "./themes/catalog";
 import "./namana.css";
@@ -25,6 +26,7 @@ function App() {
   const demoTheme = getDemoTheme(path.slice(1));
   let page;
   if (path === "/") page = <IntroLanding />;
+  else if (path === "/dokter") page = <DoctorSite />;
   else if (path === "/formulir") page = <ClientForm />;
   else if (["/mitra","/daftar"].includes(path)) page = <BusinessPortal />;
   else if (path === "/akses") page = <BusinessMagicAccess />;

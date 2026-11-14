@@ -4,6 +4,7 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
+import { createDoctorTemplate, setDoctorAppearance } from "../static/doctorTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -100,6 +101,7 @@ export function StudioV2() {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [slug, setSlug] = useState("vini");
   const [newSlug, setNewSlug] = useState("");
+  const [newTemplate, setNewTemplate] = useState<"original" | "doctor">("original");
   const [site, setSite] = useState<SiteDocument | null>(null);
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
@@ -306,7 +308,7 @@ export function StudioV2() {
     try {
       // A fresh, independent copy of the live /vini demo, including its
       // video, animated-icon data, Karya, and Produk collections.
-      const template = await loadViniTemplate(normalized);
+      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : await loadViniTemplate(normalized);
       setSite(template);
       setSlug(normalized);
       setSha(null);
@@ -335,6 +337,20 @@ export function StudioV2() {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Gagal menyalin template /vini.");
     } finally { setWorking(false); }
+  };
+
+  const setAppearance = (presentation: "original" | "doctor") => {
+    if (!site || slug === "vini") return;
+    change((next) => {
+      if (presentation === "doctor") Object.assign(next, setDoctorAppearance(next));
+      else {
+        next.presentation = "original";
+        if (next.content.original) next.content.original.style = {
+          ...originalStyleDefaults, backgroundColor:"#08080c", textColor:"#fff5ed",
+          accentColor:"#f34b53", buttonColor:"#b5232b", buttonTextColor:"#ffffff", borderColor:"#b67b78",
+        };
+      }
+    });
   };
 
   const publish = async () => {
@@ -495,6 +511,15 @@ export function StudioV2() {
         ["buttonTextColor", "Teks tombol"], ["borderColor", "Garis & border"],
       ] as const;
       return <>
+        <div className="studio-v2__template-reset">
+          <strong>Pilih template tampilan</strong>
+          <p>Ganti gaya website tanpa menghapus nama, media, karya, produk, dan kontak klien.</p>
+          <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
+            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation!=="doctor"} onClick={() => setAppearance("original")}>Original NAMINA</button>
+            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>
+          </div>
+          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Lihat contoh /dokter ↗</a></p>
+        </div>
         <p className="studio-v2__inspector-hint">Semua pengaturan langsung terlihat pada layar HP. Tidak mengubah template asli klien lain.</p>
         {slug !== "vini" && <div className="studio-v2__template-reset">
           <strong>Mulai dari contoh /vini</strong>
@@ -724,7 +749,11 @@ export function StudioV2() {
           <summary title="Buat website baru">+ Klien</summary>
           <div><input aria-label="Nama link klien baru" placeholder="nama-klien"
             value={newSlug} onChange={(event) => setNewSlug(event.target.value)} />
-            <button type="button" disabled={working} onClick={() => void createClient()}>{working ? "Menyiapkan…" : "Buat dari /vini"}</button>
+            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor")}>
+              <option value="original">Original /vini</option>
+              <option value="doctor">Dokter • Medical Teal</option>
+            </select>
+            <button type="button" disabled={working} onClick={() => void createClient()}>{working ? "Menyiapkan…" : "Buat Website"}</button>
           </div>
         </details>
       </div>

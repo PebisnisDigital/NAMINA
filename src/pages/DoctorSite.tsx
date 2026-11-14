@@ -4,37 +4,12 @@ import { createDoctorTemplate } from "../static/doctorTemplate";
 import { playableDropboxMediaUrl, retryDropboxImage, type SiteDocument } from "../static/sites";
 import "./DoctorSite.css";
 
-const facts = [
-  { label: "Domisili", value: "Jakarta (Demo)", icon: "⌖" },
-  { label: "Profesi", value: "Dokter Umum", icon: "✚" },
-  { label: "Status", value: "Profil Contoh", icon: "◈" },
-];
 const menu = [
   { id: "nama", label: "Nama", icon: "♙" },
   { id: "karir", label: "Karir", icon: "▣" },
   { id: "skill", label: "Skill", icon: "✳" },
   { id: "karya", label: "Karya", icon: "▧" },
   { id: "produk", label: "Produk", icon: "◇" },
-];
-const career = [
-  { title: "Pelayanan Kesehatan", description: "Contoh bidang pelayanan pasien dan edukasi preventif.", icon: "✚" },
-  { title: "Edukasi Masyarakat", description: "Contoh kegiatan penyuluhan dan literasi kesehatan.", icon: "♡" },
-  { title: "Pengembangan Profesi", description: "Contoh aktivitas pembelajaran dan pengembangan kompetensi.", icon: "▤" },
-];
-const skills = [
-  { title: "Edukasi Medis", desc: "Komunikasi kesehatan yang jelas dan mudah dipahami.", icon: "✦" },
-  { title: "Konseling Kesehatan", desc: "Pendampingan perilaku hidup sehat dan pencegahan.", icon: "♡" },
-  { title: "Pelayanan Umum", desc: "Contoh keterampilan layanan kesehatan dasar.", icon: "✚" },
-];
-const works = [
-  { title: "Edukasi Hidup Sehat", tag: "Kegiatan", icon: "♡" },
-  { title: "Seminar Kesehatan", tag: "Publikasi", icon: "♧" },
-  { title: "Konten Kesehatan", tag: "Edukasi", icon: "▣" },
-];
-const products = [
-  { title: "Konsultasi Online", tag: "Contoh Layanan", icon: "▤" },
-  { title: "Paket Cek Kesehatan", tag: "Contoh Layanan", icon: "✚" },
-  { title: "Program Hidup Sehat", tag: "Contoh Program", icon: "♡" },
 ];
 
 function SectionTitle({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {

@@ -4,6 +4,7 @@ import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
+import { setDoctorAppearance } from "../static/doctorTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -233,6 +234,15 @@ export function BusinessVisualStudio() {
   function controls(){
     if(!site||!original)return null;
     if(design)return <>
+      <div className="studio-v2__template-reset">
+        <strong>Pilih template tampilan</strong>
+        <p>Ganti layout tanpa menghapus data klien, foto, video, karya atau produk.</p>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation !== "doctor"} onClick={()=>change(next=>{next.presentation="original";if(next.content.original)next.content.original.style={...originalStyleDefaults,backgroundColor:"#08080c",textColor:"#fff5ed",accentColor:"#f34b53",buttonColor:"#b5232b",buttonTextColor:"#ffffff",borderColor:"#b67b78"};})}>Original NAMINA</button>
+          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "doctor"} onClick={()=>change(next=>Object.assign(next,setDoctorAppearance(next)))}>Dokter • Medical Teal</button>
+        </div>
+        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Lihat contoh Dokter ↗</a></p>
+      </div>
       <div className="studio-v2__template-reset">
         <strong>Isi dari Template /vini</strong>
         <p>Draft klien terlanjur kosong? Salin contoh lengkap /vini: video, ikon slide, Nama, Karir, Skill, Karya, dan Produk. Perubahan hanya untuk website ini.</p>

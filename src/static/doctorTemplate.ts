@@ -11,8 +11,6 @@ export function setDoctorAppearance(document: SiteDocument): SiteDocument {
   next.presentation = "doctor";
   const original = next.content.original;
   if (original) original.style = {
-    backgroundColor: "#ffffff", textColor: "#0b233d", accentColor: "#078e8d",
-    buttonColor: "#078e8d", buttonTextColor: "#ffffff", borderColor: "#c9e7e8",
     fontFamily: "poppins", titleScale: 1, bodyScale: 1, roleScale: 1,
     menuScale: 1, layoutPreset: "original", contentMargin: 72,
     topSpacing: 20, factColumns: 3, galleryColumns: 3, cardGap: 18,

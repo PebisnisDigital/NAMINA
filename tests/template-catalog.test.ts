@@ -3,15 +3,16 @@ import assert from "node:assert/strict";
 import { templateCatalog, createSiteFromTemplate, applySiteAppearance, selectedTemplate } from "../src/static/templateCatalog.ts";
 import { cloneViniTemplate, prepareSite, siteDocumentSchema } from "../src/static/sites.ts";
 
-test("the same five template choices are available to admin and partner Studios", () => {
-  assert.deepEqual(templateCatalog.map(item => item.id), ["original", "original-white", "doctor", "chibi", "wedding"]);
-  assert.deepEqual(templateCatalog.map(item => item.demo), ["/vini", "", "/dokter", "/chibi", "/wedding"]);
-  assert.equal(new Set(templateCatalog.map(item => item.id)).size, 5);
-  assert.deepEqual(templateCatalog[4].menus, ["Mempelai", "Acara", "Kisah", "Amplop", "Love Story"]);
+test("the same six template choices are available to admin and partner Studios", () => {
+  assert.deepEqual(templateCatalog.map(item => item.id), ["original", "original-white", "doctor", "chibi", "wedding2", "wedding"]);
+  assert.deepEqual(templateCatalog.map(item => item.demo), ["/vini", "", "/dokter", "/chibi", "/wedding2", "/wedding"]);
+  assert.equal(new Set(templateCatalog.map(item => item.id)).size, 6);
+  assert.deepEqual(templateCatalog[4].menus, ["Mempelai", "Acara", "Kisah", "Galeri", "Hadiah"]);
+  assert.deepEqual(templateCatalog[5].menus, ["Mempelai", "Acara", "Kisah", "Amplop", "Love Story"]);
 });
 
 test("new websites use their selected template seed instead of always copying /vini", async () => {
-  for (const id of ["original", "original-white", "doctor", "chibi", "wedding"] as const) {
+  for (const id of ["original", "original-white", "doctor", "chibi", "wedding2", "wedding"] as const) {
     const site = siteDocumentSchema.parse(prepareSite(await createSiteFromTemplate("klien-" + id, id)));
     assert.equal(site.slug, "klien-" + id);
     assert.equal(site.presentation ?? "original", id);
@@ -24,6 +25,10 @@ test("new websites use their selected template seed instead of always copying /v
   assert.equal(white.presentation, "original-white");
   assert.equal(white.content.original?.style?.backgroundColor, "#ffffff");
   assert.equal(white.content.original?.style?.textColor, "#191919");
+  const living = await createSiteFromTemplate("pasangan-living-paper", "wedding2");
+  assert.equal(living.presentation, "wedding2");
+  assert.equal(living.media.desktopVideo, "");
+  assert.equal(living.content.original?.menuTitles?.karya, "Galeri");
   const wedding = await createSiteFromTemplate("pasangan-klien", "wedding");
   assert.equal(wedding.content.original?.menuTitles?.karya, "Amplop");
   assert.equal(wedding.content.original?.menuTitles?.produk, "Love Story");
@@ -32,7 +37,7 @@ test("new websites use their selected template seed instead of always copying /v
 test("switching existing client templates only updates appearance and standard menu labels", () => {
   const original = cloneViniTemplate("klien-contoh");
   const snapshot = structuredClone(original);
-  for (const id of ["doctor", "chibi", "wedding", "original"] as const) {
+  for (const id of ["doctor", "chibi", "wedding", "wedding2", "original"] as const) {
     const edited = applySiteAppearance(original, id);
     assert.equal(edited.presentation, id);
     assert.deepEqual(edited.media, original.media);

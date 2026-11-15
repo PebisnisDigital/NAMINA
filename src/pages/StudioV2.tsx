@@ -6,7 +6,7 @@ import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { createSiteFromTemplate, applySiteAppearance, type TemplateKey } from "../static/templateCatalog";
+import { createSiteFromTemplate, applySiteAppearance, templateCatalog, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -779,6 +779,11 @@ export function StudioV2() {
             <span className="studio-v2__template-trigger-label">Template</span>
           </button>
         </div>
+        {slug === "vini" && masterPreview !== "original" && (
+          <span className="studio-v2__template-preview-note" role="status">
+            Pratinjau {templateCatalog.find(item => item.id === masterPreview)?.name} · master aman
+          </span>
+        )}
         <span className="studio-v2__autosave"><i /> Draft otomatis</span>
         <button type="button" className="studio-v2__design-trigger"
           onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Desain</span></button>

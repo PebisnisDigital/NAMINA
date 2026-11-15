@@ -20,19 +20,19 @@ export function createWeddingTemplate(slug: string): SiteDocument {
     nama: "Mempelai",
     karir: "Acara",
     skill: "Kisah",
-    karya: "Galeri",
-    produk: "RSVP",
+    karya: "Amplop",
+    produk: "Love Story",
   };
   profile.menuSettings = {
     ...profile.menuSettings,
     nama: { icon: "heart", slideSpeed: 60 },
     karir: { icon: "award", slideSpeed: 60 },
     skill: { icon: "book", slideSpeed: 60 },
-    karya: { icon: "image", slideSpeed: 65 },
-    produk: { icon: "heart", slideSpeed: 65 },
+    karya: { icon: "shopping", slideSpeed: 65 },
+    produk: { icon: "image", slideSpeed: 65 },
   };
   profile.contactUrl = "";
-  profile.contactLabel = "Isi RSVP";
+  profile.contactLabel = "Love Story";
   profile.contactMessage = "";
 
   profile.nama = {
@@ -57,8 +57,8 @@ export function createWeddingTemplate(slug: string): SiteDocument {
     ],
   };
   profile.skill = {
-    intro: "OUR LOVE STORY",
-    subtitle: "Cerita Kita",
+    intro: "OUR JOURNEY",
+    subtitle: "Timeline Cinta",
     description: "Dari pertemuan pertama hingga memilih berjalan berdua selamanya.",
     items: [
       fact("Awal Cerita", "Pertemuan pertama"),
@@ -67,23 +67,24 @@ export function createWeddingTemplate(slug: string): SiteDocument {
     ],
   };
   profile.karya = {
-    intro: "OUR MEMORIES",
-    subtitle: "Momen Indah",
+    intro: "WEDDING GIFT",
+    subtitle: "Amplop Digital",
     description: "",
     items: [
-      card("Foto Prewedding", "Ganti gambar contoh dengan foto prewedding pasangan."),
-      card("Kenangan Berdua", "Galeri foto perjalanan cinta pasangan."),
-      card("Cinematic Love Story", "Tambahkan video prewedding pada latar utama di Studio."),
+      card("Amplop Digital", "Tempat untuk menampilkan gambar rekening tujuan hadiah pernikahan. Unggah gambar rekening asli melalui Studio."),
+      card("Rekening Mempelai", "Ganti kartu ini dengan gambar informasi bank dan nomor rekening yang telah disetujui pasangan."),
+      card("Hadiah Pernikahan", "Informasi alternatif pengiriman hadiah. Jangan menampilkan data rekening sebelum diverifikasi."),
     ],
   };
   profile.produk = {
-    intro: "BE OUR GUEST",
-    subtitle: "Konfirmasi Kehadiran",
+    intro: "OUR LOVE STORY",
+    subtitle: "Galeri Perjalanan Cinta",
     description: "",
     items: [
-      card("Konfirmasi Kehadiran", "Contoh menu RSVP. Pengiriman RSVP belum terhubung ke penerima."),
-      card("Ucapan & Doa", "Area contoh untuk pesan dan doa dari para tamu."),
-      card("Wedding Gift", "Area contoh untuk hadiah pernikahan secara opsional."),
+      card("Pertama Bertemu", "Unggah foto awal pertemuan dan ceritakan bagaimana perjalanan cinta dimulai."),
+      card("Hari Lamaran", "Unggah foto momen lamaran dan kenangan menuju hari bahagia."),
+      card("Foto Prewedding", "Unggah foto prewedding pasangan untuk ditampilkan sebagai galeri foto sinematik."),
+      card("Menuju Selamanya", "Unggah foto favorit yang melengkapi kisah perjalanan cinta."),
     ],
   };
   site.content.cards = site.content.cards.slice(0, 3).map((item, index) => ({

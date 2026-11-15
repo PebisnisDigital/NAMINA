@@ -508,7 +508,7 @@ export function StudioV2() {
       return <>
         <div className="studio-v2__template-reset">
           <strong>Pilih template tampilan</strong>
-          <p>Semua pilihan memakai layout /vini. Wedding menampilkan lima menu undangan: Mempelai, Acara, Kisah, Galeri, dan RSVP.</p>
+          <p>Semua pilihan memakai layout /vini. Wedding menampilkan lima menu undangan: Mempelai, Acara, Kisah, Amplop, dan Love Story.</p>
           <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={!site.presentation || site.presentation==="original"} onClick={() => setAppearance("original")}>Original NAMINA</button>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>

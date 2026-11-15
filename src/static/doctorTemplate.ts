@@ -49,8 +49,13 @@ const originalSkin = {
   buttonVariant: originalStyleDefaults.buttonVariant,
 };
 const weddingLabels = {
-  nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Galeri", produk: "RSVP",
+  nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Amplop", produk: "Love Story",
 } as const;
+const historicalWeddingLabels = [
+  { nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Galeri", produk: "RSVP" },
+  { nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Amplop", produk: "Ucapan" },
+  { nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Ucapan", produk: "Amplop" },
+] as const;
 const originalLabels = {
   nama: "Nama", karir: "Karir", skill: "Skill", karya: "Karya", produk: "Produk",
 } as const;
@@ -63,10 +68,13 @@ function changeSkin(document: SiteDocument, presentation: "original" | "doctor" 
     const section = next.content.original;
     const previousLabels = section.menuTitles ?? {};
     if (presentation === "wedding" && sectionNames.every(key =>
-      !previousLabels[key] || previousLabels[key] === originalLabels[key] || previousLabels[key] === weddingLabels[key])) {
+      !previousLabels[key] || previousLabels[key] === originalLabels[key] ||
+      previousLabels[key] === weddingLabels[key] ||
+      historicalWeddingLabels.some(old => old[key] === previousLabels[key]))) {
       section.menuTitles = { ...previousLabels, ...weddingLabels };
     } else if (presentation !== "wedding" && document.presentation === "wedding" && sectionNames.every(key =>
-      previousLabels[key] === weddingLabels[key])) {
+      previousLabels[key] === weddingLabels[key] ||
+      historicalWeddingLabels.some(old => old[key] === previousLabels[key]))) {
       section.menuTitles = { ...previousLabels, ...originalLabels };
     }
     next.content.original.style = {

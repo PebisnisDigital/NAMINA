@@ -6,7 +6,7 @@ import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { createSiteFromTemplate, applySiteAppearance, templateCatalog, type TemplateKey } from "../static/templateCatalog";
+import { createSiteFromTemplate, applySiteAppearance, selectedTemplate, templateCatalog, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -527,14 +527,7 @@ export function StudioV2() {
           <p>Salin ulang data, video, slide ikon, karya, dan produk jika draft klien masih kosong. Konten saat ini akan diganti, tetapi website yang sudah tayang tidak berubah sampai dipublikasikan.</p>
           <button className="studio-v2__ghost" type="button" disabled={working} onClick={() => void useViniTemplate()}>Isi Template /vini</button>
         </div>}
-        <div className="studio-v2__template-reset">
-          <strong>Pilih template warna</strong>
-          <p>Ganti tampilan tanpa menghapus data, foto, video, karya, atau produk klien.</p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button type="button" className="studio-v2__ghost" aria-pressed={style.backgroundColor.toLowerCase() === "#08080c"} onClick={() => change((next) => { next.content.original!.style = { ...style, backgroundColor: "#08080c", textColor: "#fff5ed", accentColor: "#f34b53", buttonColor: "#b5232b", buttonTextColor: "#ffffff", borderColor: "#b67b78" }; })}>◐ Template Gelap</button>
-            <button type="button" className="studio-v2__ghost" aria-pressed={style.backgroundColor.toLowerCase() === "#ffffff"} onClick={() => change((next) => { next.content.original!.style = { ...style, backgroundColor: "#ffffff", textColor: "#191919", accentColor: "#d52e3c", buttonColor: "#c62836", buttonTextColor: "#ffffff", borderColor: "#d8d8de" }; })}>☀ Template Putih</button>
-          </div>
-        </div>
+        <p className="studio-v2__inspector-hint">Original Gelap dan Original Putih sekarang dipilih lewat tombol Template di toolbar. Di sini semua warna tetap bebas dikustom.</p>
         <ClientLogoSettings value={original.logo} fallbackColor={style.textColor}
           onChange={(logo) => change((next) => { next.content.original!.logo = logo; })} />
         <div className="studio-v2__colors">
@@ -572,7 +565,7 @@ export function StudioV2() {
         <label className="studio-v2__slider"><span>Sudut tombol <b>{style.buttonRadius}px</b></span>
           <input type="range" min="0" max="32" step="1" value={style.buttonRadius}
             onChange={(event) => updateStyle("buttonRadius", Number(event.target.value))} /></label>
-        <button type="button" className="studio-v2__ghost" onClick={() => change((next) => { delete next.content.original!.style; })}>Reset desain Original</button>
+        <button type="button" className="studio-v2__ghost" onClick={() => change((next) => Object.assign(next, applySiteAppearance(next, selectedTemplate(next))))}>Reset warna & font sesuai template</button>
       </>;
     }
     if (selected === "logo") return <ClientLogoSettings value={original.logo} fallbackColor={style.textColor}
@@ -747,7 +740,7 @@ export function StudioV2() {
           </select>
         </label>
         <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create">
-          <summary title="Buat website dari salah satu dari 4 template">+ Klien · 4 Template</summary>
+          <summary title="Buat website dari salah satu dari 5 template">+ Klien · 5 Template</summary>
           <div className="studio-v2__create-panel">
             <strong>Pilih Template Website Baru</strong>
             <p>Mulai dari konten contoh sesuai pilihan, kemudian ubah semuanya di Studio.</p>
@@ -815,7 +808,7 @@ export function StudioV2() {
     </div>
 
     {templateOpen && site && <StudioTemplateDialog
-      value={slug === "vini" ? masterPreview : site.presentation ?? "original"}
+      value={slug === "vini" ? masterPreview : selectedTemplate(site)}
       onChange={setAppearance}
       onClose={() => setTemplateOpen(false)}
       masterPreview={slug === "vini"}

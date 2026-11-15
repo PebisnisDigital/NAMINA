@@ -5,7 +5,7 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { applySiteAppearance } from "../static/templateCatalog";
+import { applySiteAppearance, selectedTemplate } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -242,14 +242,7 @@ export function BusinessVisualStudio() {
         <button className="studio-v2__ghost" type="button" disabled={working} onClick={() => void applyViniTemplate()}>Gunakan Template /vini</button>
       </div>
       <p className="studio-v2__inspector-hint">Atur tampilan visual dari website klien ini saja.</p>
-      <div className="studio-v2__template-reset">
-        <strong>Pilih template warna</strong>
-        <p>Ubah warna website ini tanpa mengganti konten klien.</p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button type="button" className="studio-v2__ghost" aria-pressed={style.backgroundColor.toLowerCase() === "#08080c"} onClick={() => change(next => { next.content.original!.style = { ...style, backgroundColor: "#08080c", textColor: "#fff5ed", accentColor: "#f34b53", buttonColor: "#b5232b", buttonTextColor: "#ffffff", borderColor: "#b67b78" }; })}>◐ Template Gelap</button>
-          <button type="button" className="studio-v2__ghost" aria-pressed={style.backgroundColor.toLowerCase() === "#ffffff"} onClick={() => change(next => { next.content.original!.style = { ...style, backgroundColor: "#ffffff", textColor: "#191919", accentColor: "#d52e3c", buttonColor: "#c62836", buttonTextColor: "#ffffff", borderColor: "#d8d8de" }; })}>☀ Template Putih</button>
-        </div>
-      </div>
+      <p className="studio-v2__inspector-hint">Pilih Original Gelap atau Original Putih lewat menu Template. Warna di bawah tetap bisa diedit manual.</p>
       <ClientLogoSettings value={original.logo} fallbackColor={style.textColor}
         onChange={(logo) => change(next => { next.content.original!.logo = logo; })} />
       <div className="studio-v2__colors">
@@ -382,7 +375,7 @@ export function BusinessVisualStudio() {
       </div>
       <div className="studio-v2__canvas-indicator"><span>{dirty?"Ada perubahan belum disimpan":"Draft tersimpan"}</span><span>·</span><span>{publishedSha?"Website telah terbit":"Belum dipublikasikan"}</span></div>
     </div>
-    {templateOpen&&site&&<StudioTemplateDialog value={site.presentation??"original"}
+    {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
       onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))}
       onClose={()=>setTemplateOpen(false)} />}
     {immersive&&<button type="button" className="studio-v2__immersive-exit" onClick={()=>setImmersive(false)}>↙ Kembali ke Studio</button>}

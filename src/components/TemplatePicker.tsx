@@ -11,7 +11,7 @@ type Props = {
 
 export function TemplatePicker({ value, onChange, compact = false, disabled = false }: Props) {
   return <div className={"namina-template-picker" + (compact ? " namina-template-picker--compact" : "")}
-    role="group" aria-label="Pilih salah satu dari empat template NAMINA">
+    role="group" aria-label="Pilih salah satu dari lima template NAMINA">
     {templateCatalog.map(template => {
       const selected = value === template.id;
       const previewStyle = {
@@ -36,8 +36,10 @@ export function TemplatePicker({ value, onChange, compact = false, disabled = fa
             <span className="namina-template-picker__state">{selected ? "✓ Dipilih" : "Pilih Template"}</span>
           </span>
         </button>
-        <a className="namina-template-picker__demo" href={template.demo} target="_blank"
-          rel="noopener noreferrer" aria-label={"Lihat demo " + template.name + " di tab baru"}>Lihat Demo ↗</a>
+        {template.demo
+          ? <a className="namina-template-picker__demo" href={template.demo} target="_blank"
+              rel="noopener noreferrer" aria-label={"Lihat demo " + template.name + " di tab baru"}>Lihat Demo ↗</a>
+          : <span className="namina-template-picker__demo namina-template-picker__demo--hint">Pratinjau di Studio</span>}
       </div>;
     })}
   </div>;

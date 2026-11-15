@@ -10,7 +10,7 @@
 .namina-template-picker__fake-nav{position:absolute;left:13px;top:7px;right:13px;display:flex;justify-content:space-between;font-weight:900;font-size:12px}
 .namina-template-picker__fake-nav span{letter-spacing:5px;font-size:9px}
 .namina-template-picker__fake-title{z-index:1;max-width:73%;margin-top:8px;font:800 clamp(14px,1.5vw,21px)/1.1 Montserrat,Arial,sans-serif;letter-spacing:-.045em}
-.namina-template-picker__item:nth-child(4) .namina-template-picker__fake-title{font-family:Georgia,serif;font-style:italic;font-weight:500}
+.namina-template-picker__item:nth-child(5) .namina-template-picker__fake-title{font-family:Georgia,serif;font-style:italic;font-weight:500}
 .namina-template-picker__fake-subtitle{z-index:1;color:var(--template-accent);font-size:8px;max-width:72%;font-weight:800;letter-spacing:.08em}
 .namina-template-picker__fake-video{position:absolute;right:10%;top:32%;width:18%;height:53%;border-radius:55% 55% 12% 12%;background:linear-gradient(130deg,transparent,var(--template-accent));opacity:.68}
 .namina-template-picker__fake-pill{position:absolute;left:13px;bottom:9px;width:46px;height:5px;border-radius:99px;background:var(--template-accent)}
@@ -32,5 +32,7 @@
 .namina-template-picker--compact .namina-template-picker__demo{font-size:10px}
 .studio-v2--fullscreen .studio-v2__workbar .namina-template-picker__option{display:grid;min-height:0;border:0;border-radius:0;padding:0;background:transparent;text-align:left;color:#fdf1ef;white-space:normal}
 .studio-v2--fullscreen .studio-v2__workbar .namina-template-picker__option:hover{background:transparent}
-@media(min-width:900px){.business__create-templates .namina-template-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:900px){.business__create-templates .namina-template-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:460px){.namina-template-picker{grid-template-columns:1fr}.namina-template-picker__option{grid-template-columns:108px minmax(0,1fr)}.namina-template-picker__preview{min-height:118px}.namina-template-picker__info{padding:10px 10px 32px}.namina-template-picker__fake-title{font-size:13px}}
+
+.namina-template-picker__demo--hint{color:#d8b9c0;text-decoration:none;pointer-events:none}

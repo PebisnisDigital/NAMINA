@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Link } from "./BusinessUi";
 import { businessClient, type BusinessSiteRow, type BusinessWorkspace } from "../business/client";
-import { loadViniTemplate, siteDocumentSchema } from "../static/sites";
-import { createDoctorTemplate } from "../static/doctorTemplate";
-import { createChibiTemplate } from "../static/chibiTemplate";
-import { createWeddingTemplate } from "../static/weddingTemplate";
+import { siteDocumentSchema } from "../static/sites";
+import { TemplatePicker } from "../components/TemplatePicker";
+import { createSiteFromTemplate, type TemplateKey } from "../static/templateCatalog";
 import { slugSchema } from "../domain/content";
 import "../business.css";
 
@@ -25,7 +24,7 @@ export function BusinessPortal() {
   const [workspace, setWorkspace] = useState<BusinessWorkspace | null>(null);
   const [sites, setSites] = useState<BusinessSiteRow[]>([]);
   const [newSlug, setNewSlug] = useState("");
-  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi" | "wedding">("original");
+  const [newTemplate, setNewTemplate] = useState<TemplateKey>("original");
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const canCreate = !!workspace && workspace.subscription_status === "active" && !!workspace.current_period_end && new Date(workspace.current_period_end).getTime() > Date.now();
@@ -114,7 +113,7 @@ export function BusinessPortal() {
     }
     setBusy(true);
     try {
-      const draft = siteDocumentSchema.parse(newTemplate === "doctor" ? createDoctorTemplate(slug) : newTemplate === "chibi" ? createChibiTemplate(slug) : newTemplate === "wedding" ? createWeddingTemplate(slug) : await loadViniTemplate(slug));
+      const draft = siteDocumentSchema.parse(await createSiteFromTemplate(slug, newTemplate));
       const response = await businessClient.from("namina_business_sites").insert({
         workspace_id: workspace.id, slug, document: draft,
       }).select("id").single();
@@ -193,17 +192,16 @@ export function BusinessPortal() {
           </section>}
           <section className="business__section">
             <h2>+ Buat website baru</h2>
-            <p className="business__fineprint">Pilih Original, Dokter, Chibi, atau Wedding. Tema Wedding memiliki 5 menu undangan.</p>
-            <form className="business__create" onSubmit={(event) => void createSite(event)}>
-              <label>Nama link website klien
-                <input required maxLength={48} value={newSlug} placeholder="contoh: klien-siti" onChange={(event) => setNewSlug(event.target.value)} />
+            <p className="business__fineprint">Empat template aktif. Pilih gaya, lihat demo, kemudian buat website klien.</p>
+            <form className="business__create business__create--templates" onSubmit={(event) => void createSite(event)}>
+              <div className="business__create-templates">
+                <strong>1. Pilih template</strong>
+                <TemplatePicker value={newTemplate} onChange={setNewTemplate} disabled={busy || !canCreate || sites.length >= workspace.max_sites} />
+              </div>
+              <label htmlFor="namina-partner-slug">2. Alamat website klien
+                <input id="namina-partner-slug" required maxLength={48} value={newSlug} placeholder="contoh: klien-siti" onChange={(event) => setNewSlug(event.target.value)} />
               </label>
-              <label>Template website
-                  <select aria-label="Pilih template website" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi" | "wedding")}>
-                    <option value="original">Original /vini</option><option value="doctor">Dokter • Medical Teal</option><option value="chibi">Chibi • Candy Pastel</option><option value="wedding">Wedding • Royal Ivory</option>
-                  </select>
-                </label>
-                <button className="business__primary" type="submit" disabled={busy || sites.length >= workspace.max_sites || !canCreate}>Buat Website</button>
+              <button className="business__primary" type="submit" disabled={busy || sites.length >= workspace.max_sites || !canCreate}>Buat Website</button>
             </form>
             <p className="business__fineprint">Perpanjangan langganan dilakukan melalui WhatsApp, bukan pembayaran di website.</p>
           </section>

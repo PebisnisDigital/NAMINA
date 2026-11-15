@@ -4,8 +4,9 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance, setChibiAppearance } from "../static/doctorTemplate";
+import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance, setChibiAppearance, setWeddingAppearance } from "../static/doctorTemplate";
 import { createChibiTemplate } from "../static/chibiTemplate";
+import { createWeddingTemplate } from "../static/weddingTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -102,7 +103,7 @@ export function StudioV2() {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [slug, setSlug] = useState("vini");
   const [newSlug, setNewSlug] = useState("");
-  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi">("original");
+  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi" | "wedding">("original");
   const [site, setSite] = useState<SiteDocument | null>(null);
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
@@ -309,7 +310,7 @@ export function StudioV2() {
     try {
       // A fresh, independent copy of the live /vini demo, including its
       // video, animated-icon data, Karya, and Produk collections.
-      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : newTemplate === "chibi" ? createChibiTemplate(normalized) : await loadViniTemplate(normalized);
+      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : newTemplate === "chibi" ? createChibiTemplate(normalized) : newTemplate === "wedding" ? createWeddingTemplate(normalized) : await loadViniTemplate(normalized);
       setSite(template);
       setSlug(normalized);
       setSha(null);
@@ -340,10 +341,10 @@ export function StudioV2() {
     } finally { setWorking(false); }
   };
 
-  const setAppearance = (presentation: "original" | "doctor" | "chibi") => {
+  const setAppearance = (presentation: "original" | "doctor" | "chibi" | "wedding") => {
     if (!site || slug === "vini") return;
     change((next) => {
-      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : presentation === "chibi" ? setChibiAppearance(next) : setOriginalAppearance(next));
+      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : presentation === "chibi" ? setChibiAppearance(next) : presentation === "wedding" ? setWeddingAppearance(next) : setOriginalAppearance(next));
     });
   };
 
@@ -507,13 +508,14 @@ export function StudioV2() {
       return <>
         <div className="studio-v2__template-reset">
           <strong>Pilih template tampilan</strong>
-          <p>Semua pilihan memakai layout /vini. Dokter dan Chibi hanya mengganti warna, font, serta gaya tombol tanpa menghapus konten.</p>
+          <p>Semua pilihan memakai layout /vini. Wedding menampilkan lima menu undangan: Mempelai, Acara, Kisah, Galeri, dan RSVP.</p>
           <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={!site.presentation || site.presentation==="original"} onClick={() => setAppearance("original")}>Original NAMINA</button>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>
             <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="chibi"} onClick={() => setAppearance("chibi")}>Chibi • Candy Pastel</button>
+            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="wedding"} onClick={() => setAppearance("wedding")}>Wedding • Royal Ivory</button>
           </div>
-          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a></p>
+          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a> · <a href="/wedding" target="_blank" rel="noopener noreferrer">Demo Wedding ↗</a></p>
         </div>
         <p className="studio-v2__inspector-hint">Semua pengaturan langsung terlihat pada layar HP. Tidak mengubah template asli klien lain.</p>
         {slug !== "vini" && <div className="studio-v2__template-reset">
@@ -744,10 +746,11 @@ export function StudioV2() {
           <summary title="Buat website baru">+ Klien</summary>
           <div><input aria-label="Nama link klien baru" placeholder="nama-klien"
             value={newSlug} onChange={(event) => setNewSlug(event.target.value)} />
-            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi")}>
+            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi" | "wedding")}>
               <option value="original">Original /vini</option>
               <option value="doctor">Dokter • Medical Teal</option>
               <option value="chibi">Chibi • Candy Pastel</option>
+              <option value="wedding">Wedding • Royal Ivory</option>
             </select>
             <button type="button" disabled={working} onClick={() => void createClient()}>{working ? "Menyiapkan…" : "Buat Website"}</button>
           </div>

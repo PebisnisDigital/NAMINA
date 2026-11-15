@@ -4,7 +4,7 @@ import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { setDoctorAppearance, setOriginalAppearance, setChibiAppearance } from "../static/doctorTemplate";
+import { setDoctorAppearance, setOriginalAppearance, setChibiAppearance, setWeddingAppearance } from "../static/doctorTemplate";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -241,8 +241,9 @@ export function BusinessVisualStudio() {
           <button type="button" className="studio-v2__ghost" aria-pressed={!site.presentation || site.presentation === "original"} onClick={()=>change(next=>Object.assign(next,setOriginalAppearance(next)))}>Original NAMINA</button>
           <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "doctor"} onClick={()=>change(next=>Object.assign(next,setDoctorAppearance(next)))}>Dokter • Medical Teal</button>
           <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "chibi"} onClick={()=>change(next=>Object.assign(next,setChibiAppearance(next)))}>Chibi • Candy Pastel</button>
+          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "wedding"} onClick={()=>change(next=>Object.assign(next,setWeddingAppearance(next)))}>Wedding • Royal Ivory</button>
         </div>
-        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a></p>
+        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a> · <a href="/wedding" target="_blank" rel="noopener noreferrer">Demo Wedding ↗</a></p>
       </div>
       <div className="studio-v2__template-reset">
         <strong>Isi dari Template /vini</strong>

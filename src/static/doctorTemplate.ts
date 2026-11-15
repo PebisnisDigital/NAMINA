@@ -48,10 +48,27 @@ const originalSkin = {
   buttonRadius: originalStyleDefaults.buttonRadius,
   buttonVariant: originalStyleDefaults.buttonVariant,
 };
+const weddingLabels = {
+  nama: "Mempelai", karir: "Acara", skill: "Kisah", karya: "Galeri", produk: "RSVP",
+} as const;
+const originalLabels = {
+  nama: "Nama", karir: "Karir", skill: "Skill", karya: "Karya", produk: "Produk",
+} as const;
+const sectionNames = ["nama", "karir", "skill", "karya", "produk"] as const;
+
 function changeSkin(document: SiteDocument, presentation: "original" | "doctor" | "chibi" | "wedding"): SiteDocument {
   const next = structuredClone(document);
   next.presentation = presentation;
   if (next.content.original) {
+    const section = next.content.original;
+    const previousLabels = section.menuTitles ?? {};
+    if (presentation === "wedding" && sectionNames.every(key =>
+      !previousLabels[key] || previousLabels[key] === originalLabels[key] || previousLabels[key] === weddingLabels[key])) {
+      section.menuTitles = { ...previousLabels, ...weddingLabels };
+    } else if (presentation !== "wedding" && document.presentation === "wedding" && sectionNames.every(key =>
+      previousLabels[key] === weddingLabels[key])) {
+      section.menuTitles = { ...previousLabels, ...originalLabels };
+    }
     next.content.original.style = {
       ...originalStyleDefaults,
       ...next.content.original.style,

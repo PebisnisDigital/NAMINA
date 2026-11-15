@@ -4,9 +4,8 @@ import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { createDoctorTemplate, setDoctorAppearance, setOriginalAppearance, setChibiAppearance, setWeddingAppearance } from "../static/doctorTemplate";
-import { createChibiTemplate } from "../static/chibiTemplate";
-import { createWeddingTemplate } from "../static/weddingTemplate";
+import { TemplatePicker } from "../components/TemplatePicker";
+import { createSiteFromTemplate, applySiteAppearance, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -103,7 +102,8 @@ export function StudioV2() {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [slug, setSlug] = useState("vini");
   const [newSlug, setNewSlug] = useState("");
-  const [newTemplate, setNewTemplate] = useState<"original" | "doctor" | "chibi" | "wedding">("original");
+  const [newTemplate, setNewTemplate] = useState<TemplateKey>("original");
+  const createPanelRef = useRef<HTMLDetailsElement>(null);
   const [site, setSite] = useState<SiteDocument | null>(null);
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
@@ -310,7 +310,7 @@ export function StudioV2() {
     try {
       // A fresh, independent copy of the live /vini demo, including its
       // video, animated-icon data, Karya, and Produk collections.
-      const template = newTemplate === "doctor" ? createDoctorTemplate(normalized) : newTemplate === "chibi" ? createChibiTemplate(normalized) : newTemplate === "wedding" ? createWeddingTemplate(normalized) : await loadViniTemplate(normalized);
+      const template = await createSiteFromTemplate(normalized, newTemplate);
       setSite(template);
       setSlug(normalized);
       setSha(null);
@@ -319,6 +319,7 @@ export function StudioV2() {
       try { localStorage.setItem(draftKey(normalized), JSON.stringify(template)); }
       catch { /* Still editable in the active Studio session. */ }
       setNewSlug("");
+      createPanelRef.current?.removeAttribute("open");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Template /vini belum bisa disalin.");
     } finally { setWorking(false); }
@@ -341,10 +342,10 @@ export function StudioV2() {
     } finally { setWorking(false); }
   };
 
-  const setAppearance = (presentation: "original" | "doctor" | "chibi" | "wedding") => {
+  const setAppearance = (presentation: TemplateKey) => {
     if (!site || slug === "vini") return;
     change((next) => {
-      Object.assign(next, presentation === "doctor" ? setDoctorAppearance(next) : presentation === "chibi" ? setChibiAppearance(next) : presentation === "wedding" ? setWeddingAppearance(next) : setOriginalAppearance(next));
+      Object.assign(next, applySiteAppearance(next, presentation));
     });
   };
 
@@ -507,15 +508,10 @@ export function StudioV2() {
       ] as const;
       return <>
         <div className="studio-v2__template-reset">
-          <strong>Pilih template tampilan</strong>
-          <p>Semua pilihan memakai layout /vini. Wedding menampilkan lima menu undangan: Mempelai, Acara, Kisah, Amplop, dan Love Story.</p>
-          <div style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
-            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={!site.presentation || site.presentation==="original"} onClick={() => setAppearance("original")}>Original NAMINA</button>
-            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="doctor"} onClick={() => setAppearance("doctor")}>Dokter • Medical Teal</button>
-            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="chibi"} onClick={() => setAppearance("chibi")}>Chibi • Candy Pastel</button>
-            <button className="studio-v2__ghost" type="button" disabled={slug==="vini"} aria-pressed={site.presentation==="wedding"} onClick={() => setAppearance("wedding")}>Wedding • Royal Ivory</button>
-          </div>
-          <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a> · <a href="/wedding" target="_blank" rel="noopener noreferrer">Demo Wedding ↗</a></p>
+          <strong>4 Template NAMINA Aktif</strong>
+          <p>Pilih gaya website ini. Nama, video, karya, produk, dan kontak klien tetap aman. Publikasikan agar tampilannya tayang.</p>
+          <TemplatePicker value={site.presentation ?? "original"} onChange={setAppearance} compact disabled={slug === "vini"} />
+          {slug === "vini" && <p>/vini adalah master template. Buat klien baru untuk mencoba gaya lain.</p>}
         </div>
         <p className="studio-v2__inspector-hint">Semua pengaturan langsung terlihat pada layar HP. Tidak mengubah template asli klien lain.</p>
         {slug !== "vini" && <div className="studio-v2__template-reset">
@@ -742,17 +738,18 @@ export function StudioV2() {
             {slugs.map((item) => <option key={item} value={item}>/{item}</option>)}
           </select>
         </label>
-        <details className="studio-v2__new studio-v2__workbar-create">
-          <summary title="Buat website baru">+ Klien</summary>
-          <div><input aria-label="Nama link klien baru" placeholder="nama-klien"
-            value={newSlug} onChange={(event) => setNewSlug(event.target.value)} />
-            <select aria-label="Pilih template website baru" value={newTemplate} onChange={event => setNewTemplate(event.target.value as "original" | "doctor" | "chibi" | "wedding")}>
-              <option value="original">Original /vini</option>
-              <option value="doctor">Dokter • Medical Teal</option>
-              <option value="chibi">Chibi • Candy Pastel</option>
-              <option value="wedding">Wedding • Royal Ivory</option>
-            </select>
-            <button type="button" disabled={working} onClick={() => void createClient()}>{working ? "Menyiapkan…" : "Buat Website"}</button>
+        <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create">
+          <summary title="Buat website dari salah satu dari 4 template">+ Klien · 4 Template</summary>
+          <div className="studio-v2__create-panel">
+            <strong>Pilih Template Website Baru</strong>
+            <p>Mulai dari konten contoh sesuai pilihan, kemudian ubah semuanya di Studio.</p>
+            <TemplatePicker value={newTemplate} onChange={setNewTemplate} disabled={working} />
+            <label htmlFor="namina-new-client-slug">Alamat website klien</label>
+            <input id="namina-new-client-slug" aria-label="Nama link klien baru" placeholder="nama-klien"
+              value={newSlug} onChange={(event) => setNewSlug(event.target.value)} maxLength={48} />
+            <button type="button" disabled={working || !newSlug.trim()} onClick={() => void createClient()}>
+              {working ? "Menyiapkan…" : "Buat Website dengan Template Ini"}
+            </button>
           </div>
         </details>
       </div>
@@ -767,7 +764,7 @@ export function StudioV2() {
       <div className="studio-v2__workbar-right">
         <span className="studio-v2__autosave"><i /> Draft otomatis</span>
         <button type="button" className="studio-v2__design-trigger"
-          onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Desain</span></button>
+          onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Template &amp; Desain</span></button>
         <button type="button" className="studio-v2__publish-trigger" disabled={!site || working}
           onClick={() => { setPopupOpen(false); setPublishConfirmOpen(true); }}>Publikasikan</button>
         <a href="/studio-v1" className="studio-v2__v1-link" title="Buka Generator 8 Tahap">V1</a>

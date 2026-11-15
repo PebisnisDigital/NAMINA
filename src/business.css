@@ -157,3 +157,14 @@
   .business__admin-row--partner { flex-direction: column; gap: 15px; }
   .business__renew-controls { width: 100%; flex: 0 0 auto; }
 }
+
+
+/* Template gallery remains visible in the partner's create-new flow. */
+.business__create--templates { grid-template-columns: minmax(0,1fr) auto; gap: 14px; align-items: end; }
+.business__create-templates { grid-column: 1/-1; display:flex; flex-direction:column; gap:12px; }
+.business__create-templates > strong { font-size: 13px; color: #ffeae7; }
+.business__create--templates > label { min-width: 0; }
+@media(max-width:650px) {
+  .business__create--templates { grid-template-columns: 1fr; }
+  .business__create--templates .business__primary { width: 100%; }
+}

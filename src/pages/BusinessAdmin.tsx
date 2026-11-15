@@ -133,22 +133,34 @@ export function BusinessAdmin() {
 
   async function extend(id: string) {
     if (!businessClient || !allowed) return;
+    const partner = partners.find((item) => item.id === id);
+    if (!partner) { setError("Mitra tidak ditemukan. Muat ulang daftar mitra."); return; }
+    const activating = partner.subscription_status === "pending";
     const days = Number(durations[id] || "365");
     if (!Number.isInteger(days) || days < 1 || days > 365) {
       setError("Isi penambahan durasi antara 1 sampai 365 hari."); return;
     }
-    if (!window.confirm("Pembayaran melalui WA sudah diperiksa? Tambahkan " + days + " hari masa pembuatan website baru?")) return;
+    const action = activating ? "Aktifkan" : "Perpanjang";
+    if (!window.confirm(
+      "Pembayaran melalui WhatsApp sudah diperiksa? " + action +
+      " akses " + (partner.display_name || "mitra NAMINA") + " selama " + days +
+      " hari dengan kuota maksimal " + partner.max_sites + " website?"
+    )) return;
     setWorking(id); setMessage(""); setError("");
     try {
       const result = await businessClient.rpc("namina_business_admin_extend", {
         p_workspace_id: id, p_days: days,
       });
       if (result.error) throw result.error;
-      setMessage("Masa pembuatan website diperpanjang " + days + " hari sampai " +
+      setMessage(
+        "Akses " + (partner.display_name || "mitra NAMINA") +
+        (activating ? " berhasil diaktifkan" : " berhasil diperpanjang") +
+        " selama " + days + " hari hingga " +
         new Date(result.data as string).toLocaleDateString("id-ID") +
-        ". Website lama tetap bisa diedit kapan saja.");
+        ". Mitra dapat membuat maksimal " + partner.max_sites + " website."
+      );
       await refresh();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Gagal menambah durasi."); }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Gagal mengubah masa akses."); }
     finally { setWorking(""); }
   }
 
@@ -209,7 +221,7 @@ export function BusinessAdmin() {
             </form>
             <p className="business__fineprint">
               Link berlaku terus selama belum dicabut atau diganti. Setelah pembayaran WA
-              dikonfirmasi, aktifkan masa 365 hari (default) melalui tombol perpanjangan di bawah. Admin dapat memilih 1–365 hari.
+              dikonfirmasi, tekan tombol Aktifkan 365 Hari pada daftar mitra. Admin dapat memilih 1–365 hari.
             </p>
           </section>
           {issued && <section className="business__issued" role="status">
@@ -243,7 +255,7 @@ export function BusinessAdmin() {
                     <div className="business__admin-summary">
                       <strong>{partner.display_name || "Mitra NAMINA"}</strong>
                       <small>WA: {partner.whatsapp_number || "Belum tercatat"} · {partner.sites || 0}/{partner.max_sites} website</small>
-                      <small>{canCreate ? "Bisa tambah website" : "Hanya bisa edit website lama"} ·
+                      <small>{partner.subscription_status === "pending" ? "Menunggu aktivasi admin" : canCreate ? "Bisa tambah website" : "Hanya bisa edit website lama"} ·
                         Masa tambah hingga {activeUntil ? activeUntil.toLocaleDateString("id-ID") : "belum aktif"}</small>
                       <div className="business__partner-buttons">
                         <button className="business__secondary" type="button" disabled={!!working}
@@ -261,14 +273,16 @@ export function BusinessAdmin() {
                       </div>
                     </div>
                     <div className="business__renew-controls">
-                      <label>Tambah durasi (hari)
+                      <label>{partner.subscription_status === "pending" ? "Durasi aktivasi (hari)" : "Tambah durasi (hari)"}
                         <input type="number" min="1" max="365" step="1" inputMode="numeric"
                           value={durations[partner.id] ?? "365"}
                           onChange={(e) => setDurations((prev) => ({ ...prev, [partner.id]: e.target.value }))} />
                       </label>
                       <button type="button" className="business__primary" disabled={!!working}
                         onClick={() => void extend(partner.id)}>
-                        {working === partner.id ? "Memproses…" : "Perpanjang Akses"}
+                        {working === partner.id ? "Memproses…" : partner.subscription_status === "pending"
+                          ? "Aktifkan " + (durations[partner.id] ?? "365") + " Hari"
+                          : "Perpanjang Akses"}
                       </button>
                     </div>
                   </div>;

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { TemplatePicker } from "./TemplatePicker";
 import type { TemplateKey } from "../static/templateCatalog";
 import "./StudioTemplateDialog.css";
@@ -13,6 +14,11 @@ type Props = {
 export function StudioTemplateDialog({
   value, onChange, onClose, masterPreview = false, onCreateFromTemplate,
 }: Props) {
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
   return <div className="studio-v2__template-backdrop"
     onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="studio-v2__template-dialog" role="dialog" aria-modal="true"

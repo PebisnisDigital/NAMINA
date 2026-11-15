@@ -7,6 +7,7 @@ import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
 import { createSiteFromTemplate, applySiteAppearance, selectedTemplate, templateCatalog, type TemplateKey } from "../static/templateCatalog";
+import { createWedding2Template } from "../static/wedding2Template";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -213,7 +214,9 @@ export function StudioV2() {
     if (!site || !ready) return;
     // /vini is the master. Show a temporary preview without saving or publishing
     // a new appearance to the master website.
-    const visible = slug === "vini" && masterPreview !== "original"
+    const visible = slug === "vini" && masterPreview === "wedding2"
+      ? createWedding2Template("preview-wedding")
+      : slug === "vini" && masterPreview !== "original"
       ? applySiteAppearance(site, masterPreview) : site;
     const prepared = prepareSite(visible);
     const assets = resolveMedia(prepared);
@@ -740,7 +743,7 @@ export function StudioV2() {
           </select>
         </label>
         <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create">
-          <summary title="Buat website dari salah satu dari 5 template">+ Klien · 5 Template</summary>
+          <summary title="Buat website dari salah satu dari 6 template">+ Klien · 6 Template</summary>
           <div className="studio-v2__create-panel">
             <strong>Pilih Template Website Baru</strong>
             <p>Mulai dari konten contoh sesuai pilihan, kemudian ubah semuanya di Studio.</p>

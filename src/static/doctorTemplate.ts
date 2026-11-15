@@ -37,6 +37,19 @@ const weddingSkin = {
   buttonVariant: "solid",
 } as const;
 
+/** Exact light preset previously available in Design, now a persistent template. */
+const originalWhiteSkin = {
+  backgroundColor: "#ffffff",
+  textColor: "#191919",
+  accentColor: "#d52e3c",
+  buttonColor: "#c62836",
+  buttonTextColor: "#ffffff",
+  borderColor: "#d8d8de",
+  fontFamily: "montserrat",
+  buttonRadius: 15,
+  buttonVariant: "solid",
+} as const;
+
 const originalSkin = {
   backgroundColor: originalStyleDefaults.backgroundColor,
   textColor: originalStyleDefaults.textColor,
@@ -61,7 +74,7 @@ const originalLabels = {
 } as const;
 const sectionNames = ["nama", "karir", "skill", "karya", "produk"] as const;
 
-function changeSkin(document: SiteDocument, presentation: "original" | "doctor" | "chibi" | "wedding"): SiteDocument {
+function changeSkin(document: SiteDocument, presentation: "original" | "original-white" | "doctor" | "chibi" | "wedding"): SiteDocument {
   const next = structuredClone(document);
   next.presentation = presentation;
   if (next.content.original) {
@@ -80,7 +93,7 @@ function changeSkin(document: SiteDocument, presentation: "original" | "doctor" 
     next.content.original.style = {
       ...originalStyleDefaults,
       ...next.content.original.style,
-      ...(presentation === "doctor" ? medicalSkin : presentation === "chibi" ? chibiSkin : presentation === "wedding" ? weddingSkin : originalSkin),
+      ...(presentation === "doctor" ? medicalSkin : presentation === "chibi" ? chibiSkin : presentation === "wedding" ? weddingSkin : presentation === "original-white" ? originalWhiteSkin : originalSkin),
     };
   }
   return siteDocumentSchema.parse(next);
@@ -89,6 +102,7 @@ export const setDoctorAppearance = (document: SiteDocument): SiteDocument => cha
 export const setChibiAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "chibi");
 export const setWeddingAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "wedding");
 export const setOriginalAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "original");
+export const setOriginalWhiteAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "original-white");
 
 /** Fictitious sample for /dokter and new medical client sites. */
 export function createDoctorTemplate(slug: string): SiteDocument {

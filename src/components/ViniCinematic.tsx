@@ -137,7 +137,7 @@ export function ViniCinematic({
   assetUrls: AssetUrls;
   introStartedAt?: number;
   fallbackOriginal?: OriginalProfile;
-  presentation?: "original" | "doctor" | "chibi" | "wedding";
+  presentation?: "original" | "original-white" | "doctor" | "chibi" | "wedding";
   previewMode?: boolean;
   editorMode?: boolean;
   editorMenu?: MenuKey;

@@ -62,7 +62,7 @@ export function Wedding2Site({ document: site, studioPreview = false }: Props) {
   const couple = site.content.identity.displayName || "Hizqil & Icaa";
   const names = couple.split(/\s*&\s*/);
   const groom = names[0] || "Hizqil", bride = names[1] || "Icaa";
-  const byKey = (key: "nama"|"karir"|"skill"|"karya"|"produk") => original?.[key];
+  const byKey = <K extends "nama"|"karir"|"skill"|"karya"|"produk",>(key: K) => original?.[key];
   const field = (index:number) => byKey("karir")?.items[index]?.value || "";
   const date = field(0) || "2027-02-20T08:00:00+07:00";
   const dateObj = new Date(date);

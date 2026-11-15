@@ -1,35 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHmac, randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { z } from "zod";
-import { contentSchema, slugSchema } from "../src/domain/content.js";
+import { slugSchema } from "../src/domain/content.js";
+import { siteDocumentSchema as documentSchema } from "../src/static/sites.js";
 import { briefStore } from "./_brief-store.js";
 import { listAdminPublications, findAdminPublication, hasAnyPublication, publishAdminToDatabase, PublicationConflict } from "./_supabase-publisher.js";
 
 type ApiRequest = IncomingMessage & { body?: unknown };
 const SESSION_TTL = 12 * 60 * 60 * 1000;
-const mediaUrl = z.string().max(2000).refine((value) => {
-  if (!value) return true;
-  if (/^\/videos\/[a-zA-Z0-9._-]+$/.test(value)) return true;
-  if (/^\/media\/[a-z0-9-]{3,48}\/[a-f0-9]{32}\.(?:png|jpg|webp)$/.test(value)) return true;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && !url.username && !url.password;
-  } catch {
-    return false;
-  }
-});
-const documentSchema = z.object({
-  slug: slugSchema,
-  content: contentSchema,
-  media: z.object({
-    desktopVideo: mediaUrl,
-    mobileVideo: mediaUrl,
-    poster: mediaUrl,
-    portrait: mediaUrl,
-    enterKey: mediaUrl.optional(),
-    cards: z.record(z.string(), mediaUrl),
-  }).strict(),
-}).strict();
 
 function send(res: ServerResponse, status: number, body: unknown) {
   res.statusCode = status;

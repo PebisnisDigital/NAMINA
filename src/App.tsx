@@ -14,6 +14,7 @@ import { StaticSite } from "./pages/StaticSite";
 import { DoctorSite } from "./pages/DoctorSite";
 import { ChibiSite } from "./pages/ChibiSite";
 import { WeddingSite } from "./pages/WeddingSite";
+import { Wedding2Demo } from "./pages/Wedding2Site";
 import { ThemeDemo, ThemeGallery } from "./pages/ThemeDemos";
 import { getDemoTheme } from "./themes/catalog";
 import "./namana.css";
@@ -31,6 +32,7 @@ function App() {
   else if (path === "/dokter") page = <DoctorSite />;
   else if (path === "/chibi") page = <ChibiSite />;
   else if (path === "/wedding") page = <WeddingSite />;
+  else if (path === "/wedding2") page = <Wedding2Demo />;
   else if (path === "/formulir") page = <ClientForm />;
   else if (["/mitra","/daftar"].includes(path)) page = <BusinessPortal />;
   else if (path === "/akses") page = <BusinessMagicAccess />;

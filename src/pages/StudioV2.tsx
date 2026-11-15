@@ -5,6 +5,7 @@ import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
+import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
 import { createSiteFromTemplate, applySiteAppearance, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
@@ -109,6 +110,8 @@ export function StudioV2() {
   const [menu, setMenu] = useState<Menu>("Nama");
   const [selected, setSelected] = useState("name");
   const [showDesign, setShowDesign] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [masterPreview, setMasterPreview] = useState<TemplateKey>("original");
   const [screen, setScreen] = useState<"desktop" | "mobile">("desktop");
   const [immersive, setImmersive] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -151,6 +154,8 @@ export function StudioV2() {
     setMenu("Nama");
     setSelected("name");
     setShowDesign(false);
+    setTemplateOpen(false);
+    setMasterPreview("original");
     setPopupOpen(false);
     setApproved(false);
     try {
@@ -206,10 +211,14 @@ export function StudioV2() {
 
   useEffect(() => {
     if (!site || !ready) return;
-    const prepared = prepareSite(site);
+    // /vini is the master. Show a temporary preview without saving or publishing
+    // a new appearance to the master website.
+    const visible = slug === "vini" && masterPreview !== "original"
+      ? applySiteAppearance(site, masterPreview) : site;
+    const prepared = prepareSite(visible);
     const assets = resolveMedia(prepared);
     sendFrame({ type: "NAMINA_V2_RENDER", site: prepared, assets });
-  }, [site, ready, sendFrame]);
+  }, [site, ready, sendFrame, slug, masterPreview]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_MENU", menu }); }, [menu, ready, sendFrame]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_SELECT", key: selected }); }, [selected, ready, sendFrame]);
 
@@ -320,6 +329,8 @@ export function StudioV2() {
       catch { /* Still editable in the active Studio session. */ }
       setNewSlug("");
       createPanelRef.current?.removeAttribute("open");
+      setTemplateOpen(false);
+      setMasterPreview("original");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Template /vini belum bisa disalin.");
     } finally { setWorking(false); }
@@ -343,10 +354,13 @@ export function StudioV2() {
   };
 
   const setAppearance = (presentation: TemplateKey) => {
-    if (!site || slug === "vini") return;
-    change((next) => {
-      Object.assign(next, applySiteAppearance(next, presentation));
-    });
+    if (!site) return;
+    if (slug === "vini") {
+      // Preview only. The real /vini seed and published document remain untouched.
+      setMasterPreview(presentation);
+      return;
+    }
+    change((next) => Object.assign(next, applySiteAppearance(next, presentation)));
   };
 
   const publish = async () => {
@@ -482,7 +496,7 @@ export function StudioV2() {
   </main>;
 
   function labelForSelection() {
-    if (showDesign) return "Warna, tipografi & layout";
+    if (showDesign) return "Warna, font, tombol & layout";
     if (selected === "logo") return "Logo website";
     if (selected === "name") return "Nama di website";
     if (selected === "profession") return "Profesi / tagline";
@@ -507,12 +521,6 @@ export function StudioV2() {
         ["buttonTextColor", "Teks tombol"], ["borderColor", "Garis & border"],
       ] as const;
       return <>
-        <div className="studio-v2__template-reset">
-          <strong>4 Template NAMINA Aktif</strong>
-          <p>Pilih gaya website ini. Nama, video, karya, produk, dan kontak klien tetap aman. Publikasikan agar tampilannya tayang.</p>
-          <TemplatePicker value={site.presentation ?? "original"} onChange={setAppearance} compact disabled={slug === "vini"} />
-          {slug === "vini" && <p>/vini adalah master template. Buat klien baru untuk mencoba gaya lain.</p>}
-        </div>
         <p className="studio-v2__inspector-hint">Semua pengaturan langsung terlihat pada layar HP. Tidak mengubah template asli klien lain.</p>
         {slug !== "vini" && <div className="studio-v2__template-reset">
           <strong>Mulai dari contoh /vini</strong>
@@ -762,9 +770,18 @@ export function StudioV2() {
           onClick={() => { setImmersive(true); setPopupOpen(false); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>⛶ <span>Layar Penuh</span></button>
       </div>
       <div className="studio-v2__workbar-right">
+        <div className="studio-v2__template-toolbar">
+          <button type="button" className="studio-v2__template-trigger"
+            title="Pilih template untuk preview dan website klien"
+            aria-haspopup="dialog" aria-expanded={templateOpen}
+            onClick={() => { setTemplateOpen(true); setPopupOpen(false); setShowDesign(false); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>
+            <span className="studio-v2__template-trigger-icon" aria-hidden="true">▦</span>
+            <span className="studio-v2__template-trigger-label">Template</span>
+          </button>
+        </div>
         <span className="studio-v2__autosave"><i /> Draft otomatis</span>
         <button type="button" className="studio-v2__design-trigger"
-          onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Template &amp; Desain</span></button>
+          onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Desain</span></button>
         <button type="button" className="studio-v2__publish-trigger" disabled={!site || working}
           onClick={() => { setPopupOpen(false); setPublishConfirmOpen(true); }}>Publikasikan</button>
         <a href="/studio-v1" className="studio-v2__v1-link" title="Buka Generator 8 Tahap">V1</a>
@@ -792,6 +809,17 @@ export function StudioV2() {
       </div>
     </div>
 
+    {templateOpen && site && <StudioTemplateDialog
+      value={slug === "vini" ? masterPreview : site.presentation ?? "original"}
+      onChange={setAppearance}
+      onClose={() => setTemplateOpen(false)}
+      masterPreview={slug === "vini"}
+      onCreateFromTemplate={slug === "vini" ? () => {
+        setNewTemplate(masterPreview);
+        setTemplateOpen(false);
+        createPanelRef.current?.setAttribute("open", "");
+      } : undefined}
+    />}
     {immersive && <button type="button" className="studio-v2__immersive-exit" onClick={() => setImmersive(false)}>↙ Kembali ke Studio</button>}
     {popupOpen && site && <div ref={inspectorRef} className="studio-v2__inline-popover"
       style={{ left: popupCoordinates.left, top: popupCoordinates.top }} role="dialog" aria-modal="false" aria-label={"Edit " + labelForSelection()}>

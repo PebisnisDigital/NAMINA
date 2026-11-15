@@ -25,6 +25,18 @@ const chibiSkin = {
   buttonVariant: "solid",
 } as const;
 
+const weddingSkin = {
+  backgroundColor: "#f8f2e8",
+  textColor: "#6b5139",
+  accentColor: "#b48a4f",
+  buttonColor: "#aa824c",
+  buttonTextColor: "#ffffff",
+  borderColor: "#d4bd93",
+  fontFamily: "cormorant",
+  buttonRadius: 28,
+  buttonVariant: "solid",
+} as const;
+
 const originalSkin = {
   backgroundColor: originalStyleDefaults.backgroundColor,
   textColor: originalStyleDefaults.textColor,
@@ -36,20 +48,21 @@ const originalSkin = {
   buttonRadius: originalStyleDefaults.buttonRadius,
   buttonVariant: originalStyleDefaults.buttonVariant,
 };
-function changeSkin(document: SiteDocument, presentation: "original" | "doctor" | "chibi"): SiteDocument {
+function changeSkin(document: SiteDocument, presentation: "original" | "doctor" | "chibi" | "wedding"): SiteDocument {
   const next = structuredClone(document);
   next.presentation = presentation;
   if (next.content.original) {
     next.content.original.style = {
       ...originalStyleDefaults,
       ...next.content.original.style,
-      ...(presentation === "doctor" ? medicalSkin : presentation === "chibi" ? chibiSkin : originalSkin),
+      ...(presentation === "doctor" ? medicalSkin : presentation === "chibi" ? chibiSkin : presentation === "wedding" ? weddingSkin : originalSkin),
     };
   }
   return siteDocumentSchema.parse(next);
 }
 export const setDoctorAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "doctor");
 export const setChibiAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "chibi");
+export const setWeddingAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "wedding");
 export const setOriginalAppearance = (document: SiteDocument): SiteDocument => changeSkin(document, "original");
 
 /** Fictitious sample for /dokter and new medical client sites. */

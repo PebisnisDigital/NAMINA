@@ -1243,3 +1243,135 @@
   }
   .vini-cinema--chibi .vini-cinema__nav button.is-active { border-color: transparent; }
 }
+
+
+/* NAMINA Wedding — Royal Ivory & Gold. Reuses ViniCinematic geometry unchanged. */
+.vini-cinema--wedding {
+  --vini-ivory: #6b5139;
+  --vini-muted: #927657;
+}
+.vini-cinema--wedding .vini-cinema__scrim {
+  background:
+    linear-gradient(90deg,
+      var(--namina-bg) 0%,
+      color-mix(in srgb, var(--namina-bg) 98%, transparent) 24%,
+      color-mix(in srgb, var(--namina-bg) 93%, transparent) 39%,
+      color-mix(in srgb, var(--namina-bg) 56%, transparent) 61%,
+      transparent 95%),
+    linear-gradient(0deg, var(--namina-bg), transparent 35%),
+    radial-gradient(ellipse at 78% 14%, #fff6db6e 0, transparent 55%);
+}
+.vini-cinema--wedding .vini-cinema__stage::after {
+  content:"";
+  position:absolute;
+  inset: 12px;
+  pointer-events:none;
+  border: 1px solid #bfa27757;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 9px #fffaf21c, inset 0 0 0 10px #bfa27722;
+}
+.vini-cinema--wedding .vini-cinema__intro h1 {
+  font-weight: 600;
+  letter-spacing: -.037em;
+  line-height: .94;
+  text-transform: none;
+}
+.vini-cinema--wedding .vini-cinema__intro h1 span {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--namina-accent);
+}
+.vini-cinema--wedding .vini-cinema__section-title { text-transform: none; }
+.vini-cinema--wedding .vini-cinema__hello {
+  background: #fffaf2cb;
+  color: var(--namina-accent);
+  border: 1px solid var(--namina-line);
+  letter-spacing: .18em;
+  font-family: "Montserrat",sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 5px 30px #c2a67a26;
+}
+.vini-cinema--wedding .vini-cinema__nav button,
+.vini-cinema--wedding .vini-cinema__menu-toggle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+.vini-cinema--wedding .vini-cinema__nav button:hover,
+.vini-cinema--wedding .vini-cinema__nav button.is-active {
+  color: #86663d;
+  background: #e9d9bc94;
+  border-color: var(--namina-line);
+}
+.vini-cinema--wedding .vini-cinema__contact-top,
+.vini-cinema--wedding .vini-cinema__detail-link {
+  border: 1px solid #c49f64;
+  border-radius: 99px;
+  color: white;
+  background: linear-gradient(135deg, #c9ab75, #a67e45);
+  box-shadow: 0 11px 25px #97774433;
+  font-family: "Montserrat", sans-serif;
+}
+.vini-cinema--wedding .vini-cinema__contact-top:hover,
+.vini-cinema--wedding .vini-cinema__detail-link:hover {
+  background: linear-gradient(135deg, #d8bb8c, #b68b53);
+}
+.vini-cinema--wedding .vini-cinema__highlight-track .vini-cinema__highlight img {
+  filter: sepia(.35) saturate(.65) hue-rotate(5deg);
+}
+.vini-cinema--wedding .vini-cinema__highlight span,
+.vini-cinema--wedding .vini-cinema__highlight strong {
+  color: var(--namina-ink);
+}
+.vini-cinema--wedding .vini-cinema__visual-card,
+.vini-cinema--wedding .vini-cinema__modal {
+  background: #fbf7ef;
+  border-color: #c9af85;
+}
+.vini-cinema--wedding .vini-cinema__modal-copy > span { color: #9e793f; }
+.vini-cinema--wedding .vini-cinema__modal-close {
+  color: #614a31;
+  background: #f7efe3;
+  border-color: #b99d74;
+}
+.vini-cinema--wedding .vini-cinema__bio,
+.vini-cinema--wedding .vini-cinema__empty {
+  color: #816a50;
+}
+@media (max-width: 850px) {
+  .vini-cinema--wedding .vini-cinema__scrim {
+    background: linear-gradient(90deg,
+      var(--namina-bg),color-mix(in srgb,var(--namina-bg) 72%,transparent) 60%,transparent),
+      linear-gradient(0deg,color-mix(in srgb,var(--namina-bg) 96%,transparent),transparent 80%);
+  }
+}
+@media (max-width: 700px) {
+  .vini-cinema--wedding .vini-cinema__scrim {
+    background: linear-gradient(180deg,
+      color-mix(in srgb,var(--namina-bg) 7%,transparent) 0%,
+      transparent 29%,
+      color-mix(in srgb,var(--namina-bg) 34%,transparent) 49%,
+      color-mix(in srgb,var(--namina-bg) 86%,transparent) 65%,
+      var(--namina-bg) 100%);
+  }
+  .vini-cinema--wedding .vini-cinema__stage::after { inset: 5px; }
+  .vini-cinema--wedding .vini-cinema__nav,
+  .vini-cinema--wedding .vini-cinema__nav--open {
+    background: color-mix(in srgb, var(--namina-bg) 93%, #d7ba88);
+    border-color: var(--namina-line);
+  }
+  .vini-cinema--wedding .vini-cinema__nav button.is-active {
+    color: #947344;
+    background: #ead9bc95;
+    border-color: transparent;
+  }
+  .vini-cinema--wedding .vini-cinema__highlight-track .vini-cinema__highlight {
+    background: #f7ecdcae;
+    border-color: var(--namina-line);
+  }
+  .vini-cinema--wedding .vini-cinema__intro h1 {
+    font-size: clamp(41px, 12.4vw, 60px);
+  }
+}

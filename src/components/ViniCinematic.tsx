@@ -73,8 +73,27 @@ function IntroDescription({ text, editorTarget }: { text: string; editorTarget?:
   );
 }
 
-function CardArtwork({ card }: { card: VisualCard }) {
+function CardArtwork({ card, wedding = false }: { card: VisualCard; wedding?: boolean }) {
   if (card.imageUrl) return <img className="vini-cinema__artwork" src={card.imageUrl} alt={`Gambar ${card.title}`} width={1280} height={720} loading="lazy" decoding="async" onError={(event) => retryDropboxImage(event.currentTarget)} />;
+  if (wedding) return (
+    <svg className="vini-cinema__artwork" viewBox="0 0 950 300" role="img"
+      aria-label={`Ilustrasi undangan ${card.title}`} preserveAspectRatio="xMidYMid slice">
+      <defs><linearGradient id={`wedding-card-${card.id}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#fffcf4" /><stop offset=".55" stopColor="#efe2cc" /><stop offset="1" stopColor="#d2bd99" />
+      </linearGradient></defs>
+      <rect width="950" height="300" fill={`url(#wedding-card-${card.id})`} />
+      <rect x="16" y="16" width="918" height="268" rx="8" fill="none" stroke="#c2a16a" strokeWidth="2" opacity=".76"/>
+      <rect x="25" y="25" width="900" height="250" rx="6" fill="none" stroke="#c2a16a" strokeWidth="1" opacity=".55"/>
+      <g transform="translate(770 145)" stroke="#a98959" fill="none" strokeWidth="3" opacity=".82">
+        <circle r="97" strokeDasharray="2 9"/><circle r="81"/><path d="M-57 2 Q-24-60 11-14 T70 6 M-54 12 Q-34 73 12 25 T62-1" />
+        <path d="M0-68Q-24-104 0-117Q24-104 0-68ZM0 68Q-24 104 0 117Q24 104 0 68Z" />
+      </g>
+      <text x="56" y="70" fill="#ad8654" fontFamily="Georgia,serif" fontWeight="700" fontSize="20" letterSpacing="5">NAMINA WEDDING</text>
+      <text x="56" y="175" fill="#6b4f35" fontFamily="Georgia,serif" fontSize={card.title.length > 22 ? "38" : card.title.length > 16 ? "47" : "58"} fontStyle="italic">{card.title}</text>
+      <path d="M56 202H370" stroke="#ae8956" strokeWidth="2"/>
+      <text x="56" y="246" fill="#8d7355" fontFamily="Georgia,serif" fontSize="19">{card.owner} · Our Love Story</text>
+    </svg>
+  );
   const gradientId = `visual-gradient-${card.id}`;
   return (
     <svg className="vini-cinema__artwork" viewBox="0 0 950 300" role="img" aria-label={`Ilustrasi ${card.title}`} preserveAspectRatio="xMidYMid slice">
@@ -118,7 +137,7 @@ export function ViniCinematic({
   assetUrls: AssetUrls;
   introStartedAt?: number;
   fallbackOriginal?: OriginalProfile;
-  presentation?: "original" | "doctor" | "chibi";
+  presentation?: "original" | "doctor" | "chibi" | "wedding";
   previewMode?: boolean;
   editorMode?: boolean;
   editorMenu?: MenuKey;
@@ -432,7 +451,7 @@ export function ViniCinematic({
   };
 
   return (
-    <main style={styleVariables} className={`vini-cinema${showLoader ? " vini-cinema--loading" : ""}${activeGallery ? " vini-cinema--gallery" : ""}${customStyle ? " vini-cinema--styled" : ""}${presentation === "doctor" ? " vini-cinema--medical" : ""}${presentation === "chibi" ? " vini-cinema--chibi" : ""}${customStyle?.layoutPreset ? ` vini-cinema--layout-${customStyle.layoutPreset}` : ""}${customStyle?.buttonVariant === "outline" ? " vini-cinema--button-outline" : ""}${editorMode && pageSize === 1 && phoneVideoHealth.height > phoneVideoHealth.width ? " vini-cinema--studio-portrait-video" : ""}`}>
+    <main style={styleVariables} className={`vini-cinema${showLoader ? " vini-cinema--loading" : ""}${activeGallery ? " vini-cinema--gallery" : ""}${customStyle ? " vini-cinema--styled" : ""}${presentation === "doctor" ? " vini-cinema--medical" : ""}${presentation === "chibi" ? " vini-cinema--chibi" : ""}${presentation === "wedding" ? " vini-cinema--wedding" : ""}${customStyle?.layoutPreset ? ` vini-cinema--layout-${customStyle.layoutPreset}` : ""}${customStyle?.buttonVariant === "outline" ? " vini-cinema--button-outline" : ""}${editorMode && pageSize === 1 && phoneVideoHealth.height > phoneVideoHealth.width ? " vini-cinema--studio-portrait-video" : ""}`}>
       <div className="vini-cinema__stage" aria-hidden="true">
         {videoSrc && (
           <video
@@ -519,7 +538,7 @@ export function ViniCinematic({
               </button>
             ))}
           </nav>
-          {original.contactUrl && <a data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" href={contactLink(original.contactUrl, original.contactMessage)} target="_blank" rel="noopener noreferrer">{original.contactLabel?.trim() || "Japri Saya!"}</a>}
+          {original.contactUrl ? <a data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" href={contactLink(original.contactUrl, original.contactMessage)} target="_blank" rel="noopener noreferrer">{original.contactLabel?.trim() || "Japri Saya!"}</a> : presentation === "wedding" ? <button type="button" data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" onClick={() => selectMenu("Produk")}>{original.contactLabel || "Isi RSVP"}</button> : null}
         </header>
 
         <div className="vini-cinema__main">
@@ -547,7 +566,7 @@ export function ViniCinematic({
                 {[...activeGallery, ...activeGallery, ...activeGallery].map((card, index) => (
                   <div className="vini-cinema__gallery-slide" key={`${card.id}-${index}`} aria-hidden={index < activeGallery.length || index >= activeGallery.length * 2}>
                     <button type="button" data-v2-edit={editorMode ? `card:${activeMenu.toLowerCase()}:${card.id}` : undefined} className="vini-cinema__visual-card" onClick={(event) => { if (suppressCardClickRef.current) { suppressCardClickRef.current = false; event.preventDefault(); return; } setSelectedCard(card); }} tabIndex={index >= activeGallery.length && index < activeGallery.length * 2 ? 0 : -1} aria-label={`Lihat detail ${card.title}`}>
-                      <CardArtwork card={card} />
+                      <CardArtwork card={card} wedding={presentation === "wedding"} />
                     </button>
                   </div>
                 ))}
@@ -586,7 +605,7 @@ export function ViniCinematic({
         <div className="vini-cinema__modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedCard(null); }}>
           <section className="vini-cinema__modal" role="dialog" aria-modal="true" aria-label={`Detail ${selectedCard.title}`}>
             <button type="button" className="vini-cinema__modal-close" onClick={() => setSelectedCard(null)} aria-label="Tutup detail">×</button>
-            <CardArtwork card={selectedCard} />
+            <CardArtwork card={selectedCard} wedding={presentation === "wedding"} />
             <div className="vini-cinema__modal-copy">
               <span>{selectedCard.eyebrow}</span>
               <h2>{selectedCard.title}</h2>

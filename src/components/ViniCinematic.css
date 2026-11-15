@@ -1375,3 +1375,71 @@
     font-size: clamp(41px, 12.4vw, 60px);
   }
 }
+
+
+/* Wedding RSVP overlays the existing NAMINA gallery slot; no new page sections. */
+.vini-cinema--wedding .vini-cinema__modal--rsvp {
+  width: min(100%, 620px);
+  max-height: min(88svh, 860px);
+  overflow-y: auto;
+  background: #faf5eb;
+  border: 1px solid #c9ab7c;
+  color: #604a35;
+  box-shadow: 0 22px 70px #60462942;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-content { padding: clamp(22px, 4vw, 38px); }
+.vini-cinema--wedding .vini-cinema__rsvp-eyebrow {
+  color: #a47f4e;
+  font: 600 11px "Montserrat", sans-serif;
+  letter-spacing: .18em;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-content h2 {
+  margin: 9px 0 6px;
+  color: #654a32;
+  font: 600 clamp(29px, 5vw, 47px) "Cormorant Garamond", Georgia, serif;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-content p {
+  margin: 0 0 20px;
+  color: #857158;
+  font: 400 13px/1.65 "Montserrat", sans-serif;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-form { display: grid; gap: 12px; }
+.vini-cinema--wedding .vini-cinema__rsvp-form label { display: grid; gap: 6px; font: 600 12px "Montserrat",sans-serif; color: #685137; }
+.vini-cinema--wedding .vini-cinema__rsvp-form input,
+.vini-cinema--wedding .vini-cinema__rsvp-form select,
+.vini-cinema--wedding .vini-cinema__rsvp-form textarea {
+  font: 400 14px "Montserrat",sans-serif;
+  color: #604a35;
+  width: 100%;
+  border: 1px solid #d7bd98;
+  border-radius: 12px;
+  background: #fffdf8;
+  padding: 12px 13px;
+  outline-offset: 2px;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-submit {
+  padding: 13px 20px;
+  min-height: 46px;
+  color: #fff;
+  font: 600 13px "Montserrat",sans-serif;
+  border: 1px solid #b38b55;
+  border-radius: 99px;
+  background: linear-gradient(135deg,#c9a874,#a17a46);
+}
+.vini-cinema--wedding .vini-cinema__rsvp-submit:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+.vini-cinema--wedding .vini-cinema__rsvp-note {
+  margin: 5px 0 0 !important;
+  color: #806e57;
+  font: 400 11px/1.55 "Montserrat",sans-serif !important;
+}
+@media(max-width: 450px) {
+  .vini-cinema--wedding .vini-cinema__rsvp-fields { grid-template-columns: 1fr; }
+}

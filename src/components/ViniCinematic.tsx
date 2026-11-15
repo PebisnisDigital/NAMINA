@@ -6,6 +6,7 @@ import { retryDropboxImage } from "../static/sites";
 import { originalFontFamilies, originalShadowValues } from "../static/originalStyle";
 import { NaminaIntroStage } from "./NaminaLogo";
 import { ClientSiteLogo } from "./ClientSiteLogo";
+import { WeddingRsvpModal } from "./WeddingRsvpModal";
 import { videoSourceForViewport } from "./videoSource";
 import "./ViniCinematic.css";
 
@@ -159,6 +160,7 @@ export function ViniCinematic({
   const [activeMenu, setActiveMenu] = useState<MenuKey>(editorMenu ?? "Nama");
   useEffect(() => { if (editorMenu) setActiveMenu(editorMenu); }, [editorMenu]);
   const [selectedCard, setSelectedCard] = useState<VisualCard | null>(null);
+  const [weddingRsvpOpen, setWeddingRsvpOpen] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
@@ -538,7 +540,7 @@ export function ViniCinematic({
               </button>
             ))}
           </nav>
-          {original.contactUrl ? <a data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" href={contactLink(original.contactUrl, original.contactMessage)} target="_blank" rel="noopener noreferrer">{original.contactLabel?.trim() || "Japri Saya!"}</a> : presentation === "wedding" ? <button type="button" data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" onClick={() => selectMenu("Produk")}>{original.contactLabel || "Isi RSVP"}</button> : null}
+          {presentation === "wedding" ? <button type="button" data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" onClick={() => { selectMenu("Produk"); if (!editorMode) setWeddingRsvpOpen(true); }}>{original.contactLabel || "Isi RSVP"}</button> : original.contactUrl ? <a data-v2-edit={editorMode ? "contact" : undefined} className="vini-cinema__contact-top" href={contactLink(original.contactUrl, original.contactMessage)} target="_blank" rel="noopener noreferrer">{original.contactLabel?.trim() || "Japri Saya!"}</a> : null}
         </header>
 
         <div className="vini-cinema__main">
@@ -565,7 +567,14 @@ export function ViniCinematic({
               >
                 {[...activeGallery, ...activeGallery, ...activeGallery].map((card, index) => (
                   <div className="vini-cinema__gallery-slide" key={`${card.id}-${index}`} aria-hidden={index < activeGallery.length || index >= activeGallery.length * 2}>
-                    <button type="button" data-v2-edit={editorMode ? `card:${activeMenu.toLowerCase()}:${card.id}` : undefined} className="vini-cinema__visual-card" onClick={(event) => { if (suppressCardClickRef.current) { suppressCardClickRef.current = false; event.preventDefault(); return; } setSelectedCard(card); }} tabIndex={index >= activeGallery.length && index < activeGallery.length * 2 ? 0 : -1} aria-label={`Lihat detail ${card.title}`}>
+                    <button type="button" data-v2-edit={editorMode ? `card:${activeMenu.toLowerCase()}:${card.id}` : undefined} className="vini-cinema__visual-card" onClick={(event) => {
+                        if (suppressCardClickRef.current) { suppressCardClickRef.current = false; event.preventDefault(); return; }
+                        if (presentation === "wedding" && activeMenu === "Produk" && index % activeGallery.length === 0 && !editorMode) {
+                          setWeddingRsvpOpen(true);
+                          return;
+                        }
+                        setSelectedCard(card);
+                      }} tabIndex={index >= activeGallery.length && index < activeGallery.length * 2 ? 0 : -1} aria-label={`Lihat detail ${card.title}`}>
                       <CardArtwork card={card} wedding={presentation === "wedding"} />
                     </button>
                   </div>
@@ -600,6 +609,11 @@ export function ViniCinematic({
           )}
         </div>
       </div>
+
+      {presentation === "wedding" && weddingRsvpOpen && !showLoader && (
+        <WeddingRsvpModal coupleName={content.identity.displayName}
+          contactUrl={original.contactUrl} onClose={() => setWeddingRsvpOpen(false)} />
+      )}
 
       {selectedCard && !showLoader && (
         <div className="vini-cinema__modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedCard(null); }}>

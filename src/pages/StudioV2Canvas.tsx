@@ -1,5 +1,6 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { ViniCinematic } from "../components/ViniCinematic";
+import { Wedding2Site } from "./Wedding2Site";
 import { siteDocumentSchema, type SiteDocument } from "../static/sites";
 import type { AssetUrls } from "../domain/content";
 import "../studio-v2-canvas.css";
@@ -117,7 +118,7 @@ export function StudioV2Canvas() {
 
   return <main className="studio-v2-canvas">
     {data ? <div className="studio-v2-canvas__interact" onClickCapture={selectElement}>
-      <ViniCinematic
+      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview /> : <ViniCinematic
         presentation={data.site.presentation}
         content={data.site.content}
         assetUrls={data.assets}
@@ -130,7 +131,7 @@ export function StudioV2Canvas() {
         }}
         onEditorAddCard={(section) => notify({ type: "NAMINA_V2_ADD_CARD", section })}
         onEditorAddFact={(section) => notify({ type: "NAMINA_V2_ADD_FACT", section })}
-      />
+      />}
     </div> : <div className="studio-v2-canvas__loading">Memuat tampilan website asli…</div>}
     {inline && <div className="studio-v2-canvas__inline" style={{
       position: "fixed", top: inline.y, left: inline.x,

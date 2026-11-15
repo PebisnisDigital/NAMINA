@@ -1250,25 +1250,51 @@
   --vini-ivory: #6b5139;
   --vini-muted: #927657;
 }
+/* Keep the actual video unblurred; feather its outer silhouette into the ivory canvas.
+   One video element only, so autoplay/mobile performance and studio editor remain unchanged. */
+.vini-cinema--wedding .vini-cinema__video {
+  opacity: 1;
+  filter: saturate(1.04) contrast(1.05) brightness(1.025);
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent 0%, #000 17%, #000 87%, transparent 100%);
+  mask-image: linear-gradient(90deg,
+    transparent 0%, #000 17%, #000 87%, transparent 100%);
+}
+
+/* Text side remains ivory, but the fade is gone before it reaches the person. */
 .vini-cinema--wedding .vini-cinema__scrim {
   background:
     linear-gradient(90deg,
       var(--namina-bg) 0%,
-      color-mix(in srgb, var(--namina-bg) 98%, transparent) 24%,
-      color-mix(in srgb, var(--namina-bg) 93%, transparent) 39%,
-      color-mix(in srgb, var(--namina-bg) 56%, transparent) 61%,
-      transparent 95%),
-    linear-gradient(0deg, var(--namina-bg), transparent 35%),
-    radial-gradient(ellipse at 78% 14%, #fff6db6e 0, transparent 55%);
+      color-mix(in srgb, var(--namina-bg) 98%, transparent) 21%,
+      color-mix(in srgb, var(--namina-bg) 90%, transparent) 31%,
+      color-mix(in srgb, var(--namina-bg) 53%, transparent) 40%,
+      color-mix(in srgb, var(--namina-bg) 10%, transparent) 53%,
+      transparent 63%),
+    linear-gradient(0deg, color-mix(in srgb, var(--namina-bg) 21%, transparent), transparent 19%);
 }
+
+/* Edge-only background blur. Never blur the middle where the couple appears.
+   Blur is masked to the video seam and the far-right feather. */
 .vini-cinema--wedding .vini-cinema__stage::after {
-  content:"";
-  position:absolute;
-  inset: 12px;
-  pointer-events:none;
-  border: 1px solid #bfa27757;
-  border-radius: 3px;
-  box-shadow: inset 0 0 0 9px #fffaf21c, inset 0 0 0 10px #bfa27722;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border: none;
+  box-shadow: none;
+  background: linear-gradient(90deg,
+    transparent 29%, #f8f2e821 39%, transparent 52%,
+    transparent 89%, #f8f2e825 100%);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent 28%, #000 38%, #000 41%, transparent 52%,
+    transparent 87%, #000 100%);
+  mask-image: linear-gradient(90deg,
+    transparent 28%, #000 38%, #000 41%, transparent 52%,
+    transparent 87%, #000 100%);
 }
 .vini-cinema--wedding .vini-cinema__intro h1 {
   font-weight: 600;
@@ -1340,23 +1366,50 @@
 .vini-cinema--wedding .vini-cinema__empty {
   color: #816a50;
 }
-@media (max-width: 850px) {
+@media (min-width: 701px) and (max-width: 850px) {
   .vini-cinema--wedding .vini-cinema__scrim {
     background: linear-gradient(90deg,
-      var(--namina-bg),color-mix(in srgb,var(--namina-bg) 72%,transparent) 60%,transparent),
-      linear-gradient(0deg,color-mix(in srgb,var(--namina-bg) 96%,transparent),transparent 80%);
+      var(--namina-bg) 0%,
+      color-mix(in srgb, var(--namina-bg) 92%, transparent) 20%,
+      color-mix(in srgb, var(--namina-bg) 48%, transparent) 43%,
+      transparent 64%),
+      linear-gradient(0deg, color-mix(in srgb, var(--namina-bg) 24%, transparent), transparent 22%);
+  }
+  .vini-cinema--wedding .vini-cinema__stage::after {
+    -webkit-mask-image: linear-gradient(90deg,
+      transparent 12%, #000 20%, #000 26%, transparent 43%,
+      transparent 89%, #000 100%);
+    mask-image: linear-gradient(90deg,
+      transparent 12%, #000 20%, #000 26%, transparent 43%,
+      transparent 89%, #000 100%);
   }
 }
 @media (max-width: 700px) {
+  /* On mobile the hero video spans full width. Preserve a clear face and
+     fade only the edges and the lower portion behind readable content. */
+  .vini-cinema--wedding .vini-cinema__video {
+    opacity: 1;
+    filter: saturate(1.04) contrast(1.04) brightness(1.025);
+    -webkit-mask-image: linear-gradient(90deg,
+      rgba(0,0,0,.48) 0%, #000 8%, #000 92%, rgba(0,0,0,.48) 100%);
+    mask-image: linear-gradient(90deg,
+      rgba(0,0,0,.48) 0%, #000 8%, #000 92%, rgba(0,0,0,.48) 100%);
+  }
   .vini-cinema--wedding .vini-cinema__scrim {
     background: linear-gradient(180deg,
-      color-mix(in srgb,var(--namina-bg) 7%,transparent) 0%,
-      transparent 29%,
-      color-mix(in srgb,var(--namina-bg) 34%,transparent) 49%,
-      color-mix(in srgb,var(--namina-bg) 86%,transparent) 65%,
+      transparent 0%, transparent 43%,
+      color-mix(in srgb, var(--namina-bg) 14%, transparent) 57%,
+      color-mix(in srgb, var(--namina-bg) 56%, transparent) 77%,
       var(--namina-bg) 100%);
   }
-  .vini-cinema--wedding .vini-cinema__stage::after { inset: 5px; }
+  .vini-cinema--wedding .vini-cinema__stage::after {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(90deg,
+      #000 0%, transparent 9%, transparent 91%, #000 100%);
+    mask-image: linear-gradient(90deg,
+      #000 0%, transparent 9%, transparent 91%, #000 100%);
+  }
   .vini-cinema--wedding .vini-cinema__nav,
   .vini-cinema--wedding .vini-cinema__nav--open {
     background: color-mix(in srgb, var(--namina-bg) 93%, #d7ba88);

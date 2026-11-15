@@ -516,3 +516,42 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+
+/* Four-template catalog popup for new admin clients. */
+.studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 125;
+  width: min(780px, calc(100vw - 28px));
+  min-width: 0;
+  max-height: calc(100dvh - 86px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 21px;
+  color: #f8eeec;
+  border: 1px solid #755762;
+  border-radius: 18px;
+  background: #1c161b;
+  box-shadow: 0 25px 85px #000b;
+}
+.studio-v2--fullscreen .studio-v2__create-panel > strong { font-size: 17px; }
+.studio-v2--fullscreen .studio-v2__create-panel > p { margin: 0; font-size: 12px; line-height: 1.55; color: #baa6ab; }
+.studio-v2--fullscreen .studio-v2__create-panel > label { font-size: 12px; font-weight: 750; }
+.studio-v2--fullscreen .studio-v2__create-panel > input {
+  min-height: 45px; width: 100%; padding: 10px 12px;
+  border-radius: 10px; border: 1px solid #78525a; background: #130d12; color: #fff;
+}
+.studio-v2--fullscreen .studio-v2__workbar .studio-v2__create-panel > button {
+  min-height: 46px; background: #c52c42; border-color: #f06a73;
+  color: white; font-weight: 800;
+}
+@media(max-width:600px) {
+  .studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel {
+    top: 94px; max-height: calc(100dvh - 110px); padding: 14px;
+  }
+}

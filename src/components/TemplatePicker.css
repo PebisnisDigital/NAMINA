@@ -1,0 +1,36 @@
+.namina-template-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
+.namina-template-picker *{box-sizing:border-box}
+.namina-template-picker__item{min-width:0;overflow:hidden;border:1px solid #5a414c;border-radius:14px;background:#241b22;position:relative}
+.namina-template-picker__item.is-selected{border-color:#ef7d85;box-shadow:0 0 0 2px #dc47592b}
+.namina-template-picker__option{display:grid;grid-template-columns:1fr;align-items:stretch;gap:0;width:100%;border:0;background:transparent;color:#fdf1ef;text-align:left;cursor:pointer;padding:0;font:inherit;white-space:normal}
+.namina-template-picker__option:focus-visible{outline:3px solid #f76d79;outline-offset:-3px}
+.namina-template-picker__option:disabled{opacity:.6;cursor:not-allowed}
+.namina-template-picker__preview{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;isolation:isolate;min-height:112px;padding:12px 13px;color:var(--template-ink);background:var(--template-bg)}
+.namina-template-picker__preview::after{content:"";position:absolute;inset:0 0 0 35%;pointer-events:none;z-index:-1;background:linear-gradient(90deg,var(--template-bg),transparent 80%),radial-gradient(ellipse at 100% 36%,var(--template-accent),transparent 70%);opacity:.65}
+.namina-template-picker__fake-nav{position:absolute;left:13px;top:7px;right:13px;display:flex;justify-content:space-between;font-weight:900;font-size:12px}
+.namina-template-picker__fake-nav span{letter-spacing:5px;font-size:9px}
+.namina-template-picker__fake-title{z-index:1;max-width:73%;margin-top:8px;font:800 clamp(14px,1.5vw,21px)/1.1 Montserrat,Arial,sans-serif;letter-spacing:-.045em}
+.namina-template-picker__item:nth-child(4) .namina-template-picker__fake-title{font-family:Georgia,serif;font-style:italic;font-weight:500}
+.namina-template-picker__fake-subtitle{z-index:1;color:var(--template-accent);font-size:8px;max-width:72%;font-weight:800;letter-spacing:.08em}
+.namina-template-picker__fake-video{position:absolute;right:10%;top:32%;width:18%;height:53%;border-radius:55% 55% 12% 12%;background:linear-gradient(130deg,transparent,var(--template-accent));opacity:.68}
+.namina-template-picker__fake-pill{position:absolute;left:13px;bottom:9px;width:46px;height:5px;border-radius:99px;background:var(--template-accent)}
+.namina-template-picker__info{display:flex;flex-direction:column;gap:5px;min-width:0;padding:12px 13px 38px}
+.namina-template-picker__category{font-size:10px;color:#db9da6;letter-spacing:.06em}
+.namina-template-picker__info strong{font-size:13px;line-height:1.3}
+.namina-template-picker__desc{font-size:11px;line-height:1.45;color:#cdbabd}
+.namina-template-picker__state{font-size:11px;color:#ffaeb8;font-weight:800;margin-top:3px}
+.namina-template-picker__item.is-selected .namina-template-picker__state{color:#bff7df}
+.namina-template-picker__demo{position:absolute;bottom:10px;right:12px;font-size:11px;text-decoration:underline;text-underline-offset:3px;color:#f8c9d0}
+.namina-template-picker--compact{grid-template-columns:1fr;gap:9px}
+.namina-template-picker--compact .namina-template-picker__option{grid-template-columns:100px minmax(0,1fr)}
+.namina-template-picker--compact .namina-template-picker__preview{min-height:103px;padding:9px}
+.namina-template-picker--compact .namina-template-picker__fake-title{font-size:12px}
+.namina-template-picker--compact .namina-template-picker__fake-subtitle{font-size:7px}
+.namina-template-picker--compact .namina-template-picker__info{padding:11px 10px 32px}
+.namina-template-picker--compact .namina-template-picker__info strong{font-size:12px}
+.namina-template-picker--compact .namina-template-picker__desc{font-size:10px}
+.namina-template-picker--compact .namina-template-picker__demo{font-size:10px}
+.studio-v2--fullscreen .studio-v2__workbar .namina-template-picker__option{display:grid;min-height:0;border:0;border-radius:0;padding:0;background:transparent;text-align:left;color:#fdf1ef;white-space:normal}
+.studio-v2--fullscreen .studio-v2__workbar .namina-template-picker__option:hover{background:transparent}
+@media(min-width:900px){.business__create-templates .namina-template-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:460px){.namina-template-picker{grid-template-columns:1fr}.namina-template-picker__option{grid-template-columns:108px minmax(0,1fr)}.namina-template-picker__preview{min-height:118px}.namina-template-picker__info{padding:10px 10px 32px}.namina-template-picker__fake-title{font-size:13px}}

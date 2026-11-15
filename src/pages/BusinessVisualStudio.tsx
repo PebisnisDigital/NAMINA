@@ -4,7 +4,7 @@ import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { TemplatePicker } from "../components/TemplatePicker";
+import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
 import { applySiteAppearance } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
@@ -36,6 +36,7 @@ export function BusinessVisualStudio() {
   const [selected,setSelected] = useState("name");
   const [popup,setPopup] = useState(false);
   const [design,setDesign] = useState(false);
+  const [templateOpen,setTemplateOpen] = useState(false);
   const [mobile,setMobile] = useState(false);
   const [immersive,setImmersive] = useState(false);
   const [popupPosition,setPopupPosition] = useState({left:80,top:96});
@@ -236,12 +237,6 @@ export function BusinessVisualStudio() {
     if(!site||!original)return null;
     if(design)return <>
       <div className="studio-v2__template-reset">
-        <strong>4 Template NAMINA Aktif</strong>
-        <p>Pilih gaya untuk klien ini tanpa menghapus data. Simpan draft, lalu publikasikan agar perubahan tayang.</p>
-        <TemplatePicker value={site.presentation ?? "original"}
-          onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))} compact />
-      </div>
-      <div className="studio-v2__template-reset">
         <strong>Isi dari Template /vini</strong>
         <p>Draft klien terlanjur kosong? Salin contoh lengkap /vini: video, ikon slide, Nama, Karir, Skill, Karya, dan Produk. Perubahan hanya untuk website ini.</p>
         <button className="studio-v2__ghost" type="button" disabled={working} onClick={() => void applyViniTemplate()}>Gunakan Template /vini</button>
@@ -360,7 +355,15 @@ export function BusinessVisualStudio() {
         <button className="studio-v2__immersive-trigger" type="button" onClick={()=>{setImmersive(true);setPopup(false)}} title="Edit website langsung dalam layar penuh" aria-label="Edit layar penuh">⛶ <span>Layar Penuh</span></button>
       </div>
       <div className="studio-v2__workbar-right">
-        <button type="button" className="studio-v2__design-trigger" onClick={()=>{setPopup(true);setDesign(true);send({type:"NAMINA_V2_CLOSE_EDITOR"})}}>Template &amp; Desain</button>
+        <div className="studio-v2__template-toolbar">
+          <button type="button" className="studio-v2__template-trigger"
+            title="Pilih template website klien" aria-haspopup="dialog" aria-expanded={templateOpen}
+            onClick={()=>{setTemplateOpen(true);setPopup(false);setDesign(false);send({type:"NAMINA_V2_CLOSE_EDITOR"})}}>
+            <span className="studio-v2__template-trigger-icon" aria-hidden="true">▦</span>
+            <span className="studio-v2__template-trigger-label">Template</span>
+          </button>
+        </div>
+        <button type="button" className="studio-v2__design-trigger" onClick={()=>{setPopup(true);setDesign(true);send({type:"NAMINA_V2_CLOSE_EDITOR"})}}>Desain</button>
         <button type="button" className="studio-v2__publish-trigger" disabled={!site||!dirty||working} onClick={()=>void save(false)}>
           {working?"Memproses…":"Simpan Draft"}
         </button>
@@ -379,6 +382,9 @@ export function BusinessVisualStudio() {
       </div>
       <div className="studio-v2__canvas-indicator"><span>{dirty?"Ada perubahan belum disimpan":"Draft tersimpan"}</span><span>·</span><span>{publishedSha?"Website telah terbit":"Belum dipublikasikan"}</span></div>
     </div>
+    {templateOpen&&site&&<StudioTemplateDialog value={site.presentation??"original"}
+      onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))}
+      onClose={()=>setTemplateOpen(false)} />}
     {immersive&&<button type="button" className="studio-v2__immersive-exit" onClick={()=>setImmersive(false)}>↙ Kembali ke Studio</button>}
     {publishedLink && <PublishSuccessModal url={publishedLink} onClose={() => setPublishedLink(null)} />}
     {popup&&site&&<div className="studio-v2__inline-popover" style={{left:popupPosition.left,top:popupPosition.top}}>

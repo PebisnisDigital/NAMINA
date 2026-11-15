@@ -4,7 +4,8 @@ import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
-import { setDoctorAppearance, setOriginalAppearance, setChibiAppearance, setWeddingAppearance } from "../static/doctorTemplate";
+import { TemplatePicker } from "../components/TemplatePicker";
+import { applySiteAppearance } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -235,15 +236,10 @@ export function BusinessVisualStudio() {
     if(!site||!original)return null;
     if(design)return <>
       <div className="studio-v2__template-reset">
-        <strong>Pilih template tampilan</strong>
-        <p>Semua template memakai layout /vini. Hanya warna, font dan gaya tombol yang berbeda.</p>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-          <button type="button" className="studio-v2__ghost" aria-pressed={!site.presentation || site.presentation === "original"} onClick={()=>change(next=>Object.assign(next,setOriginalAppearance(next)))}>Original NAMINA</button>
-          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "doctor"} onClick={()=>change(next=>Object.assign(next,setDoctorAppearance(next)))}>Dokter • Medical Teal</button>
-          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "chibi"} onClick={()=>change(next=>Object.assign(next,setChibiAppearance(next)))}>Chibi • Candy Pastel</button>
-          <button type="button" className="studio-v2__ghost" aria-pressed={site.presentation === "wedding"} onClick={()=>change(next=>Object.assign(next,setWeddingAppearance(next)))}>Wedding • Royal Ivory</button>
-        </div>
-        <p><a href="/dokter" target="_blank" rel="noopener noreferrer">Demo Dokter ↗</a> · <a href="/chibi" target="_blank" rel="noopener noreferrer">Demo Chibi ↗</a> · <a href="/wedding" target="_blank" rel="noopener noreferrer">Demo Wedding ↗</a></p>
+        <strong>4 Template NAMINA Aktif</strong>
+        <p>Pilih gaya untuk klien ini tanpa menghapus data. Simpan draft, lalu publikasikan agar perubahan tayang.</p>
+        <TemplatePicker value={site.presentation ?? "original"}
+          onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))} compact />
       </div>
       <div className="studio-v2__template-reset">
         <strong>Isi dari Template /vini</strong>
@@ -364,7 +360,7 @@ export function BusinessVisualStudio() {
         <button className="studio-v2__immersive-trigger" type="button" onClick={()=>{setImmersive(true);setPopup(false)}} title="Edit website langsung dalam layar penuh" aria-label="Edit layar penuh">⛶ <span>Layar Penuh</span></button>
       </div>
       <div className="studio-v2__workbar-right">
-        <button type="button" className="studio-v2__design-trigger" onClick={()=>{setPopup(true);setDesign(true);send({type:"NAMINA_V2_CLOSE_EDITOR"})}}>Desain</button>
+        <button type="button" className="studio-v2__design-trigger" onClick={()=>{setPopup(true);setDesign(true);send({type:"NAMINA_V2_CLOSE_EDITOR"})}}>Template &amp; Desain</button>
         <button type="button" className="studio-v2__publish-trigger" disabled={!site||!dirty||working} onClick={()=>void save(false)}>
           {working?"Memproses…":"Simpan Draft"}
         </button>

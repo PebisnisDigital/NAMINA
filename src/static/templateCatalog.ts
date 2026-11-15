@@ -1,9 +1,10 @@
 import { createDoctorTemplate, setDoctorAppearance, setChibiAppearance, setWeddingAppearance, setOriginalAppearance, setOriginalWhiteAppearance } from "./doctorTemplate";
 import { createChibiTemplate } from "./chibiTemplate";
 import { createWeddingTemplate } from "./weddingTemplate";
-import { loadViniTemplate, type SiteDocument } from "./sites";
+import { createWedding2Template } from "./wedding2Template";
+import { loadViniTemplate, siteDocumentSchema, type SiteDocument } from "./sites";
 
-export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding";
+export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2";
 
 export type TemplateInfo = {
   id: TemplateKey;
@@ -17,7 +18,7 @@ export type TemplateInfo = {
   menus: readonly [string, string, string, string, string];
 };
 
-/** Five template choices are shared by administrator and partner Studio. */
+/** Available templates are shared by administrator and partner Studio. */
 export const templateCatalog: readonly TemplateInfo[] = [
   {
     id: "original", name: "Original · Gelap", category: "Personal Branding",
@@ -48,6 +49,13 @@ export const templateCatalog: readonly TemplateInfo[] = [
     menus: ["Nama", "Karir", "Skill", "Karya", "Produk"],
   },
   {
+    id: "wedding2", name: "Wedding · Living Paper", category: "Undangan Pernikahan",
+    description: "Amplop 3D, intro video, bunga SVG, animasi kertas, dan undangan scroll khusus mobile.",
+    demo: "/wedding2", headline: "Hizqil & Icaa", subtitle: "SAGE BLOOM",
+    palette: { background: "#e7eade", accent: "#47654e", text: "#284432" },
+    menus: ["Mempelai", "Acara", "Kisah", "Galeri", "Hadiah"],
+  },
+  {
     id: "wedding", name: "Wedding · Royal Ivory", category: "Undangan Pernikahan",
     description: "Ivory-emas dengan Love Story dan Amplop digital.",
     demo: "/wedding", headline: "Alya & Raka", subtitle: "OUR WEDDING DAY",
@@ -61,6 +69,7 @@ export async function createSiteFromTemplate(slug: string, id: TemplateKey): Pro
     case "doctor": return createDoctorTemplate(slug);
     case "chibi": return createChibiTemplate(slug);
     case "wedding": return createWeddingTemplate(slug);
+    case "wedding2": return createWedding2Template(slug);
     case "original": return setOriginalAppearance(await loadViniTemplate(slug));
     case "original-white": return setOriginalWhiteAppearance(await loadViniTemplate(slug));
   }
@@ -72,6 +81,7 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
     case "doctor": return setDoctorAppearance(site);
     case "chibi": return setChibiAppearance(site);
     case "wedding": return setWeddingAppearance(site);
+    case "wedding2": return siteDocumentSchema.parse({ ...setWeddingAppearance(site), presentation: "wedding2" });
     case "original": return setOriginalAppearance(site);
     case "original-white": return setOriginalWhiteAppearance(site);
   }

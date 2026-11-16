@@ -106,6 +106,7 @@ export function StudioV2() {
   const [newSlug, setNewSlug] = useState("");
   const [newTemplate, setNewTemplate] = useState<TemplateKey>("original");
   const [newTemplateChosen, setNewTemplateChosen] = useState(false);
+  const [createPanelOpen, setCreatePanelOpen] = useState(false);
   const createPanelRef = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -789,10 +790,11 @@ export function StudioV2() {
           </select>
         </label>
         <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create"
-          onToggle={(event) => { if (event.currentTarget.open) setNewTemplateChosen(false); }}>
+          onToggle={(event) => {
+            setCreatePanelOpen(event.currentTarget.open);
+            if (event.currentTarget.open) setNewTemplateChosen(false);
+          }}>
           <summary title="Buat website dari salah satu dari 6 template">+ Klien · 6 Template</summary>
-          <div className="studio-v2__create-panel-dismiss" aria-hidden="true"
-            onPointerDown={() => createPanelRef.current?.removeAttribute("open")} />
           <div className="studio-v2__create-panel">
             <div className="studio-v2__create-panel-head">
               <div>
@@ -858,6 +860,9 @@ export function StudioV2() {
       </div>
         <a href="/studio/admin" className="studio-v2__admin-link" title="Kelola mitra dan perpanjangan">Admin Mitra</a>
     </header>
+
+    {createPanelOpen && <div className="studio-v2__create-panel-dismiss" aria-hidden="true"
+      onPointerDown={() => createPanelRef.current?.removeAttribute("open")} />}
 
     {error && <p className="studio-v2__floating-message studio-v2__floating-message--error" role="alert">{error}
       <button type="button" onClick={() => setError("")}>×</button>

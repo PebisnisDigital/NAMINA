@@ -73,21 +73,10 @@ for (const width of [390, 1440]) {
 
     await summary.click();
     await expect(panel).toBeVisible();
-    const debug = await page.evaluate(() => {
-      const point = document.elementFromPoint(5, 240);
-      const overlay = document.querySelector(".studio-v2__create-panel-dismiss");
-      const picker = document.querySelector(".studio-v2__create-panel");
-      const details = document.querySelector(".studio-v2__workbar-create");
-      return {
-        viewport: { width: innerWidth, height: innerHeight },
-        clickTarget: point ? { tag: point.tagName, className: String(point.className), insideDetails: !!details?.contains(point) } : null,
-        overlayRect: overlay?.getBoundingClientRect().toJSON(),
-        panelRect: picker?.getBoundingClientRect().toJSON(),
-        open: details?.hasAttribute("open"),
-        overlayPointerEvents: overlay && getComputedStyle(overlay).pointerEvents,
-      };
-    });
-    console.log("PICKER_OUTSIDE_DEBUG", JSON.stringify(debug));
+    const panelRect = await panel.boundingBox();
+    expect(panelRect).not.toBeNull();
+    expect(panelRect!.x).toBeGreaterThanOrEqual(0);
+    expect(panelRect!.x + panelRect!.width).toBeLessThanOrEqual(width + 1);
     await page.mouse.click(5, 240);
     await expect(panel).toBeHidden();
   });

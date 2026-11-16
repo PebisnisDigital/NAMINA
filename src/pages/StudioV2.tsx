@@ -7,7 +7,7 @@ import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { createSiteFromTemplate, switchSiteTemplate, selectedTemplate, type TemplateKey } from "../static/templateCatalog";
+import { createSiteFromTemplate, switchSiteTemplate, applySiteAppearance, selectedTemplate, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";

@@ -107,6 +107,6 @@ test("V1 controls are gone and legacy generator URLs lead to the official Studio
 
   for (const oldPath of ["/studio-v1", "/generator"]) {
     await page.goto(oldPath);
-    await expect(page).toHaveURL(/\\/studio$/);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/studio");
   }
 });

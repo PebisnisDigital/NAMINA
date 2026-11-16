@@ -2,7 +2,7 @@ import { createDoctorTemplate, setDoctorAppearance, setChibiAppearance, setWeddi
 import { createChibiTemplate } from "./chibiTemplate";
 import { createWeddingTemplate } from "./weddingTemplate";
 import { createWedding2Template } from "./wedding2Template";
-import { loadViniTemplate, siteDocumentSchema, type SiteDocument } from "./sites";
+import { loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites";
 
 export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2";
 
@@ -85,6 +85,46 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
     case "original": return setOriginalAppearance(site);
     case "original-white": return setOriginalWhiteAppearance(site);
   }
+}
+
+
+/**
+ * Switch the design of the CURRENT slug (including /vini). Unlike creation,
+ * this operation never allocates a new URL or publishes to the database.
+ * Separate personal/wedding snapshots keep both categories editable, even
+ * after an intentional publish of the newly selected template.
+ */
+export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDocument {
+  const current = selectedTemplate(site);
+  if (current === id) return siteDocumentSchema.parse(structuredClone(site));
+  const snapshot = (source: SiteDocument) => siteTemplateSnapshotSchema.parse({
+    presentation: source.presentation,
+    content: structuredClone(source.content),
+    media: structuredClone(source.media),
+    ...(source.weddingDesign ? { weddingDesign: structuredClone(source.weddingDesign) } : {}),
+  });
+  if (id === "wedding2") {
+    const archives = {
+      ...site.templateSnapshots,
+      personal: snapshot(site),
+    };
+    const wedding = archives.wedding
+      ? { ...structuredClone(archives.wedding), slug: site.slug }
+      : createWedding2Template(site.slug);
+    return siteDocumentSchema.parse({
+      ...wedding, slug: site.slug, presentation: "wedding2",
+      templateSnapshots: archives,
+    });
+  }
+  if (current === "wedding2") {
+    const archives = { ...site.templateSnapshots, wedding: snapshot(site) };
+    const restored = archives.personal
+      ? { ...structuredClone(archives.personal), slug: site.slug }
+      : siteDocumentSchema.parse(structuredClone(site));
+    const updated = applySiteAppearance(siteDocumentSchema.parse(restored), id);
+    return siteDocumentSchema.parse({ ...updated, templateSnapshots: archives });
+  }
+  return siteDocumentSchema.parse(applySiteAppearance(site, id));
 }
 
 /** Old manual white-mode sites should show the matching template selection. */

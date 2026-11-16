@@ -378,7 +378,8 @@ export function StudioV2() {
       catch { /* Draft stays editable in this Studio session. */ }
       return next;
     });
-    if (presentation === "wedding2") setScreen("mobile");
+    setScreen(presentation === "wedding2" ? "mobile" : "desktop");
+    sendFrame({ type: "WEDDING2_STAGE", stage: "page" });
     setWeddingSelection("");
     setSelected("name");
     setPopupOpen(false);

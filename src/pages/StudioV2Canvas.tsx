@@ -28,6 +28,7 @@ export function StudioV2Canvas() {
   const [data, setData] = useState<CanvasState | null>(null);
   const [activeMenu, setActiveMenu] = useState<VisualMenu>("Nama");
   const [selected, setSelected] = useState("");
+  const [weddingStage, setWeddingStage] = useState<"cover"|"film"|"page">("page");
   const [inline, setInline] = useState<InlineEdit | null>(null);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export function StudioV2Canvas() {
       if (message.type === "NAMINA_V2_SELECT" && typeof message.key === "string") setSelected(message.key);
       if (message.type === "NAMINA_V2_CLOSE_EDITOR") setInline(null);
       if (message.type === "WEDDING2_FOCUS" && typeof message.id === "string") setSelected(message.id);
+      if (message.type === "WEDDING2_STAGE" && (message.stage === "cover" || message.stage === "film" || message.stage === "page")) setWeddingStage(message.stage);
     };
     window.addEventListener("message", receive);
     notify({ type: "NAMINA_V2_READY" });
@@ -119,7 +121,7 @@ export function StudioV2Canvas() {
 
   return <main className="studio-v2-canvas">
     {data ? <div className="studio-v2-canvas__interact" onClickCapture={selectElement}>
-      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview editorMode selectedId={selected} /> : <ViniCinematic
+      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview editorMode selectedId={selected} studioStage={weddingStage} /> : <ViniCinematic
         presentation={data.site.presentation}
         content={data.site.content}
         assetUrls={data.assets}

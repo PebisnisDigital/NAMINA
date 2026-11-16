@@ -38,3 +38,5 @@
 @keyframes w2-placed-soft{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media(max-width:700px){.w2-root .w2-section-title h2{font-size:calc(clamp(42px,11vw,55px)*var(--w2-heading-scale,1))}.w2-root .w2-hero h1{font-size:calc(clamp(54px,15vw,76px)*var(--w2-heading-scale,1))}}
 @media(prefers-reduced-motion:reduce){.w2-animation-paper,.w2-animation-soft{animation:none}}
+
+.w2-root .w2-map-button{display:inline-flex;justify-content:center;align-items:center;margin-top:12px;padding:11px 19px;background:var(--w2-green,#334d3c);color:#fff;border-radius:30px;min-height:43px;font-size:12px;font-weight:700;text-decoration:none}

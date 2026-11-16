@@ -28,10 +28,10 @@ function Petals({ className = "" }: { className?: string }) {
     <path d="M33 223q-34-4-17-34 23 6 17 34Zm27-47q23-36 44-21-9 24-44 21Zm26-63q-32-25-19-45 25 9 19 45Zm52-46q22-30 46-20-12 24-46 20Z" fill="#829c79" opacity=".9"/>
   </svg>;
 }
-function PaperTitle({ children, eyebrow }: { children: React.ReactNode; eyebrow?: string }) {
+function PaperTitle({ children, eyebrow, editable }: { children: React.ReactNode; eyebrow?: string; editable?: string }) {
   return <header className="w2-section-title">
     {eyebrow && <span className="w2-eyebrow">{eyebrow}</span>}
-    <h2>{children}</h2><span className="w2-title-ornament">✦ ─── ♡ ─── ✦</span>
+    <h2 data-w2-select={editable}>{children}</h2><span className="w2-title-ornament">✦ ─── ♡ ─── ✦</span>
   </header>;
 }
 function Counter({ date }: { date: string }) {
@@ -178,7 +178,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
         </section>
 
         <Section id="mempelai" color={sectionColor("mempelai")} className="w2-introduction">
-          <div className="w2-reveal"><PaperTitle eyebrow="BISMILLAHIRRAHMANIRRAHIM">Dengan Penuh Cinta</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:mempelai" eyebrow="BISMILLAHIRRAHMANIRRAHIM">{design.sectionTitles?.mempelai||"Dengan Penuh Cinta"}</PaperTitle>
           <p className="w2-centered-copy" data-w2-select="intro">{byKey("nama")?.description || "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk hadir pada hari pernikahan kami."}</p>
           <div className="w2-names"><div><span>Mempelai Pria</span><strong>{groom}</strong><p data-w2-select="parent-0">{byKey("nama")?.items[0]?.value||"Putra dari keluarga tercinta"}</p></div><span className="w2-amp">&</span><div><span>Mempelai Wanita</span><strong>{bride}</strong><p data-w2-select="parent-1">{byKey("nama")?.items[1]?.value||"Putri dari keluarga tercinta"}</p></div></div>
           </div>
@@ -186,7 +186,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
         </Section>
 
         <Section id="acara" color={sectionColor("acara")} className="w2-events">
-          <div className="w2-reveal"><PaperTitle eyebrow="SAVE OUR DATE">Hari Bahagia</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:acara" eyebrow="SAVE OUR DATE">{design.sectionTitles?.acara||"Hari Bahagia"}</PaperTitle>
           <p className="w2-date" data-w2-select="date">{dateLabel}</p><Counter date={date}/>
           <div className="w2-event-grid">
             <article className="w2-event-card"><span className="w2-event-symbol">◈</span><h3>Akad Nikah</h3><p data-w2-select="akad">{field(1)||"Waktu dan lokasi akad diisi melalui Studio"}</p><span>{dateLabel}</span></article>
@@ -198,21 +198,21 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
         </Section>
 
         <Section id="cerita" color={sectionColor("cerita")}>
-          <div className="w2-reveal"><PaperTitle eyebrow="A LITTLE STORY">Kisah Kami</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:cerita" eyebrow="A LITTLE STORY">{design.sectionTitles?.cerita||"Kisah Kami"}</PaperTitle>
           <div className="w2-timeline">{(byKey("skill")?.items||[]).slice(0,4).map((item,i)=><article key={item.id}><span className="w2-timeline-point">{["♡","✧","♧","❦"][i]}</span><div><span>{item.label}</span><p data-w2-select={"story-"+i}>{item.value}</p></div></article>)}</div>
           </div>
           {placed("cerita")}
         </Section>
 
         <Section id="galeri" color={sectionColor("galeri")} className="w2-gallery-section">
-          <div className="w2-reveal"><PaperTitle eyebrow="THE LITTLE MOMENTS">Galeri Cinta</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:galeri" eyebrow="THE LITTLE MOMENTS">{design.sectionTitles?.galeri||"Galeri Cinta"}</PaperTitle>
           <div className="w2-gallery">{photos.map((src,i)=><button key={i} type="button" data-w2-select={"gallery-"+i} className={"w2-photo w2-photo--"+i%3} onClick={()=>setActivePhoto(i)} aria-label={"Perbesar foto "+(i+1)}>
             <img src={src} alt={gallery[i]?.title || "Galeri pasangan pengantin"} loading="lazy" onError={e=>{e.currentTarget.style.opacity="0";}} /><span>{gallery[i]?.title||"Our moment"}</span></button>)}</div></div>
           {placed("galeri")}
         </Section>
 
         <Section id="rsvp" color={sectionColor("rsvp")} className="w2-rsvp-section">
-          <div className="w2-reveal"><PaperTitle eyebrow="YOUR PRESENCE MATTERS">Kehadiran & Doa</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:rsvp" eyebrow="YOUR PRESENCE MATTERS">{design.sectionTitles?.rsvp||"Kehadiran & Doa"}</PaperTitle>
             <p className="w2-centered-copy">Kirim doa dan konfirmasi kehadiran untuk kedua mempelai.</p>
             <form className="w2-rsvp-form" onSubmit={submit}>
               <label>Nama Tamu<input value={guestName} maxLength={60} required onChange={e=>{setGuestName(e.target.value);setSent(false);}} placeholder="Nama lengkap" /></label>
@@ -226,14 +226,14 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
         </Section>
 
         <Section id="hadiah" color={sectionColor("hadiah")} className="w2-gift-section">
-          <div className="w2-reveal"><PaperTitle eyebrow="WITH LOVE">Amplop Digital</PaperTitle>
+          <div className="w2-reveal"><PaperTitle editable="heading:hadiah" eyebrow="WITH LOVE">{design.sectionTitles?.hadiah||"Amplop Digital"}</PaperTitle>
             <p className="w2-centered-copy">Doa restu Anda adalah hadiah paling berharga bagi kami.</p>
             <div className="w2-gift-grid">{(byKey("produk")?.items||[]).slice(0,2).map(item=><div className="w2-gift-card" key={item.id}><span>❦</span><h3>{item.title}</h3><p data-w2-select={"gift-"+(byKey("produk")?.items||[]).findIndex(g=>g.id===item.id)}>{item.description}</p></div>)}</div>
           </div>
           {placed("hadiah")}
         </Section>
 
-        <footer className="w2-footer"><Petals className="w2-footer-flower"/><p>TERIMA KASIH</p><h2>{couple}</h2><span>{dateLabel}</span><small>Undangan digital · NAMINA Wedding Living Paper</small></footer>
+        <footer className="w2-footer"><Petals className="w2-footer-flower"/><p data-w2-select="closing-text">{design.closingText||"TERIMA KASIH"}</p><h2>{couple}</h2><span>{dateLabel}</span><small>Undangan digital · NAMINA Wedding Living Paper</small></footer>
       </main>
       <nav className="w2-bottom-nav" aria-label="Navigasi bawah">
         {[["⌂","beranda","Beranda"],["♡","mempelai","Mempelai"],["◷","acara","Acara"],["▧","galeri","Galeri"],["✉","rsvp","Ucapan"]].map(([icon,id,label])=><a key={id} href={"#"+id}><span aria-hidden="true">{icon}</span><small>{label}</small></a>)}

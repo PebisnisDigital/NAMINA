@@ -7,7 +7,7 @@ import { createWedding2Template } from "../static/wedding2Template";
 import "./Wedding2Site.css";
 
 type Stage = "cover" | "opening" | "film" | "page";
-type Props = { document: SiteDocument; studioPreview?: boolean; editorMode?: boolean; selectedId?: string };
+type Props = { document: SiteDocument; studioPreview?: boolean; editorMode?: boolean; selectedId?: string; studioStage?: "cover"|"film"|"page" };
 const fallbackPhoto = "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80";
 const fallbackGallery = [
   "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=75",
@@ -49,7 +49,7 @@ function Counter({ date }: { date: string }) {
 function Section({ id, children, className = "", color }: { id: string; children: React.ReactNode; className?: string; color?: string }) {
   return <section id={id} className={"w2-paper-section " + className} style={color ? { backgroundColor:color } : undefined}>{children}</section>;
 }
-export function Wedding2Site({ document: site, studioPreview = false, editorMode = false, selectedId = "" }: Props) {
+export function Wedding2Site({ document: site, studioPreview = false, editorMode = false, selectedId = "", studioStage = "page" }: Props) {
   const original = site.content.original;
   const design = site.weddingDesign || defaultWeddingDesign();
   const sectionColor = (section: WeddingSection) => design.sectionColors?.[section];
@@ -60,6 +60,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
   } as CSSProperties;
   const placed = (section: WeddingSection) => <WeddingCanvasElements elements={design.elements} section={section} editorMode={editorMode} selectedId={selectedId}/>;
   const [phase,setPhase] = useState<Stage>(studioPreview ? "page" : "cover");
+  const displayed = studioPreview ? studioStage : phase;
   const [guest,setGuest] = useState("");
   const [guestName,setGuestName] = useState("");
   const [attending,setAttending] = useState("hadir");
@@ -134,13 +135,13 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
     setSent(true);
   };
   return <div className={"w2-root w2-font-"+design.font+" w2-motion-"+design.motion+(editorMode?" w2-root--editing":"")} ref={frame} style={rootStyle} onClickCapture={onEditClick}>
-    {!studioPreview && phase !== "page" && <div className={"w2-stage w2-stage--"+phase}>
-      {phase==="cover"||phase==="opening" ? <div className="w2-cover">
+    {displayed !== "page" && <div className={"w2-stage w2-stage--"+displayed}>
+      {displayed==="cover"||displayed==="opening" ? <div className="w2-cover">
         <Petals className="w2-cover-flower w2-cover-flower--left"/>
         <Petals className="w2-cover-flower w2-cover-flower--right"/>
         <p className="w2-overline">THE WEDDING INVITATION</p>
         <h1 data-w2-select="couple">{couple}</h1>
-        <p className="w2-cover-intro">Sebuah kisah, satu janji selamanya.</p>
+        <p data-w2-select="cover-subtitle" className="w2-cover-intro">{design.coverSubtitle||"Sebuah kisah, satu janji selamanya."}</p>
         <button type="button" className="w2-envelope-button" aria-label="Buka amplop undangan" onClick={()=>setPhase("opening")} disabled={phase==="opening"}>
           <span className="w2-envelope">
             <span className="w2-envelope-back"/><span className="w2-envelope-letter">{couple}<small>You're invited</small></span>
@@ -149,7 +150,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
           </span>
         </button>
         <span className="w2-hint">Sentuh amplop untuk membuka</span>
-        <button type="button" className="w2-cover-cta" onClick={()=>setPhase("opening")}>Buka Undangan <span aria-hidden="true">↗</span></button>
+        <button type="button" className="w2-cover-cta" onClick={()=>setPhase("opening")} data-w2-select="cover-button">{design.coverButtonText||"Buka Undangan"} <span aria-hidden="true">↗</span></button>
         <p className="w2-guest">Kepada Yth. {guest || "Bapak / Ibu / Saudara/i"}</p>
       </div> : <div className="w2-film">
         {introVideo ? <video ref={film} src={introVideo} poster={site.media.poster||undefined} muted={muted} playsInline autoPlay onEnded={done} onError={done} aria-label="Video pembuka undangan"/> :
@@ -160,7 +161,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
       </div>}
     </div>}
 
-    {(phase==="page"||studioPreview)&&<>
+    {displayed==="page"&&<>
       <nav className="w2-topbar" aria-label="Navigasi undangan"><a href="#beranda" className="w2-monogram">W<span>♡</span></a><span>THE WEDDING OF {couple}</span><a href="#acara">Detail Acara ↗</a></nav>
       <main className="w2-main">
         <section id="beranda" className="w2-hero" style={sectionColor("beranda")?{backgroundColor:sectionColor("beranda")}:undefined}>
@@ -191,7 +192,7 @@ export function Wedding2Site({ document: site, studioPreview = false, editorMode
             <article className="w2-event-card"><span className="w2-event-symbol">◈</span><h3>Akad Nikah</h3><p data-w2-select="akad">{field(1)||"Waktu dan lokasi akad diisi melalui Studio"}</p><span>{dateLabel}</span></article>
             <article className="w2-event-card"><span className="w2-event-symbol">❦</span><h3>Resepsi</h3><p data-w2-select="resepsi">{field(2)||"Waktu dan lokasi resepsi diisi melalui Studio"}</p><span>{dateLabel}</span></article>
           </div>
-          <div className="w2-location"><span>LOKASI ACARA</span><h3 data-w2-select="lokasi">{field(3)||"Lokasi menyusul"}</h3><p>Pastikan alamat sesuai undangan resmi pasangan.</p></div>
+          <div className="w2-location"><span>LOKASI ACARA</span><h3 data-w2-select="lokasi">{field(3)||"Lokasi menyusul"}</h3><p>Pastikan alamat sesuai undangan resmi pasangan.</p>{design.mapUrl?.startsWith("https://")&&<a data-w2-select="map-button" className="w2-map-button" href={design.mapUrl} target="_blank" rel="noopener noreferrer">Buka Google Maps ↗</a>}</div>
           </div>
           {placed("acara")}
         </Section>

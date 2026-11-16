@@ -393,7 +393,7 @@ export function BusinessVisualStudio() {
       </div>
       <div className="studio-v2__canvas-indicator"><span>{dirty?"Ada perubahan belum disimpan":"Draft tersimpan"}</span><span>·</span><span>{publishedSha?"Website telah terbit":"Belum dipublikasikan"}</span></div>
     </div>
-    {site?.presentation==="wedding2"&&<WeddingStudioPanel site={site} selectedId={weddingSelection}
+    {site?.presentation==="wedding2"&&<WeddingStudioPanel site={site} siteId={rowId} selectedId={weddingSelection}
        onSelect={id=>{setWeddingSelection(id);send({type:"WEDDING2_FOCUS",id});}}
        onChange={change} onStageChange={stage=>send({type:"WEDDING2_STAGE",stage})}/>}
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}

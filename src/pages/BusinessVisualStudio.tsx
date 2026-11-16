@@ -6,7 +6,7 @@ import { WeddingStudioPanel } from "../components/WeddingStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { applySiteAppearance, selectedTemplate } from "../static/templateCatalog";
+import { switchSiteTemplate, selectedTemplate } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import type { OriginalMenuIcon, OriginalStyle } from "../domain/content";
 import "../business.css";
@@ -397,7 +397,16 @@ export function BusinessVisualStudio() {
        onSelect={id=>{setWeddingSelection(id);send({type:"WEDDING2_FOCUS",id});}}
        onChange={change} onStageChange={stage=>send({type:"WEDDING2_STAGE",stage})}/>}
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
-      onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))}
+      onChange={id=>{
+        setSite(current=>current?switchSiteTemplate(current,id):null);
+        if(id==="wedding2")setMobile(true);
+        setWeddingSelection("");
+        setSelected("name");
+        setPopup(false);setDesign(false);
+        setDirty(true);
+        setFeedback("");
+        setTemplateOpen(false);
+      }}
       onClose={()=>setTemplateOpen(false)} />}
     {immersive&&<button type="button" className="studio-v2__immersive-exit" onClick={()=>setImmersive(false)}>↙ Kembali ke Studio</button>}
     {publishedLink && <PublishSuccessModal url={publishedLink} onClose={() => setPublishedLink(null)} />}

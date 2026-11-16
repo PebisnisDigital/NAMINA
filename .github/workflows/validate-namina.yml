@@ -20,3 +20,17 @@ jobs:
       - run: npm run typecheck
       - run: npx tsx --test tests/vini-template.test.ts tests/mobile-video-preview.test.ts tests/admin-publish-no-deploy.test.ts tests/video-studio-upload.test.ts tests/wedding2-design.test.ts tests/template-catalog.test.ts
       - run: npm run build
+
+  studio-template-browser:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/browser/studio-template-flow.spec.ts

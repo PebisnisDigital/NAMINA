@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { WeddingCanvasElements } from "../components/WeddingCanvasElements";
+import { defaultWeddingDesign, type WeddingSection } from "../static/weddingDesign";
 import type { SiteDocument } from "../static/sites";
 import { playableDropboxMediaUrl } from "../static/sites";
 import { createWedding2Template } from "../static/wedding2Template";
 import "./Wedding2Site.css";
 
 type Stage = "cover" | "opening" | "film" | "page";
-type Props = { document: SiteDocument; studioPreview?: boolean };
+type Props = { document: SiteDocument; studioPreview?: boolean; editorMode?: boolean; selectedId?: string };
 const fallbackPhoto = "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80";
 const fallbackGallery = [
   "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=75",
@@ -44,11 +46,19 @@ function Counter({ date }: { date: string }) {
     {numbers.map((n,i) => <div className="w2-counter" key={i}><strong>{String(n).padStart(2,"0")}</strong><span>{["Hari","Jam","Menit","Detik"][i]}</span></div>)}
   </div>;
 }
-function Section({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) {
-  return <section id={id} className={"w2-paper-section " + className}>{children}</section>;
+function Section({ id, children, className = "", color }: { id: string; children: React.ReactNode; className?: string; color?: string }) {
+  return <section id={id} className={"w2-paper-section " + className} style={color ? { backgroundColor:color } : undefined}>{children}</section>;
 }
-export function Wedding2Site({ document: site, studioPreview = false }: Props) {
+export function Wedding2Site({ document: site, studioPreview = false, editorMode = false, selectedId = "" }: Props) {
   const original = site.content.original;
+  const design = site.weddingDesign || defaultWeddingDesign();
+  const sectionColor = (section: WeddingSection) => design.sectionColors?.[section];
+  const rootStyle = {
+    "--w2-paper":design.surface, "--w2-green":design.primary, "--w2-ink":design.primary,
+    "--w2-gold":design.accent, "--w2-page-background":design.background,
+    "--w2-heading-scale":design.headingScale,
+  } as CSSProperties;
+  const placed = (section: WeddingSection) => <WeddingCanvasElements elements={design.elements} section={section} editorMode={editorMode} selectedId={selectedId}/>;
   const [phase,setPhase] = useState<Stage>(studioPreview ? "page" : "cover");
   const [guest,setGuest] = useState("");
   const [guestName,setGuestName] = useState("");
@@ -103,6 +113,19 @@ export function Wedding2Site({ document: site, studioPreview = false }: Props) {
     nodes.forEach(n=>observer.observe(n));
     return () => observer.disconnect();
   },[phase]);
+  useEffect(() => {
+    if(!editorMode)return;
+    frame.current?.querySelectorAll<HTMLElement>("[data-w2-select]").forEach(node=>
+      node.classList.toggle("w2-active-edit",node.dataset.w2Select===selectedId));
+  },[editorMode,selectedId]);
+  const onEditClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if(!editorMode)return;
+    const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-w2-select]") : null;
+    if(!target)return;
+    event.preventDefault();
+    event.stopPropagation();
+    if(window.parent!==window)window.parent.postMessage({type:"WEDDING2_SELECT",id:target.dataset.w2Select},window.location.origin);
+  };
   const done = () => {setPhase("page");window.scrollTo({top:0,behavior:"instant"});};
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -110,13 +133,13 @@ export function Wedding2Site({ document: site, studioPreview = false }: Props) {
     try{localStorage.setItem("namina:wedding2:rsvp:"+site.slug,JSON.stringify({name:guestName.slice(0,60),attending,message:message.slice(0,400)}));}catch{/* local-only preview */}
     setSent(true);
   };
-  return <div className="w2-root" ref={frame}>
+  return <div className={"w2-root w2-font-"+design.font+" w2-motion-"+design.motion+(editorMode?" w2-root--editing":"")} ref={frame} style={rootStyle} onClickCapture={onEditClick}>
     {!studioPreview && phase !== "page" && <div className={"w2-stage w2-stage--"+phase}>
       {phase==="cover"||phase==="opening" ? <div className="w2-cover">
         <Petals className="w2-cover-flower w2-cover-flower--left"/>
         <Petals className="w2-cover-flower w2-cover-flower--right"/>
         <p className="w2-overline">THE WEDDING INVITATION</p>
-        <h1 data-v2-edit="name">{couple}</h1>
+        <h1 data-w2-select="couple">{couple}</h1>
         <p className="w2-cover-intro">Sebuah kisah, satu janji selamanya.</p>
         <button type="button" className="w2-envelope-button" aria-label="Buka amplop undangan" onClick={()=>setPhase("opening")} disabled={phase==="opening"}>
           <span className="w2-envelope">
@@ -140,49 +163,54 @@ export function Wedding2Site({ document: site, studioPreview = false }: Props) {
     {(phase==="page"||studioPreview)&&<>
       <nav className="w2-topbar" aria-label="Navigasi undangan"><a href="#beranda" className="w2-monogram">W<span>♡</span></a><span>THE WEDDING OF {couple}</span><a href="#acara">Detail Acara ↗</a></nav>
       <main className="w2-main">
-        <section id="beranda" className="w2-hero">
+        <section id="beranda" className="w2-hero" style={sectionColor("beranda")?{backgroundColor:sectionColor("beranda")}:undefined}>
           <Petals className="w2-hero-flower w2-hero-flower--left"/><Petals className="w2-hero-flower w2-hero-flower--right"/>
           <div className="w2-hero-inner w2-reveal">
             <p className="w2-overline">THE WEDDING OF</p>
-            <h1 data-v2-edit="name">{couple}</h1>
+            <h1 data-w2-select="couple">{couple}</h1>
             <div className="w2-hero-divider">✧ ───── ♡ ───── ✧</div>
-            <p>{dateLabel}</p>
-            <div className="w2-hero-photo"><img src={photo} alt="Ilustrasi pasangan pengantin. Ganti foto dengan foto klien di Studio." loading="eager" onError={e=>{e.currentTarget.style.opacity="0";}} /></div>
-            <p className="w2-hero-verse">{site.content.identity.bio || "Dua hati, satu perjalanan, dan doa yang menyatukan."}</p>
+            <p data-w2-select="date">{dateLabel}</p>
+            <div className="w2-hero-photo" data-w2-select="photo"><img src={photo} alt="Ilustrasi pasangan pengantin. Ganti foto dengan foto klien di Studio." loading="eager" onError={e=>{e.currentTarget.style.opacity="0";}} /></div>
+            <p className="w2-hero-verse" data-w2-select="bio">{site.content.identity.bio || "Dua hati, satu perjalanan, dan doa yang menyatukan."}</p>
           </div>
+          {placed("beranda")}
         </section>
 
-        <Section id="mempelai" className="w2-introduction">
+        <Section id="mempelai" color={sectionColor("mempelai")} className="w2-introduction">
           <div className="w2-reveal"><PaperTitle eyebrow="BISMILLAHIRRAHMANIRRAHIM">Dengan Penuh Cinta</PaperTitle>
-          <p className="w2-centered-copy" data-v2-edit="description">{byKey("nama")?.description || "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk hadir pada hari pernikahan kami."}</p>
-          <div className="w2-names"><div><span>Mempelai Pria</span><strong>{groom}</strong><p>{byKey("nama")?.items[0]?.value||"Putra dari keluarga tercinta"}</p></div><span className="w2-amp">&</span><div><span>Mempelai Wanita</span><strong>{bride}</strong><p>{byKey("nama")?.items[1]?.value||"Putri dari keluarga tercinta"}</p></div></div>
+          <p className="w2-centered-copy" data-w2-select="intro">{byKey("nama")?.description || "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Anda untuk hadir pada hari pernikahan kami."}</p>
+          <div className="w2-names"><div><span>Mempelai Pria</span><strong>{groom}</strong><p data-w2-select="parent-0">{byKey("nama")?.items[0]?.value||"Putra dari keluarga tercinta"}</p></div><span className="w2-amp">&</span><div><span>Mempelai Wanita</span><strong>{bride}</strong><p data-w2-select="parent-1">{byKey("nama")?.items[1]?.value||"Putri dari keluarga tercinta"}</p></div></div>
           </div>
+          {placed("mempelai")}
         </Section>
 
-        <Section id="acara" className="w2-events">
+        <Section id="acara" color={sectionColor("acara")} className="w2-events">
           <div className="w2-reveal"><PaperTitle eyebrow="SAVE OUR DATE">Hari Bahagia</PaperTitle>
-          <p className="w2-date">{dateLabel}</p><Counter date={date}/>
+          <p className="w2-date" data-w2-select="date">{dateLabel}</p><Counter date={date}/>
           <div className="w2-event-grid">
-            <article className="w2-event-card"><span className="w2-event-symbol">◈</span><h3>Akad Nikah</h3><p>{field(1)||"Waktu dan lokasi akad diisi melalui Studio"}</p><span>{dateLabel}</span></article>
-            <article className="w2-event-card"><span className="w2-event-symbol">❦</span><h3>Resepsi</h3><p>{field(2)||"Waktu dan lokasi resepsi diisi melalui Studio"}</p><span>{dateLabel}</span></article>
+            <article className="w2-event-card"><span className="w2-event-symbol">◈</span><h3>Akad Nikah</h3><p data-w2-select="akad">{field(1)||"Waktu dan lokasi akad diisi melalui Studio"}</p><span>{dateLabel}</span></article>
+            <article className="w2-event-card"><span className="w2-event-symbol">❦</span><h3>Resepsi</h3><p data-w2-select="resepsi">{field(2)||"Waktu dan lokasi resepsi diisi melalui Studio"}</p><span>{dateLabel}</span></article>
           </div>
-          <div className="w2-location"><span>LOKASI ACARA</span><h3>{field(3)||"Lokasi menyusul"}</h3><p>Pastikan alamat sesuai undangan resmi pasangan.</p></div>
+          <div className="w2-location"><span>LOKASI ACARA</span><h3 data-w2-select="lokasi">{field(3)||"Lokasi menyusul"}</h3><p>Pastikan alamat sesuai undangan resmi pasangan.</p></div>
           </div>
+          {placed("acara")}
         </Section>
 
-        <Section id="cerita">
+        <Section id="cerita" color={sectionColor("cerita")}>
           <div className="w2-reveal"><PaperTitle eyebrow="A LITTLE STORY">Kisah Kami</PaperTitle>
-          <div className="w2-timeline">{(byKey("skill")?.items||[]).slice(0,4).map((item,i)=><article key={item.id}><span className="w2-timeline-point">{["♡","✧","♧","❦"][i]}</span><div><span>{item.label}</span><p>{item.value}</p></div></article>)}</div>
+          <div className="w2-timeline">{(byKey("skill")?.items||[]).slice(0,4).map((item,i)=><article key={item.id}><span className="w2-timeline-point">{["♡","✧","♧","❦"][i]}</span><div><span>{item.label}</span><p data-w2-select={"story-"+i}>{item.value}</p></div></article>)}</div>
           </div>
+          {placed("cerita")}
         </Section>
 
-        <Section id="galeri" className="w2-gallery-section">
+        <Section id="galeri" color={sectionColor("galeri")} className="w2-gallery-section">
           <div className="w2-reveal"><PaperTitle eyebrow="THE LITTLE MOMENTS">Galeri Cinta</PaperTitle>
-          <div className="w2-gallery">{photos.map((src,i)=><button key={i} type="button" className={"w2-photo w2-photo--"+i%3} onClick={()=>setActivePhoto(i)} aria-label={"Perbesar foto "+(i+1)}>
+          <div className="w2-gallery">{photos.map((src,i)=><button key={i} type="button" data-w2-select={"gallery-"+i} className={"w2-photo w2-photo--"+i%3} onClick={()=>setActivePhoto(i)} aria-label={"Perbesar foto "+(i+1)}>
             <img src={src} alt={gallery[i]?.title || "Galeri pasangan pengantin"} loading="lazy" onError={e=>{e.currentTarget.style.opacity="0";}} /><span>{gallery[i]?.title||"Our moment"}</span></button>)}</div></div>
+          {placed("galeri")}
         </Section>
 
-        <Section id="rsvp" className="w2-rsvp-section">
+        <Section id="rsvp" color={sectionColor("rsvp")} className="w2-rsvp-section">
           <div className="w2-reveal"><PaperTitle eyebrow="YOUR PRESENCE MATTERS">Kehadiran & Doa</PaperTitle>
             <p className="w2-centered-copy">Kirim doa dan konfirmasi kehadiran untuk kedua mempelai.</p>
             <form className="w2-rsvp-form" onSubmit={submit}>
@@ -193,13 +221,15 @@ export function Wedding2Site({ document: site, studioPreview = false }: Props) {
               {sent&&<p role="status" className="w2-form-notice">Ucapan tersimpan di perangkat ini sebagai demo. Database tamu belum terhubung.</p>}
             </form>
           </div>
+          {placed("rsvp")}
         </Section>
 
-        <Section id="hadiah" className="w2-gift-section">
+        <Section id="hadiah" color={sectionColor("hadiah")} className="w2-gift-section">
           <div className="w2-reveal"><PaperTitle eyebrow="WITH LOVE">Amplop Digital</PaperTitle>
             <p className="w2-centered-copy">Doa restu Anda adalah hadiah paling berharga bagi kami.</p>
-            <div className="w2-gift-grid">{(byKey("produk")?.items||[]).slice(0,2).map(item=><div className="w2-gift-card" key={item.id}><span>❦</span><h3>{item.title}</h3><p>{item.description}</p></div>)}</div>
+            <div className="w2-gift-grid">{(byKey("produk")?.items||[]).slice(0,2).map(item=><div className="w2-gift-card" key={item.id}><span>❦</span><h3>{item.title}</h3><p data-w2-select={"gift-"+(byKey("produk")?.items||[]).findIndex(g=>g.id===item.id)}>{item.description}</p></div>)}</div>
           </div>
+          {placed("hadiah")}
         </Section>
 
         <footer className="w2-footer"><Petals className="w2-footer-flower"/><p>TERIMA KASIH</p><h2>{couple}</h2><span>{dateLabel}</span><small>Undangan digital · NAMINA Wedding Living Paper</small></footer>

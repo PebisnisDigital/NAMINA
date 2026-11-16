@@ -183,6 +183,7 @@ export function StudioV2() {
         }
       } catch { /* Invalid local draft should not block editing. */ }
       setSite(defaultSite(client));
+      if (client.presentation === "wedding2") setScreen("mobile");
       setSha(newSha);
     } catch (cause) { setError((cause as Error).message); }
     finally { setWorking(false); }
@@ -343,6 +344,7 @@ export function StudioV2() {
       // video, animated-icon data, Karya, and Produk collections.
       const template = await createSiteFromTemplate(normalized, newTemplate);
       setSite(template);
+      if (template.presentation === "wedding2") setScreen("mobile");
       setSlug(normalized);
       setSha(null);
       setMenu("Nama"); setSelected("name");
@@ -382,6 +384,7 @@ export function StudioV2() {
       setMasterPreview(presentation);
       return;
     }
+    if (presentation === "wedding2") setScreen("mobile");
     change((next) => Object.assign(next, applySiteAppearance(next, presentation)));
   };
 

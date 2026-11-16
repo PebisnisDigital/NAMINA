@@ -1,11 +1,13 @@
 import { createWeddingTemplate } from "./weddingTemplate";
 import { siteDocumentSchema, type SiteDocument } from "./sites";
+import { defaultWeddingDesign } from "./weddingDesign";
 
 /** Independent Living Paper wedding sample. All personal data and venues are fictional. */
 export function createWedding2Template(slug: string): SiteDocument {
   const site = createWeddingTemplate(slug);
   const o = site.content.original!;
   site.presentation = "wedding2";
+  site.weddingDesign = defaultWeddingDesign();
   site.content.identity.displayName = "Hizqil & Icaa";
   site.content.identity.profession = "The Wedding of Hizqil & Icaa";
   site.content.identity.bio = "Dalam setiap pertemuan, ada cerita indah yang ditulis oleh takdir.";

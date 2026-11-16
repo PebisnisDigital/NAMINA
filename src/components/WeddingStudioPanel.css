@@ -53,3 +53,11 @@
 .w2-panel-stage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:9px 12px;background:#f1f6ef}
 .w2-panel-stage button{min-height:38px;border:1px solid #b9cdb8;border-radius:8px;background:#fff;color:#315340;font-size:11px;font-weight:700;cursor:pointer}
 .w2-panel-stage button[aria-pressed=true]{background:#3b6349;border-color:#3b6349;color:#fff}
+
+.w2-video-upload{display:grid;gap:9px;padding:13px;border-radius:9px;background:#eff5ec;border:1px solid #c2d3bd}
+.w2-video-upload input[type=file]{padding:8px 6px;font-size:11px;background:#fff}
+.w2-video-upload progress{width:100%;height:12px;accent-color:#528b61}
+.w2-video-progress{display:grid;gap:6px}
+.w2-video-progress span,.w2-video-success,.w2-video-error{font-size:11px;line-height:1.5;margin:0}
+.w2-video-success{color:#2e7042;font-weight:700}.w2-video-error{color:#aa3633}
+.w2-video-progress button{background:#fff4ee;border:1px solid #d1aaaa;color:#8b403c;padding:7px;border-radius:7px}

@@ -518,7 +518,7 @@
 }
 
 
-/* Four-template catalog popup for new admin clients. */
+/* Six-template catalog popup for new admin clients. */
 .studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel {
   position: fixed;
   top: 68px;
@@ -539,8 +539,31 @@
   background: #1c161b;
   box-shadow: 0 25px 85px #000b;
 }
-.studio-v2--fullscreen .studio-v2__create-panel > strong { font-size: 17px; }
-.studio-v2--fullscreen .studio-v2__create-panel > p { margin: 0; font-size: 12px; line-height: 1.55; color: #baa6ab; }
+.studio-v2--fullscreen .studio-v2__create-panel-head {
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+  position:sticky;top:-21px;z-index:2;background:#1c161b;
+  padding:0 0 12px;border-bottom:1px solid #4b343d;
+}
+.studio-v2--fullscreen .studio-v2__create-panel-head strong { font-size:17px; }
+.studio-v2--fullscreen .studio-v2__create-panel-head p {
+  margin:8px 0 0;font-size:12px;line-height:1.5;color:#baa6ab;
+}
+.studio-v2--fullscreen .studio-v2__workbar .studio-v2__create-panel-head .studio-v2__create-panel-close {
+  flex:0 0 40px;width:40px;min-height:40px;padding:0;
+  font-size:24px;background:#3e2932;border:1px solid #996073;cursor:pointer;
+}
+.studio-v2--fullscreen .studio-v2__workbar .studio-v2__create-panel-head .studio-v2__create-panel-close:hover {
+  background:#663347;
+}
+.studio-v2--fullscreen .studio-v2__create-panel-selection {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:12px;padding:13px 15px;background:#302028;border:1px solid #775262;
+  border-radius:11px;font-size:12px;line-height:1.5;
+}
+.studio-v2--fullscreen .studio-v2__create-panel-selection strong {color:#c5f4d6}
+.studio-v2--fullscreen .studio-v2__workbar .studio-v2__create-panel-selection button {
+  min-height:38px;padding:8px 12px;background:#4f303c;cursor:pointer;
+}
 .studio-v2--fullscreen .studio-v2__create-panel > label { font-size: 12px; font-weight: 750; }
 .studio-v2--fullscreen .studio-v2__create-panel > input {
   min-height: 45px; width: 100%; padding: 10px 12px;
@@ -554,4 +577,5 @@
   .studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel {
     top: 94px; max-height: calc(100dvh - 110px); padding: 14px;
   }
+  .studio-v2--fullscreen .studio-v2__create-panel-head {top:-14px;}
 }

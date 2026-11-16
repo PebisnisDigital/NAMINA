@@ -7,8 +7,7 @@ import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { createSiteFromTemplate, applySiteAppearance, selectedTemplate, templateCatalog, type TemplateKey } from "../static/templateCatalog";
-import { createWedding2Template } from "../static/wedding2Template";
+import { createSiteFromTemplate, switchSiteTemplate, selectedTemplate, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -114,7 +113,6 @@ export function StudioV2() {
   const [weddingSelection, setWeddingSelection] = useState("");
   const [showDesign, setShowDesign] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
-  const [masterPreview, setMasterPreview] = useState<TemplateKey>("original");
   const [screen, setScreen] = useState<"desktop" | "mobile">("desktop");
   const [immersive, setImmersive] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -159,7 +157,6 @@ export function StudioV2() {
     setWeddingSelection("");
     setShowDesign(false);
     setTemplateOpen(false);
-    setMasterPreview("original");
     setPopupOpen(false);
     setApproved(false);
     try {
@@ -216,16 +213,12 @@ export function StudioV2() {
 
   useEffect(() => {
     if (!site || !ready) return;
-    // /vini is the master. Show a temporary preview without saving or publishing
-    // a new appearance to the master website.
-    const visible = slug === "vini" && masterPreview === "wedding2"
-      ? createWedding2Template("preview-wedding")
-      : slug === "vini" && masterPreview !== "original"
-      ? applySiteAppearance(site, masterPreview) : site;
-    const prepared = prepareSite(visible);
+    // Always render the draft of the selected website, including /vini.
+    // The public website remains unchanged until explicit publication.
+    const prepared = prepareSite(site);
     const assets = resolveMedia(prepared);
     sendFrame({ type: "NAMINA_V2_RENDER", site: prepared, assets });
-  }, [site, ready, sendFrame, slug, masterPreview]);
+  }, [site, ready, sendFrame]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_MENU", menu }); }, [menu, ready, sendFrame]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_SELECT", key: selected }); }, [selected, ready, sendFrame]);
   useEffect(() => { if (ready && site?.presentation === "wedding2") sendFrame({ type: "WEDDING2_FOCUS", id: weddingSelection }); }, [weddingSelection, ready, site?.presentation, sendFrame]);
@@ -354,7 +347,6 @@ export function StudioV2() {
       setNewSlug("");
       createPanelRef.current?.removeAttribute("open");
       setTemplateOpen(false);
-      setMasterPreview("original");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Template /vini belum bisa disalin.");
     } finally { setWorking(false); }
@@ -378,14 +370,23 @@ export function StudioV2() {
   };
 
   const setAppearance = (presentation: TemplateKey) => {
-    if (!site) return;
-    if (slug === "vini") {
-      // Preview only. The real /vini seed and published document remain untouched.
-      setMasterPreview(presentation);
-      return;
-    }
+    if (!site || working) return;
+    setSite(current => {
+      if (!current) return null;
+      const next = switchSiteTemplate(current, presentation);
+      try { localStorage.setItem(draftKey(next.slug), JSON.stringify(next)); }
+      catch { /* Draft stays editable in this Studio session. */ }
+      return next;
+    });
     if (presentation === "wedding2") setScreen("mobile");
-    change((next) => Object.assign(next, applySiteAppearance(next, presentation)));
+    setWeddingSelection("");
+    setSelected("name");
+    setPopupOpen(false);
+    setShowDesign(false);
+    setApproved(false);
+    setPublished(null);
+    setError("");
+    setTemplateOpen(false);
   };
 
   const publish = async () => {
@@ -797,11 +798,6 @@ export function StudioV2() {
             <span className="studio-v2__template-trigger-label">Template</span>
           </button>
         </div>
-        {slug === "vini" && masterPreview !== "original" && (
-          <span className="studio-v2__template-preview-note" role="status">
-            Pratinjau {templateCatalog.find(item => item.id === masterPreview)?.name} · master aman
-          </span>
-        )}
         <span className="studio-v2__autosave"><i /> Draft otomatis</span>
         <button type="button" className="studio-v2__design-trigger"
           onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Desain</span></button>
@@ -837,15 +833,9 @@ export function StudioV2() {
       onChange={change} onStageChange={stage=>sendFrame({type:"WEDDING2_STAGE",stage})} />}
 
     {templateOpen && site && <StudioTemplateDialog
-      value={slug === "vini" ? masterPreview : selectedTemplate(site)}
+      value={selectedTemplate(site)}
       onChange={setAppearance}
       onClose={() => setTemplateOpen(false)}
-      masterPreview={slug === "vini"}
-      onCreateFromTemplate={slug === "vini" ? () => {
-        setNewTemplate(masterPreview);
-        setTemplateOpen(false);
-        createPanelRef.current?.setAttribute("open", "");
-      } : undefined}
     />}
     {immersive && <button type="button" className="studio-v2__immersive-exit" onClick={() => setImmersive(false)}>↙ Kembali ke Studio</button>}
     {popupOpen && site && site.presentation !== "wedding2" && <div ref={inspectorRef} className="studio-v2__inline-popover"

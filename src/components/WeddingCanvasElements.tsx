@@ -48,7 +48,18 @@ function Placed({ element, editorMode=false, selectedId }: {element: WeddingElem
     {element.type==="image"&&(media?<img src={media} alt={element.text||"Foto undangan"} loading="lazy"/>:<div className="w2-placed-placeholder">✧ Foto<br/>Masukkan URL gambar</div>)}
     {element.type==="video"&&(media?<video src={media} muted playsInline loop autoPlay controls={!editorMode}/>:<div className="w2-placed-placeholder">▶ Video<br/>Masukkan URL video</div>)}
     {element.type==="button"&&<a className="w2-placed-button" href={editorMode?undefined:link} target={link.startsWith("https:")?"_blank":undefined} rel="noopener noreferrer" onClick={event=>{if(editorMode)event.preventDefault();}}>{element.text||"Tombol"} ↗</a>}
-    {element.type==="ornament"&&<span className="w2-placed-ornament" aria-hidden="true">{element.text||"❦"}</span>}
+    {element.type==="ornament"&&(element.text==="flower"?
+      <svg className="w2-placed-flower" viewBox="0 0 120 120" role="img" aria-label="Ornamen bunga kertas">
+        <g fill="#fffdf4" stroke={element.color} strokeWidth="1.3">
+          <ellipse cx="60" cy="35" rx="13" ry="25"/><ellipse cx="60" cy="85" rx="13" ry="25"/>
+          <ellipse cx="35" cy="60" rx="25" ry="13"/><ellipse cx="85" cy="60" rx="25" ry="13"/>
+          <ellipse cx="42" cy="42" rx="13" ry="24" transform="rotate(-45 42 42)"/>
+          <ellipse cx="78" cy="42" rx="13" ry="24" transform="rotate(45 78 42)"/>
+          <ellipse cx="42" cy="78" rx="13" ry="24" transform="rotate(45 42 78)"/>
+          <ellipse cx="78" cy="78" rx="13" ry="24" transform="rotate(-45 78 78)"/>
+        </g><circle cx="60" cy="60" r="10" fill="#ccb17b" stroke="#9a854f" strokeWidth="2"/>
+      </svg>
+      :<span className="w2-placed-ornament" aria-hidden="true">{element.text||"❦"}</span>)}
     {editorMode&&<span className="w2-element-handle" aria-hidden="true">⠿</span>}
   </div>;
 }

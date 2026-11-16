@@ -541,7 +541,6 @@ export function StudioV2() {
         <button type="submit" disabled={working}>Masuk Editor</button>
       </form> : <p>Studio menunggu konfigurasi admin.</p>}
       {error && <p role="alert" className="studio-v2__error">{error}</p>}
-      <a className="studio-v2__back-link" href="/studio-v1">Buka Generator V1</a>
     </section>
   </main>;
 
@@ -855,7 +854,6 @@ export function StudioV2() {
           onClick={() => { setShowDesign(true); setPopupOpen(true); setPopupCoordinates({ left: Math.max(12, window.innerWidth - 404), top: 82 }); sendFrame({ type: "NAMINA_V2_CLOSE_EDITOR" }); }}>✦ <span>Desain</span></button>
         <button type="button" className="studio-v2__publish-trigger" disabled={!site || working}
           onClick={() => { setPopupOpen(false); setPublishConfirmOpen(true); }}>Publikasikan</button>
-        <a href="/studio-v1" className="studio-v2__v1-link" title="Buka Generator 8 Tahap">V1</a>
         <button type="button" className="studio-v2__exit" onClick={() => void logout()} title="Keluar dari Studio">Keluar</button>
       </div>
         <a href="/studio/admin" className="studio-v2__admin-link" title="Kelola mitra dan perpanjangan">Admin Mitra</a>

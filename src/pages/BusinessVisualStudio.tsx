@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { businessClient } from "../business/client";
 import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
+import { WeddingStudioPanel } from "../components/WeddingStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
@@ -34,6 +35,7 @@ export function BusinessVisualStudio() {
   const [publishedLink,setPublishedLink] = useState<string | null>(null);
   const [menu,setMenu] = useState<Menu>("Nama");
   const [selected,setSelected] = useState("name");
+  const [weddingSelection,setWeddingSelection] = useState("");
   const [popup,setPopup] = useState(false);
   const [design,setDesign] = useState(false);
   const [templateOpen,setTemplateOpen] = useState(false);
@@ -89,6 +91,7 @@ export function BusinessVisualStudio() {
       setRowId(result.data.id);
       setPublishedSha(result.data.published_sha || null);
       setSite(parsed);
+      if (parsed.presentation === "wedding2") setMobile(true);
     })().catch((e:Error)=>{if(active)setError(e.message)}).finally(()=>{if(active)setLoading(false)});
     return()=>{active=false};
   },[]);
@@ -111,6 +114,7 @@ export function BusinessVisualStudio() {
   },[site,ready,send]);
   useEffect(()=>{if(ready)send({type:"NAMINA_V2_MENU",menu})},[menu,ready,send]);
   useEffect(()=>{if(ready)send({type:"NAMINA_V2_SELECT",key:selected})},[selected,ready,send]);
+  useEffect(()=>{if(ready&&site?.presentation==="wedding2")send({type:"WEDDING2_FOCUS",id:weddingSelection})},[weddingSelection,ready,site?.presentation,send]);
 
   function setSectionText(key:string,value:string,which:MenuKey){
     change(next=>{
@@ -154,6 +158,20 @@ export function BusinessVisualStudio() {
       const value=event.data as Record<string,unknown>|null;
       if(!value||typeof value!=="object")return;
       if(value.type==="NAMINA_V2_READY")setReady(true);
+      if(value.type==="WEDDING2_SELECT"&&typeof value.id==="string"){
+        setWeddingSelection(value.id);setPopup(false);
+      }
+      if(value.type==="WEDDING2_DROP"&&typeof value.id==="string"&&
+        typeof value.x==="number"&&Number.isFinite(value.x)&&
+        typeof value.y==="number"&&Number.isFinite(value.y)){
+        change(next=>{
+          const element=next.weddingDesign?.elements.find(item=>item.id===value.id);
+          if(element){
+            element.x=Math.max(0,Math.min(95,value.x as number));
+            element.y=Math.max(0,Math.min(1800,value.y as number));
+          }
+        });
+      }
       if(value.type==="NAMINA_V2_MENU_CHANGED" && typeof value.menu==="string" && allMenus.includes(value.menu as Menu))setMenu(value.menu as Menu);
       if(value.type==="NAMINA_V2_SELECT" && typeof value.key==="string"){
         setSelected(value.key);setDesign(false);
@@ -335,7 +353,7 @@ export function BusinessVisualStudio() {
   if(loading)return <main className="business business__loading">Memuat Studio Mitra…</main>;
   if(error&&!site)return <main className="business business__loading"><p>{error}</p><a href="/studio">Kembali ke dashboard</a></main>;
 
-  return <main className={"studio-v2 studio-v2--fullscreen business__visual-editor" + (immersive ? " studio-v2--immersive" : "")}>
+  return <main className={"studio-v2 studio-v2--fullscreen business__visual-editor" + (immersive ? " studio-v2--immersive" : "") + (site?.presentation==="wedding2"?" w2-studio-open":"")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a className="studio-v2__logo" href="/studio">NAMINA<span>MITRA STUDIO</span></a>
@@ -375,12 +393,15 @@ export function BusinessVisualStudio() {
       </div>
       <div className="studio-v2__canvas-indicator"><span>{dirty?"Ada perubahan belum disimpan":"Draft tersimpan"}</span><span>·</span><span>{publishedSha?"Website telah terbit":"Belum dipublikasikan"}</span></div>
     </div>
+    {site?.presentation==="wedding2"&&<WeddingStudioPanel site={site} selectedId={weddingSelection}
+       onSelect={id=>{setWeddingSelection(id);send({type:"WEDDING2_FOCUS",id});}}
+       onChange={change}/>}
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
       onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))}
       onClose={()=>setTemplateOpen(false)} />}
     {immersive&&<button type="button" className="studio-v2__immersive-exit" onClick={()=>setImmersive(false)}>↙ Kembali ke Studio</button>}
     {publishedLink && <PublishSuccessModal url={publishedLink} onClose={() => setPublishedLink(null)} />}
-    {popup&&site&&<div className="studio-v2__inline-popover" style={{left:popupPosition.left,top:popupPosition.top}}>
+    {popup&&site&&site.presentation!=="wedding2"&&<div className="studio-v2__inline-popover" style={{left:popupPosition.left,top:popupPosition.top}}>
       <div className="studio-v2__inline-popover-header"><div><small>STUDIO MITRA</small><strong>{design?"Desain":selected.startsWith("menu:")?"Pengaturan menu":"Edit elemen"}</strong></div>
         <button type="button" onClick={()=>{setPopup(false);setDesign(false)}} aria-label="Tutup">×</button>
       </div>

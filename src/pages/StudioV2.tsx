@@ -831,7 +831,7 @@ export function StudioV2() {
 
     {site?.presentation === "wedding2" && <WeddingStudioPanel site={site} selectedId={weddingSelection}
       onSelect={id=>{setWeddingSelection(id);sendFrame({type:"WEDDING2_FOCUS",id});}}
-      onChange={change} />}
+      onChange={change} onStageChange={stage=>sendFrame({type:"WEDDING2_STAGE",stage})} />}
 
     {templateOpen && site && <StudioTemplateDialog
       value={slug === "vini" ? masterPreview : selectedTemplate(site)}

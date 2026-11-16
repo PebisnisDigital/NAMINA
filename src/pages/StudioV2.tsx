@@ -776,7 +776,7 @@ export function StudioV2() {
     </div>;
   }
 
-  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
+  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (createPanelOpen ? " studio-v2--picker-open" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a href="/" className="studio-v2__logo" aria-label="NAMINA beranda">NAMINA<span>STUDIO</span></a>

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { templateCatalog, createSiteFromTemplate, applySiteAppearance, selectedTemplate } from "../src/static/templateCatalog.ts";
+import { templateCatalog, createSiteFromTemplate, applySiteAppearance, switchSiteTemplate, selectedTemplate } from "../src/static/templateCatalog.ts";
 import { cloneViniTemplate, prepareSite, siteDocumentSchema } from "../src/static/sites.ts";
 
 test("the same six template choices are available to admin and partner Studios", () => {
@@ -67,4 +67,44 @@ test("legacy white sites show the light template without modifying content", () 
   assert.equal(selectedTemplate(old), "original-white");
   const explicit = applySiteAppearance(old, "original-white");
   assert.equal(siteDocumentSchema.parse(prepareSite(explicit)).presentation, "original-white");
+});
+
+test("in-place /vini switch to Living Paper keeps the same slug and an editable Wedding", () => {
+  const original = cloneViniTemplate("vini");
+  original.content.identity.displayName = "TEH VINI";
+  const oldVideo = original.media.desktopVideo;
+  const wedding = switchSiteTemplate(original, "wedding2");
+  assert.equal(wedding.slug, "vini", "switch must not create a new client URL");
+  assert.equal(wedding.presentation, "wedding2");
+  assert.equal(wedding.content.identity.displayName, "Hizqil & Icaa");
+  assert.ok(wedding.weddingDesign);
+  assert.equal(wedding.templateSnapshots?.personal?.content.identity.displayName, "TEH VINI");
+  assert.equal(wedding.templateSnapshots?.personal?.media.desktopVideo, oldVideo);
+  assert.equal(original.presentation, undefined);
+  assert.equal(original.content.identity.displayName, "TEH VINI", "source is never mutated");
+  const edited = structuredClone(wedding);
+  edited.content.identity.displayName = "Hana & Rafi";
+  edited.weddingDesign!.coverButtonText = "Buka Undangan";
+  const publishedShape = siteDocumentSchema.parse(prepareSite(edited));
+  assert.equal(publishedShape.templateSnapshots?.personal?.content.identity.displayName, "TEH VINI");
+  assert.equal(publishedShape.content.identity.displayName, "Hana & Rafi");
+});
+
+test("switching back restores original /vini, and returning to Wedding restores edits", () => {
+  const original = cloneViniTemplate("vini");
+  const oldName = original.content.identity.displayName;
+  const oldVideo = original.media.desktopVideo;
+  const wedding = switchSiteTemplate(original, "wedding2");
+  wedding.content.identity.displayName = "Hana & Rafi";
+  wedding.weddingDesign!.coverButtonText = "Buka Sampul";
+  const restored = switchSiteTemplate(wedding, "original");
+  assert.equal(restored.slug, "vini");
+  assert.equal(restored.presentation, "original");
+  assert.equal(restored.content.identity.displayName, oldName);
+  assert.equal(restored.media.desktopVideo, oldVideo);
+  assert.equal(restored.templateSnapshots?.wedding?.content.identity.displayName, "Hana & Rafi");
+  const backToWedding = switchSiteTemplate(restored, "wedding2");
+  assert.equal(backToWedding.content.identity.displayName, "Hana & Rafi");
+  assert.equal(backToWedding.weddingDesign?.coverButtonText, "Buka Sampul");
+  assert.equal(siteDocumentSchema.safeParse(backToWedding).success, true);
 });

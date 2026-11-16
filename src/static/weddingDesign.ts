@@ -27,7 +27,7 @@ export const weddingDesignSchema = z.object({
   font: weddingFontSchema,
   motion: weddingMotionSchema,
   headingScale: z.number().min(.7).max(1.7),
-  sectionColors: z.record(weddingSectionSchema,color).optional(),
+  sectionColors: z.partialRecord(weddingSectionSchema,color).optional(),
   elements: z.array(weddingElementSchema).max(60),
 }).strict();
 export type WeddingDesign = z.infer<typeof weddingDesignSchema>;

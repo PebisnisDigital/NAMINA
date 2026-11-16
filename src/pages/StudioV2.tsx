@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
+import { WeddingStudioPanel } from "../components/WeddingStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
@@ -110,6 +111,7 @@ export function StudioV2() {
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
   const [selected, setSelected] = useState("name");
+  const [weddingSelection, setWeddingSelection] = useState("");
   const [showDesign, setShowDesign] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [masterPreview, setMasterPreview] = useState<TemplateKey>("original");
@@ -154,6 +156,7 @@ export function StudioV2() {
     setSlug(nextSlug);
     setMenu("Nama");
     setSelected("name");
+    setWeddingSelection("");
     setShowDesign(false);
     setTemplateOpen(false);
     setMasterPreview("original");
@@ -224,6 +227,7 @@ export function StudioV2() {
   }, [site, ready, sendFrame, slug, masterPreview]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_MENU", menu }); }, [menu, ready, sendFrame]);
   useEffect(() => { if (ready) sendFrame({ type: "NAMINA_V2_SELECT", key: selected }); }, [selected, ready, sendFrame]);
+  useEffect(() => { if (ready && site?.presentation === "wedding2") sendFrame({ type: "WEDDING2_FOCUS", id: weddingSelection }); }, [weddingSelection, ready, site?.presentation, sendFrame]);
 
   const addCard = (section: GalleryKey) => {
     if (!site) return;
@@ -255,6 +259,21 @@ export function StudioV2() {
       if (!value || typeof value !== "object") return;
       if (value.type === "NAMINA_V2_READY") {
         setReady(true);
+      }
+      if (value.type === "WEDDING2_SELECT" && typeof value.id === "string") {
+        setWeddingSelection(value.id);
+        setPopupOpen(false);
+      }
+      if (value.type === "WEDDING2_DROP" && typeof value.id === "string" &&
+        typeof value.x === "number" && Number.isFinite(value.x) &&
+        typeof value.y === "number" && Number.isFinite(value.y)) {
+        change(next => {
+          const element = next.weddingDesign?.elements.find(item => item.id === value.id);
+          if (element) {
+            element.x = Math.max(0, Math.min(95,value.x as number));
+            element.y = Math.max(0, Math.min(1800,value.y as number));
+          }
+        });
       }
       if (value.type === "NAMINA_V2_SELECT" && typeof value.key === "string") {
         const key = value.key;
@@ -729,7 +748,7 @@ export function StudioV2() {
     </div>;
   }
 
-  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "")}>
+  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a href="/" className="studio-v2__logo" aria-label="NAMINA beranda">NAMINA<span>STUDIO</span></a>
@@ -810,6 +829,10 @@ export function StudioV2() {
       </div>
     </div>
 
+    {site?.presentation === "wedding2" && <WeddingStudioPanel site={site} selectedId={weddingSelection}
+      onSelect={id=>{setWeddingSelection(id);sendFrame({type:"WEDDING2_FOCUS",id});}}
+      onChange={change} />}
+
     {templateOpen && site && <StudioTemplateDialog
       value={slug === "vini" ? masterPreview : selectedTemplate(site)}
       onChange={setAppearance}
@@ -822,7 +845,7 @@ export function StudioV2() {
       } : undefined}
     />}
     {immersive && <button type="button" className="studio-v2__immersive-exit" onClick={() => setImmersive(false)}>↙ Kembali ke Studio</button>}
-    {popupOpen && site && <div ref={inspectorRef} className="studio-v2__inline-popover"
+    {popupOpen && site && site.presentation !== "wedding2" && <div ref={inspectorRef} className="studio-v2__inline-popover"
       style={{ left: popupCoordinates.left, top: popupCoordinates.top }} role="dialog" aria-modal="false" aria-label={"Edit " + labelForSelection()}>
       <div className="studio-v2__inline-popover-header">
         <div><small>{showDesign ? "KUSTOMISASI" : "UBAH LANGSUNG"}</small><strong>{labelForSelection()}</strong></div>

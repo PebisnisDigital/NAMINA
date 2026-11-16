@@ -99,3 +99,14 @@ test("existing /kustin template selection updates only its draft and dismisses d
   // Previewing a style never writes to the publication endpoint.
   await expect(page.locator(".studio-v2__canvas-indicator")).toContainText("namina.biz.id/kustin");
 });
+
+test("V1 controls are gone and legacy generator URLs lead to the official Studio", async ({ page }) => {
+  await openAdminStudio(page);
+  await expect(page.getByRole("link", { name: "V1", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Buka Generator V1" })).toHaveCount(0);
+
+  for (const oldPath of ["/studio-v1", "/generator"]) {
+    await page.goto(oldPath);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/studio");
+  }
+});

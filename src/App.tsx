@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Legal } from "./pages/Landing";
 import { IntroLanding } from "./pages/IntroLanding";
-import { StaticStudio } from "./pages/StaticStudio";
 import { StudioV2 } from "./pages/StudioV2";
 import { StudioGateway } from "./pages/StudioGateway";
 import { StudioV2Canvas } from "./pages/StudioV2Canvas";
@@ -38,10 +37,10 @@ function App() {
   else if (path === "/akses") page = <BusinessMagicAccess />;
   else if (path === "/mitra/studio") page = <BusinessVisualStudio />;
   else if (path === "/mitra/admin" || path === "/studio/admin") page = <BusinessAdmin />;
-  // Visual Studio is the official editor; the 8-stage generator remains available.
+  // The Visual Studio is the only supported editor. Legacy V1 URLs return to it.
   else if (path === "/studio") page = <StudioGateway />;
   else if (path === "/studio-v2") page = <StudioV2 />;
-  else if (path === "/studio-v1" || path === "/generator") page = <StaticStudio />;
+  else if (path === "/studio-v1" || path === "/generator") page = <Redirect to="/studio" />;
   else if (path === "/studio-v2-canvas") page = <StudioV2Canvas />;
   else if (path === "/gaya" || path === "/templates") page = <ThemeGallery />;
   else if (demoTheme) page = <ThemeDemo theme={demoTheme} />;

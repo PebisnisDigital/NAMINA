@@ -791,6 +791,8 @@ export function StudioV2() {
         <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create"
           onToggle={(event) => { if (event.currentTarget.open) setNewTemplateChosen(false); }}>
           <summary title="Buat website dari salah satu dari 6 template">+ Klien · 6 Template</summary>
+          <div className="studio-v2__create-panel-dismiss" aria-hidden="true"
+            onPointerDown={() => createPanelRef.current?.removeAttribute("open")} />
           <div className="studio-v2__create-panel">
             <div className="studio-v2__create-panel-head">
               <div>

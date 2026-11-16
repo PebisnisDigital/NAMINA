@@ -7,12 +7,10 @@ type Props = {
   value: TemplateKey;
   onChange: (value: TemplateKey) => void;
   onClose: () => void;
-  masterPreview?: boolean;
-  onCreateFromTemplate?: () => void;
 };
 
 export function StudioTemplateDialog({
-  value, onChange, onClose, masterPreview = false, onCreateFromTemplate,
+  value, onChange, onClose,
 }: Props) {
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -34,18 +32,14 @@ export function StudioTemplateDialog({
       <div className="studio-v2__template-dialog-scroll">
         <TemplatePicker value={value} onChange={onChange} />
         <p className="studio-v2__template-dialog-note" role="status">
-          {masterPreview
-            ? "Ini pratinjau di /vini (master). Coba ganti template sesukamu tanpa mengubah website /vini yang tayang. Buat website klien untuk menyimpan tema pilihan."
-            : "Template pilihan langsung terlihat di preview. Nama, video, galeri, dan data klien tetap dipertahankan. Simpan atau publikasikan untuk menayangkannya."}
+          Template akan langsung mengganti desain website yang sedang dibuka, termasuk /vini.
+          Data personal dan Wedding tersimpan terpisah saat berganti kategori.
+          Website publik baru berubah setelah tombol Publikasikan ditekan.
         </p>
       </div>
       <footer className="studio-v2__template-dialog-actions">
-        {masterPreview && onCreateFromTemplate &&
-          <button type="button" className="studio-v2__template-action-primary" onClick={onCreateFromTemplate}>
-            Buat Klien dengan Tema Ini
-          </button>}
         <button type="button" className="studio-v2__template-action-secondary" onClick={onClose}>
-          Tutup
+          Selesai
         </button>
       </footer>
     </section>

@@ -152,7 +152,7 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange}:Props){
         <label className="w2-panel-field"><span>Ukuran judul utama · {Math.round(design.headingScale*100)}%</span><input type="range" min=".7" max="1.7" step=".05" value={design.headingScale} onChange={e=>updateDesign(d=>{d.headingScale=Number(e.target.value);})}/></label>
         <Select label="Animasi halaman" value={design.motion} options={animationOptions} onChange={v=>updateDesign(d=>{d.motion=v as WeddingDesign["motion"];})}/>
         <SectionTitle>Warna tiap halaman</SectionTitle>
-        {weddingSections.map(item=><Color key={item.id} label={item.label} value={design.sectionColors?.[item.id]||design.surface} onChange={v=>updateDesign(d=>{d.sectionColors ||= {};d.sectionColors[item.id]=v;})}/>)}
+        {weddingSections.map(item=><Color key={item.id} label={item.label} value={design.sectionColors?.[item.id]||design.surface} onChange={v=>updateDesign(d=>{const colors = d.sectionColors ?? (d.sectionColors={});colors[item.id]=v;})}/>)}
         <button type="button" className="w2-panel-link" onClick={()=>updateDesign(d=>{d.sectionColors={};})}>Reset warna tiap halaman</button>
       </div>}
       {tab==="elemen"&&<div className="w2-panel-stack">

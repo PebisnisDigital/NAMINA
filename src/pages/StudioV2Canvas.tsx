@@ -46,6 +46,7 @@ export function StudioV2Canvas() {
       }
       if (message.type === "NAMINA_V2_SELECT" && typeof message.key === "string") setSelected(message.key);
       if (message.type === "NAMINA_V2_CLOSE_EDITOR") setInline(null);
+      if (message.type === "WEDDING2_FOCUS" && typeof message.id === "string") setSelected(message.id);
     };
     window.addEventListener("message", receive);
     notify({ type: "NAMINA_V2_READY" });
@@ -118,7 +119,7 @@ export function StudioV2Canvas() {
 
   return <main className="studio-v2-canvas">
     {data ? <div className="studio-v2-canvas__interact" onClickCapture={selectElement}>
-      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview /> : <ViniCinematic
+      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview editorMode selectedId={selected} /> : <ViniCinematic
         presentation={data.site.presentation}
         content={data.site.content}
         assetUrls={data.assets}

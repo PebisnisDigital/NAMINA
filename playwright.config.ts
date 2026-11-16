@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
 export default defineConfig({
   testDir: "tests/browser",
   timeout: 45000,
@@ -12,7 +13,7 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     launchOptions: {
-      executablePath: "/usr/bin/chromium",
+      ...(existsSync("/usr/bin/chromium") ? { executablePath: "/usr/bin/chromium" } : {}),
       args: ["--no-sandbox"],
     },
   },

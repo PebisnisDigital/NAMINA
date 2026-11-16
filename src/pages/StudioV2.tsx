@@ -105,7 +105,29 @@ export function StudioV2() {
   const [slug, setSlug] = useState("vini");
   const [newSlug, setNewSlug] = useState("");
   const [newTemplate, setNewTemplate] = useState<TemplateKey>("original");
+  const [newTemplateChosen, setNewTemplateChosen] = useState(false);
+  const [createPanelOpen, setCreatePanelOpen] = useState(false);
   const createPanelRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (createPanelRef.current?.open && event.target instanceof Node &&
+          !createPanelRef.current.contains(event.target)) {
+        createPanelRef.current.removeAttribute("open");
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && createPanelRef.current?.open) {
+        createPanelRef.current.removeAttribute("open");
+        event.stopPropagation();
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
   const [site, setSite] = useState<SiteDocument | null>(null);
   const [sha, setSha] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu>("Nama");
@@ -345,6 +367,7 @@ export function StudioV2() {
       try { localStorage.setItem(draftKey(normalized), JSON.stringify(template)); }
       catch { /* Still editable in the active Studio session. */ }
       setNewSlug("");
+      setNewTemplateChosen(false);
       createPanelRef.current?.removeAttribute("open");
       setTemplateOpen(false);
     } catch (cause) {
@@ -753,7 +776,7 @@ export function StudioV2() {
     </div>;
   }
 
-  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
+  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (createPanelOpen ? " studio-v2--picker-open" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a href="/" className="studio-v2__logo" aria-label="NAMINA beranda">NAMINA<span>STUDIO</span></a>
@@ -766,18 +789,46 @@ export function StudioV2() {
             {slugs.map((item) => <option key={item} value={item}>/{item}</option>)}
           </select>
         </label>
-        <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create">
+        <details ref={createPanelRef} className="studio-v2__new studio-v2__workbar-create"
+          onToggle={(event) => {
+            setCreatePanelOpen(event.currentTarget.open);
+            if (event.currentTarget.open) setNewTemplateChosen(false);
+          }}>
           <summary title="Buat website dari salah satu dari 6 template">+ Klien · 6 Template</summary>
           <div className="studio-v2__create-panel">
-            <strong>Pilih Template Website Baru</strong>
-            <p>Mulai dari konten contoh sesuai pilihan, kemudian ubah semuanya di Studio.</p>
-            <TemplatePicker value={newTemplate} onChange={setNewTemplate} disabled={working} />
-            <label htmlFor="namina-new-client-slug">Alamat website klien</label>
-            <input id="namina-new-client-slug" aria-label="Nama link klien baru" placeholder="nama-klien"
-              value={newSlug} onChange={(event) => setNewSlug(event.target.value)} maxLength={48} />
-            <button type="button" disabled={working || !newSlug.trim()} onClick={() => void createClient()}>
-              {working ? "Menyiapkan…" : "Buat Website dengan Template Ini"}
-            </button>
+            <div className="studio-v2__create-panel-head">
+              <div>
+                <strong>{newTemplateChosen ? "Siapkan Website Klien" : "Pilih Template Website Baru"}</strong>
+                <p>{newTemplateChosen
+                  ? "Template sudah dipilih. Isi alamat website untuk membuat draft baru."
+                  : "Pilih salah satu desain. Website yang sedang dibuka tidak berubah."}</p>
+              </div>
+              <button type="button" className="studio-v2__create-panel-close"
+                aria-label="Tutup pilihan template" title="Tutup"
+                onClick={() => createPanelRef.current?.removeAttribute("open")}>×</button>
+            </div>
+            {!newTemplateChosen ? (
+              <TemplatePicker value={newTemplate} disabled={working}
+                onChange={(template) => { setNewTemplate(template); setNewTemplateChosen(true); }} />
+            ) : (
+              <div className="studio-v2__create-panel-selection">
+                <span>Template dipilih: <strong>{newTemplate === "original" ? "Original · Gelap" :
+                  newTemplate === "original-white" ? "Original · Putih" :
+                  newTemplate === "doctor" ? "Dokter · Medical Teal" :
+                  newTemplate === "chibi" ? "Chibi · Candy Pastel" :
+                  newTemplate === "wedding2" ? "Wedding · Living Paper" : "Wedding · Royal Ivory"}</strong></span>
+                <button type="button" onClick={() => setNewTemplateChosen(false)}>Ganti Template</button>
+              </div>
+            )}
+            {newTemplateChosen && <>
+              <label htmlFor="namina-new-client-slug">Alamat website klien</label>
+              <input id="namina-new-client-slug" aria-label="Nama link klien baru" placeholder="nama-klien"
+                value={newSlug} onChange={(event) => setNewSlug(event.target.value)} maxLength={48} />
+              <button type="button" className="studio-v2__create-panel-submit"
+                disabled={working || !newSlug.trim()} onClick={() => void createClient()}>
+                {working ? "Menyiapkan…" : "Buat Website dengan Template Ini"}
+              </button>
+            </>}
           </div>
         </details>
       </div>
@@ -809,6 +860,9 @@ export function StudioV2() {
       </div>
         <a href="/studio/admin" className="studio-v2__admin-link" title="Kelola mitra dan perpanjangan">Admin Mitra</a>
     </header>
+
+    {createPanelOpen && <div className="studio-v2__create-panel-dismiss" aria-hidden="true"
+      onPointerDown={() => createPanelRef.current?.removeAttribute("open")} />}
 
     {error && <p className="studio-v2__floating-message studio-v2__floating-message--error" role="alert">{error}
       <button type="button" onClick={() => setError("")}>×</button>

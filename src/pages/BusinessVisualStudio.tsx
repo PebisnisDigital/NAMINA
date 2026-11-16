@@ -395,7 +395,7 @@ export function BusinessVisualStudio() {
     </div>
     {site?.presentation==="wedding2"&&<WeddingStudioPanel site={site} selectedId={weddingSelection}
        onSelect={id=>{setWeddingSelection(id);send({type:"WEDDING2_FOCUS",id});}}
-       onChange={change}/>}
+       onChange={change} onStageChange={stage=>send({type:"WEDDING2_STAGE",stage})}/>}
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
       onChange={id=>change(next=>Object.assign(next,applySiteAppearance(next,id)))}
       onClose={()=>setTemplateOpen(false)} />}

@@ -29,7 +29,7 @@
 .w2-canvas-element img,.w2-canvas-element video{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:5px}
 .w2-placed-text{display:block;white-space:pre-wrap}
 .w2-placed-button{display:inline-flex;justify-content:center;align-items:center;min-height:42px;padding:10px 17px;border-radius:32px;color:#fff!important;font-family:'DM Sans',sans-serif;font-size:clamp(12px,.65em,17px);font-weight:700;text-decoration:none}
-.w2-placed-ornament{font-size:1.6em;line-height:1}
+.w2-placed-ornament{font-size:1.6em;line-height:1}.w2-placed-flower{display:block;width:100%;height:auto;max-height:140px;filter:drop-shadow(0 4px 3px #334d3c24)}
 .w2-placed-placeholder{padding:15px 9px;background:#dce4d7;border:1px dashed #69856e;color:#254631;text-align:center;font:11px/1.6 'DM Sans',sans-serif}
 .w2-element-handle{display:grid;place-items:center;position:absolute;right:-11px;bottom:-11px;border-radius:50%;width:23px;height:23px;background:#426552;color:#fff;font-size:17px;box-shadow:0 2px 7px #233a2b44}
 .w2-animation-paper{animation:w2-placed-paper .9s both}

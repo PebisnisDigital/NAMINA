@@ -30,7 +30,7 @@ function SectionTitle({children}: {children:ReactNode}){return <h3 className="w2
 const fontOptions = [{value:"romantic",label:"Romantic Script"},{value:"classic",label:"Classic Serif"},{value:"modern",label:"Modern Sans"}] as const;
 const animationOptions = [{value:"paper",label:"Paper Reveal"},{value:"soft",label:"Soft Fade"},{value:"none",label:"Tanpa animasi"}] as const;
 const textElementLabels:Record<WeddingElement["type"],string>={text:"Teks",image:"Foto",button:"Tombol",video:"Video",ornament:"Ornamen"};
-const initialText:Record<WeddingElement["type"],string>={text:"Teks baru",image:"Foto baru",button:"Buka Lokasi",video:"Video",ornament:"❦"};
+const initialText:Record<WeddingElement["type"],string>={text:"Teks baru",image:"Foto baru",button:"Buka Lokasi",video:"Video",ornament:"flower"};
 const selectionLabels:Record<string,string>={
   couple:"Nama pasangan",bio:"Deskripsi hero",photo:"Foto utama",date:"Tanggal acara",intro:"Kalimat pengantar",
   "parent-0":"Orang tua mempelai pria","parent-1":"Orang tua mempelai wanita",

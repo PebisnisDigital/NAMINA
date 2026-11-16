@@ -36,6 +36,7 @@ const selectionLabels:Record<string,string>={
   "parent-0":"Orang tua mempelai pria","parent-1":"Orang tua mempelai wanita",
   akad:"Akad nikah",resepsi:"Resepsi",lokasi:"Lokasi acara",
   "cover-subtitle":"Kalimat sampul","cover-button":"Tombol buka undangan","map-button":"Tautan peta",
+  "closing-text":"Teks penutup",
 };
 
 export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageChange}:Props){
@@ -58,7 +59,7 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageCha
   });
   useEffect(()=>{
     if(selectedId.startsWith("element:"))setTab("elemen");
-    else if(selectedId && (selectionLabels[selectedId]||/^(gallery|story|gift)-\d+$/.test(selectedId)))setTab("konten");
+    else if(selectedId && (selectionLabels[selectedId]||selectedId.startsWith("heading:")||/^(gallery|story|gift)-\d+$/.test(selectedId)))setTab("konten");
   },[selectedId]);
   const add=(type:WeddingElement["type"])=>{
     if(design.elements.length>=60)return;
@@ -96,6 +97,14 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageCha
       <Field key="cover-button" label="Teks tombol buka undangan" value={design.coverButtonText||""} onChange={v=>updateDesign(d=>{d.coverButtonText=v;})}/>,
       <Field key="map-button" label="Link Google Maps (HTTPS)" value={design.mapUrl||""} type="url" onChange={v=>updateDesign(d=>{d.mapUrl=v;})}/>,
     ];
+    if(selectedId.startsWith("heading:")) {
+      const id=selectedId.slice(8) as WeddingSection;
+      return <Field label={"Judul bagian "+(weddingSections.find(s=>s.id===id)?.label||id)}
+        value={design.sectionTitles?.[id]||""}
+        onChange={v=>updateDesign(d=>{const titles=d.sectionTitles??(d.sectionTitles={});titles[id]=v;})}/>;
+    }
+    if(selectedId==="closing-text")return <Field label="Teks penutup" value={design.closingText||""}
+      onChange={v=>updateDesign(d=>{d.closingText=v;})}/>;
     if(selectionLabels[selectedId])return <>{base.filter((_,index)=>{
       const ids=["couple","bio","photo","intro","parent-0","parent-1","date","akad","resepsi","lokasi","video","cover-subtitle","cover-button","map-button"];
       return ids[index]===selectedId;
@@ -117,6 +126,11 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageCha
       <Field label="Keterangan hadiah" value={item.description} multiline onChange={v=>editGallery("produk",i,"description",v)}/></>;
     }
     return <>
+      <SectionTitle>Judul Tiap Bagian</SectionTitle>
+      {weddingSections.filter(item=>item.id!=="beranda").map(item=><Field key={item.id} label={item.label}
+        value={design.sectionTitles?.[item.id]||""}
+        onChange={v=>updateDesign(d=>{const titles=d.sectionTitles??(d.sectionTitles={});titles[item.id]=v;})}/>)}
+      <Field label="Kalimat penutup" value={design.closingText||""} onChange={v=>updateDesign(d=>{d.closingText=v;})}/>
       <SectionTitle>Pasangan & Sampul</SectionTitle>{base.slice(0,6)}
       <SectionTitle>Acara & Video</SectionTitle>{base.slice(6,11)}
       <SectionTitle>Sampul & Tombol</SectionTitle>{base.slice(11)}

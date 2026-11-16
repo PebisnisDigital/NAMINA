@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { weddingDesignSchema } from "./weddingDesign.js";
 import { contentSchema, slugSchema, type AssetUrls, type SiteContent } from "../domain/content.js";
 import { originalProfileTabs } from "./originalProfileTabs.js";
 import { viniOriginal } from "./originalSeed.js";
@@ -20,6 +21,7 @@ export const siteDocumentSchema = z.object({
   slug: slugSchema,
   presentation: z.enum(["original", "original-white", "doctor", "chibi", "wedding", "wedding2"]).optional(),
   content: contentSchema,
+  weddingDesign: weddingDesignSchema.optional(),
   media: z.object({
     desktopVideo: mediaUrl,
     mobileVideo: mediaUrl,

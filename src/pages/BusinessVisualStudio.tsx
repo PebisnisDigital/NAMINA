@@ -399,7 +399,8 @@ export function BusinessVisualStudio() {
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
       onChange={id=>{
         setSite(current=>current?switchSiteTemplate(current,id):null);
-        if(id==="wedding2")setMobile(true);
+        setMobile(id==="wedding2");
+        send({type:"WEDDING2_STAGE",stage:"page"});
         setWeddingSelection("");
         setSelected("name");
         setPopup(false);setDesign(false);

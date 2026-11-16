@@ -534,8 +534,10 @@
 .studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel {
   position: fixed;
   top: 68px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  transform: none;
   z-index: 125;
   width: min(780px, calc(100vw - 28px));
   min-width: 0;

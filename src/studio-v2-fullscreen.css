@@ -519,10 +519,10 @@
 
 
 /* The overlay catches outside taps even when the canvas is an iframe. */
-.studio-v2--fullscreen .studio-v2__workbar-create > .studio-v2__create-panel-dismiss {
-  position:fixed;inset:0;left:0;right:0;top:0;bottom:0;
-  z-index:124;width:100vw;height:100dvh;
-  padding:0;margin:0;border:0;border-radius:0;
+.studio-v2--fullscreen > .studio-v2__create-panel-dismiss {
+  position:fixed;inset:0;z-index:79;
+  width:100vw;height:100dvh;
+  padding:0;margin:0;border:0;
   background:transparent;box-shadow:none;cursor:default;
 }
 

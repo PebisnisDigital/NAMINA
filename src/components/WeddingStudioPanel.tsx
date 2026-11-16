@@ -8,6 +8,7 @@ type Props = {
   selectedId: string;
   onSelect: (id:string)=>void;
   onChange: (fn:(draft:SiteDocument)=>void)=>void;
+  onStageChange?: (stage:"cover"|"film"|"page")=>void;
 };
 type Tab = "konten" | "desain" | "elemen";
 type FieldProps = {label:string;value:string;onChange:(value:string)=>void;type?:string;placeholder?:string;multiline?:boolean};
@@ -34,11 +35,13 @@ const selectionLabels:Record<string,string>={
   couple:"Nama pasangan",bio:"Deskripsi hero",photo:"Foto utama",date:"Tanggal acara",intro:"Kalimat pengantar",
   "parent-0":"Orang tua mempelai pria","parent-1":"Orang tua mempelai wanita",
   akad:"Akad nikah",resepsi:"Resepsi",lokasi:"Lokasi acara",
+  "cover-subtitle":"Kalimat sampul","cover-button":"Tombol buka undangan","map-button":"Tautan peta",
 };
 
-export function WeddingStudioPanel({site,selectedId,onSelect,onChange}:Props){
+export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageChange}:Props){
   const design=site.weddingDesign || defaultWeddingDesign();
   const [tab,setTab]=useState<Tab>("konten");
+  const [stage,setStage]=useState<"cover"|"film"|"page">("page");
   const [section,setSection]=useState<WeddingSection>("beranda");
   const original=site.content.original!;
   const selectedElement=selectedId.startsWith("element:")
@@ -89,9 +92,12 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange}:Props){
         onChange={value=>editFact("karir",3,"value",value)}/>,
       <Field key="video" label="URL video pembuka (MP4 atau Dropbox)" type="url" value={site.media.mobileVideo||site.media.desktopVideo}
         placeholder="https://.../video.mp4" onChange={value=>edit(next=>{next.media.mobileVideo=value;next.media.desktopVideo=value;})}/>,
+      <Field key="cover-subtitle" label="Kalimat di sampul" value={design.coverSubtitle||""} onChange={v=>updateDesign(d=>{d.coverSubtitle=v;})}/>,
+      <Field key="cover-button" label="Teks tombol buka undangan" value={design.coverButtonText||""} onChange={v=>updateDesign(d=>{d.coverButtonText=v;})}/>,
+      <Field key="map-button" label="Link Google Maps (HTTPS)" value={design.mapUrl||""} type="url" onChange={v=>updateDesign(d=>{d.mapUrl=v;})}/>,
     ];
     if(selectionLabels[selectedId])return <>{base.filter((_,index)=>{
-      const ids=["couple","bio","photo","intro","parent-0","parent-1","date","akad","resepsi","lokasi","video"];
+      const ids=["couple","bio","photo","intro","parent-0","parent-1","date","akad","resepsi","lokasi","video","cover-subtitle","cover-button","map-button"];
       return ids[index]===selectedId;
     })}<button type="button" className="w2-panel-link" onClick={()=>onSelect("")}>Lihat seluruh kolom</button></>;
     if(selectedId.startsWith("story-")){
@@ -112,7 +118,8 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange}:Props){
     }
     return <>
       <SectionTitle>Pasangan & Sampul</SectionTitle>{base.slice(0,6)}
-      <SectionTitle>Acara & Video</SectionTitle>{base.slice(6)}
+      <SectionTitle>Acara & Video</SectionTitle>{base.slice(6,11)}
+      <SectionTitle>Sampul & Tombol</SectionTitle>{base.slice(11)}
       <SectionTitle>Love Story</SectionTitle>
       {original.skill.items.map((item,index)=><div key={item.id} className="w2-panel-card">
         <Field label={"Judul cerita "+(index+1)} value={item.label} onChange={v=>editFact("skill",index,"label",v)}/>
@@ -133,6 +140,10 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange}:Props){
   }
   return <aside className="w2-studio-panel" aria-label="Editor visual Wedding Living Paper">
     <div className="w2-panel-head"><span>NAMINA · WEDDING BUILDER</span><strong>Living Paper Studio</strong><p>Klik teks atau gambar di preview untuk mengedit. Geser elemen tambahan ke posisi yang diinginkan.</p></div>
+    <div className="w2-panel-stage" role="group" aria-label="Pilih tahap undangan">
+      {([["cover","Sampul"],["film","Intro Video"],["page","Isi Undangan"]] as const).map(([id,label])=>
+        <button key={id} type="button" aria-pressed={stage===id} onClick={()=>{setStage(id);onSelect("");onStageChange?.(id);}}>{label}</button>)}
+    </div>
     <nav className="w2-panel-tabs" aria-label="Kategori editor">
       {([["konten","Konten"],["desain","Desain"],["elemen","Elemen"]] as const).map(([id,label])=>
         <button key={id} type="button" aria-pressed={tab===id} onClick={()=>{setTab(id);onSelect("");}}>{label}</button>)}

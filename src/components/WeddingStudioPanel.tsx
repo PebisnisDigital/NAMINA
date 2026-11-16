@@ -1,10 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { SiteDocument } from "../static/sites";
 import { defaultWeddingDesign, weddingSections, type WeddingElement, type WeddingDesign, type WeddingSection } from "../static/weddingDesign";
+import { WeddingVideoUpload } from "./WeddingVideoUpload";
 import "./WeddingStudioPanel.css";
 
 type Props = {
   site: SiteDocument;
+  siteId?: string;
   selectedId: string;
   onSelect: (id:string)=>void;
   onChange: (fn:(draft:SiteDocument)=>void)=>void;
@@ -39,7 +41,7 @@ const selectionLabels:Record<string,string>={
   "closing-text":"Teks penutup",
 };
 
-export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageChange}:Props){
+export function WeddingStudioPanel({site,siteId,selectedId,onSelect,onChange,onStageChange}:Props){
   const design=site.weddingDesign || defaultWeddingDesign();
   const [tab,setTab]=useState<Tab>("konten");
   const [stage,setStage]=useState<"cover"|"film"|"page">("page");
@@ -133,6 +135,7 @@ export function WeddingStudioPanel({site,selectedId,onSelect,onChange,onStageCha
       <Field label="Kalimat penutup" value={design.closingText||""} onChange={v=>updateDesign(d=>{d.closingText=v;})}/>
       <SectionTitle>Pasangan & Sampul</SectionTitle>{base.slice(0,6)}
       <SectionTitle>Acara & Video</SectionTitle>{base.slice(6,11)}
+      <WeddingVideoUpload slug={site.slug} siteId={siteId} onUploaded={url=>edit(next=>{next.media.mobileVideo=url;next.media.desktopVideo=url;})}/>
       <SectionTitle>Sampul & Tombol</SectionTitle>{base.slice(11)}
       <SectionTitle>Love Story</SectionTitle>
       {original.skill.items.map((item,index)=><div key={item.id} className="w2-panel-card">

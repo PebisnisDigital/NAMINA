@@ -49,3 +49,7 @@
   .studio-v2--fullscreen.w2-studio-open .studio-v2__site-workspace--desktop>.studio-v2__site-frame{height:100%;width:100%}
 }
 @media(max-width:420px){.w2-panel-library{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.w2-panel-stage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:9px 12px;background:#f1f6ef}
+.w2-panel-stage button{min-height:38px;border:1px solid #b9cdb8;border-radius:8px;background:#fff;color:#315340;font-size:11px;font-weight:700;cursor:pointer}
+.w2-panel-stage button[aria-pressed=true]{background:#3b6349;border-color:#3b6349;color:#fff}

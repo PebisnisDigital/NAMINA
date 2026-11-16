@@ -29,6 +29,8 @@ export const weddingDesignSchema = z.object({
   headingScale: z.number().min(.7).max(1.7),
   coverButtonText: z.string().max(60).optional(),
   coverSubtitle: z.string().max(120).optional(),
+  sectionTitles: z.partialRecord(weddingSectionSchema,z.string().max(100)).optional(),
+  closingText: z.string().max(120).optional(),
   mapUrl: z.string().max(2000).optional(),
   sectionColors: z.partialRecord(weddingSectionSchema,color).optional(),
   elements: z.array(weddingElementSchema).max(60),
@@ -47,5 +49,7 @@ export function defaultWeddingDesign(): WeddingDesign {
     background:"#e9ecdf",surface:"#faf8ee",primary:"#334d3c",accent:"#b49a65",
     font:"romantic",motion:"paper",headingScale:1,sectionColors:{},elements:[],
     coverButtonText:"Buka Undangan",coverSubtitle:"Sebuah kisah, satu janji selamanya.",mapUrl:"",
+    sectionTitles:{mempelai:"Dengan Penuh Cinta",acara:"Hari Bahagia",cerita:"Kisah Kami",galeri:"Galeri Cinta",rsvp:"Kehadiran & Doa",hadiah:"Amplop Digital"},
+    closingText:"TERIMA KASIH",
   };
 }

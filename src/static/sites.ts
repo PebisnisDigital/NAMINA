@@ -17,19 +17,31 @@ const mediaUrl = z.string().max(2000).refine((value) => {
   }
 }, "Gunakan URL HTTPS, misalnya tautan Dropbox dengan raw=1.");
 
-export const siteDocumentSchema = z.object({
-  slug: slugSchema,
-  presentation: z.enum(["original", "original-white", "doctor", "chibi", "wedding", "wedding2"]).optional(),
+const presentationSchema = z.enum(["original", "original-white", "doctor", "chibi", "wedding", "wedding2"]);
+const siteMediaSchema = z.object({
+  desktopVideo: mediaUrl,
+  mobileVideo: mediaUrl,
+  poster: mediaUrl,
+  portrait: mediaUrl,
+  enterKey: mediaUrl.optional(),
+  cards: z.record(z.string(), mediaUrl),
+}).strict();
+
+// Store only one generation of each editor category: avoid nesting complete site
+// documents or relying on browser-local backups when a published website changes.
+export const siteTemplateSnapshotSchema = z.object({
+  presentation: presentationSchema.optional(),
   content: contentSchema,
   weddingDesign: weddingDesignSchema.optional(),
-  media: z.object({
-    desktopVideo: mediaUrl,
-    mobileVideo: mediaUrl,
-    poster: mediaUrl,
-    portrait: mediaUrl,
-    enterKey: mediaUrl.optional(),
-    cards: z.record(z.string(), mediaUrl),
-  }).strict(),
+  media: siteMediaSchema,
+}).strict();
+
+export const siteDocumentSchema = siteTemplateSnapshotSchema.extend({
+  slug: slugSchema,
+  templateSnapshots: z.object({
+    personal: siteTemplateSnapshotSchema.optional(),
+    wedding: siteTemplateSnapshotSchema.optional(),
+  }).strict().optional(),
 }).strict();
 
 export type SiteDocument = z.infer<typeof siteDocumentSchema>;

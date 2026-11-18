@@ -3,6 +3,7 @@ import { Legal } from "./pages/Landing";
 import { IntroLanding } from "./pages/IntroLanding";
 import { StudioV2 } from "./pages/StudioV2";
 import { StudioGateway } from "./pages/StudioGateway";
+import { McpConsent } from "./pages/McpConsent";
 import { StudioV2Canvas } from "./pages/StudioV2Canvas";
 import { BusinessPortal } from "./pages/BusinessPortal";
 import { BusinessMagicAccess } from "./pages/BusinessMagicAccess";
@@ -40,6 +41,7 @@ function App() {
   else if (path === "/mitra/studio") page = <BusinessVisualStudio />;
   else if (path === "/mitra/admin" || path === "/studio/admin") page = <BusinessAdmin />;
   // The Visual Studio is the only supported editor. Legacy V1 URLs return to it.
+  else if (path === "/studio/oauth") page = <McpConsent />;
   else if (path === "/studio") page = <StudioGateway />;
   else if (path === "/studio-v2") page = <StudioV2 />;
   else if (path === "/studio-v1" || path === "/generator") page = <Redirect to="/studio" />;

@@ -53,7 +53,7 @@ export function oauthMetadata() {
     token_endpoint:MCP_ISSUER+"/api/mcp-oauth?action=token", registration_endpoint:MCP_ISSUER+"/api/mcp-oauth?action=register",
     response_types_supported:["code"], grant_types_supported:["authorization_code"],
     token_endpoint_auth_methods_supported:["none","client_secret_post","client_secret_basic"],
-    code_challenge_methods_supported:["S256"], scopes_supported:MCP_SCOPES };
+    code_challenge_methods_supported:["S256"], authorization_response_iss_parameter_supported:true,scopes_supported:MCP_SCOPES };
 }
 export function resourceMetadata() {
   return {resource:MCP_RESOURCE,authorization_servers:[MCP_ISSUER],scopes_supported:MCP_SCOPES,bearer_methods_supported:["header"]};

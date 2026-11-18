@@ -1,11 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { siteDocumentSchema, prepareSite } from "../src/static/sites.js";
 
 type Request = IncomingMessage & { body?: unknown };
 const versions = ["2025-11-25", "2025-06-18", "2025-03-26"];
 const tools = [
+  { name: "create_website", description: "Create a private website draft from a complete validated NAMINA document. Does not publish.", inputSchema: { type: "object", properties: { document: { type: "object" } }, required: ["document"], additionalProperties: false }, annotations: { readOnlyHint: false, destructiveHint: false } },
   { name: "list_websites", description: "List websites in your own NAMINA workspace.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true } },
   { name: "get_website", description: "Read your own website draft.", inputSchema: { type: "object", properties: { id: { type: "string", format: "uuid" } }, required: ["id"], additionalProperties: false }, annotations: { readOnlyHint: true } },
   { name: "update_draft", description: "Save a complete validated website document without publishing. Use the updated_at value from get_website to avoid overwriting concurrent edits.", inputSchema: { type: "object", properties: { id: { type: "string", format: "uuid" }, updated_at: { type: "string" }, document: { type: "object" } }, required: ["id", "updated_at", "document"], additionalProperties: false }, annotations: { readOnlyHint: false, destructiveHint: true } },
@@ -25,19 +27,22 @@ export default async function handler(req: Request, res: ServerResponse) {
   if (process.env.NAMINA_MCP_ENABLED !== "true") return send(503, { error: "MCP preview disabled" });
   const origin = req.headers.origin;
   if (origin && origin !== "https://namina.biz.id") return send(403, { error: "Origin denied" });
+  const bearer = req.headers.authorization?.match(/^Bearer (nmn_[A-Za-z0-9_-]{43})$/)?.[1];
+  if (!bearer) { res.setHeader("WWW-Authenticate", "Bearer"); return send(401, { error: "NAMINA agent key required" }); }
   const url = process.env.VITE_SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) return send(503, { error: "MCP unavailable" });
-  const bearer = req.headers.authorization?.match(/^Bearer ([^\s]+)$/)?.[1];
-  if (!bearer) { res.setHeader("WWW-Authenticate", "Bearer"); return send(401, { error: "Authentication required" }); }
-  const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers: { Authorization: "Bearer " + bearer } } });
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !service || (process.env.SUPABASE_URL && process.env.SUPABASE_URL !== url)) return send(503, { error: "MCP unavailable" });
+  const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
+  const hash=createHash("sha256").update(bearer).digest("hex");
+  async function operation(action: string, siteId: string|null=null, document: unknown=null, updatedAt: string|null=null) {
+    return db.rpc("namina_mcp_operation",{p_hash:hash,p_action:action,p_id:siteId,p_document:document,p_updated_at:updatedAt});
+  }
   try {
-    const { data: auth, error: authError } = await db.auth.getUser(bearer);
-    if (authError || !auth.user) return send(401, { error: "Invalid session" });
-    const { data: workspace, error: workspaceError } = await db.from("namina_business_workspaces").select("id,subscription_status").eq("owner_id", auth.user.id).maybeSingle();
-    if (workspaceError || !workspace || workspace.subscription_status === "suspended") return send(403, { error: "Workspace unavailable" });
-    const session = await db.rpc("namina_business_session_valid", { p_workspace_id: workspace.id });
-    if (session.error || session.data !== true) return send(403, { error: "Session revoked or invalid" });
+    const auth=await operation("authorize");
+    if (auth.error) return send(503,{error:"MCP unavailable"});
+    if (auth.data?.error==="rate_limit") { res.setHeader("Retry-After","60"); return send(429,{error:"Rate limit"}); }
+    if (!["read","draft"].includes(auth.data?.scope)) { res.setHeader("WWW-Authenticate","Bearer"); return send(401,{error:"Invalid or expired key"}); }
+    const scope=auth.data.scope;
     if (req.method !== "POST") { res.setHeader("Allow", "POST"); return send(405); }
     let body: unknown;
     try {
@@ -67,26 +72,38 @@ export default async function handler(req: Request, res: ServerResponse) {
       return result({ protocolVersion: version, capabilities: { tools: {} }, serverInfo: { name: "namina-partner-preview", version: "0.1.0" } });
     }
     if (method === "ping") return result({});
-    if (method === "tools/list") return result({ tools });
+    if (method === "tools/list") return result({ tools: scope === "read" ? tools.filter(tool => tool.annotations.readOnlyHint) : tools });
     if (method !== "tools/call") return fail(-32601, "Method not found");
+    async function respond(action: string, siteId: string|null=null, document: unknown=null, updatedAt: string|null=null) {
+      const response=await operation(action,siteId,document,updatedAt);
+      if (response.error) return content({error:"Operation failed"},true);
+      if (response.data?.error) return content({error:response.data.error},true);
+      return content(response.data?.data);
+    }
     if (params?.name === "list_websites") {
       if (!z.object({}).strict().safeParse(params.arguments ?? {}).success) return fail(-32602, "Invalid arguments");
-      const response = await db.from("namina_business_sites").select("id,slug,updated_at,published_sha").eq("workspace_id", workspace.id).order("updated_at", { ascending: false }).limit(100);
-      return response.error ? content({ error: "Unable to list websites" }, true) : content(response.data);
+      return respond("list");
     }
     if (params?.name === "get_website") {
-      const args = idArgs.safeParse(params.arguments);
+      const args=idArgs.safeParse(params.arguments);
       if (!args.success) return fail(-32602, "Invalid arguments");
-      const response = await db.from("namina_business_sites").select("id,slug,document,updated_at,published_sha").eq("workspace_id", workspace.id).eq("id", args.data.id).maybeSingle();
-      return response.error || !response.data ? content({ error: "Website unavailable" }, true) : content(response.data);
+      return respond("get",args.data.id);
     }
     if (params?.name === "update_draft") {
-      const args = updateArgs.safeParse(params.arguments);
-      if (!args.success) return fail(-32602, "Invalid arguments or site document");
-      const document = siteDocumentSchema.parse(prepareSite(args.data.document));
-      if (Buffer.byteLength(JSON.stringify(document)) > 245000) return content({ error: "Document too large" }, true);
-      const response = await db.from("namina_business_sites").update({ document, updated_at: new Date().toISOString() }).eq("workspace_id", workspace.id).eq("id", args.data.id).eq("slug", document.slug).eq("updated_at", args.data.updated_at).select("id,slug,updated_at").maybeSingle();
-      return response.error || !response.data ? content({ error: "Draft unavailable or changed; reload before retrying" }, true) : content(response.data);
+      if (scope!=="draft") return content({error:"Draft editing is not permitted"},true);
+      const args=updateArgs.safeParse(params.arguments);
+      if (!args.success) return fail(-32602,"Invalid arguments or site document");
+      const document=siteDocumentSchema.parse(prepareSite(args.data.document));
+      if (Buffer.byteLength(JSON.stringify(document))>245000) return content({error:"Document too large"},true);
+      return respond("update",args.data.id,document,args.data.updated_at);
+    }
+    if (params?.name === "create_website") {
+      if (scope!=="draft") return content({error:"Draft creation is not permitted"},true);
+      const args=z.object({document:siteDocumentSchema}).strict().safeParse(params.arguments);
+      if (!args.success) return fail(-32602,"Invalid site document");
+      const document=siteDocumentSchema.parse(prepareSite(args.data.document));
+      if (Buffer.byteLength(JSON.stringify(document))>245000) return content({error:"Document too large"},true);
+      return respond("create",null,document);
     }
     return fail(-32602, "Unknown tool");
   } catch {

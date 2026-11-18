@@ -1,0 +1,102 @@
+/* Layout scoped to /kloning; it does not affect NAMINA Studio or client pages. */
+.noval-page {
+  --noval-ink: #192130;
+  --noval-muted: #566171;
+  --noval-accent: #183b63;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 64px) 16px;
+  background: #e9edf0;
+  color: var(--noval-ink);
+  font-family: "Poppins", "Montserrat", system-ui, sans-serif;
+  isolation: isolate;
+  overflow: hidden;
+}
+.noval-page *, .noval-page *::before, .noval-page *::after { box-sizing: border-box; }
+.noval-page .noval-background { position: absolute; z-index: -1; inset: 0; pointer-events: none; overflow: hidden; }
+.noval-page .noval-background span { display: block; position: absolute; border: 1px solid rgba(24,59,99,.09); border-radius: 50%; }
+.noval-page .noval-background span:first-child { width: min(90vw, 700px); aspect-ratio: 1; top: -420px; left: -220px; }
+.noval-page .noval-background span:last-child { width: min(110vw, 900px); aspect-ratio: 1; bottom: -650px; right: -350px; }
+.noval-page .noval-card {
+  width: min(100%, 490px);
+  border: 1px solid #d8e0e6;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 18px 55px rgba(18, 35, 52, .095);
+  padding: clamp(24px, 5.4vw, 38px);
+}
+.noval-page .noval-header { text-align: center; }
+.noval-page .noval-avatar {
+  display: grid; place-items: center;
+  width: 86px; height: 86px;
+  margin: 0 auto 19px; border-radius: 50%;
+  background: var(--noval-accent); color: #fff;
+  box-shadow: 0 0 0 5px #e9eff5;
+  font: 500 43px/1 "Cormorant Garamond", Georgia, serif;
+}
+.noval-page .noval-kicker {
+  margin: 0 0 8px;
+  font: 700 10px/1.4 "Montserrat", sans-serif;
+  letter-spacing: .22em; color: #657589;
+}
+.noval-page h1 { margin: 0 0 13px; font: 650 clamp(27px, 5vw, 36px)/1.2 "Poppins", sans-serif; letter-spacing: -.035em; color: var(--noval-ink); }
+.noval-page .noval-intro {
+  margin: 0 auto;
+  max-width: 330px;
+  color: var(--noval-muted);
+  font-size: 14px; line-height: 1.72;
+}
+.noval-page .noval-divider { display: flex; align-items: center; justify-content: center; margin: 25px 0 23px; }
+.noval-page .noval-divider::before, .noval-page .noval-divider::after { content: ""; flex: 1; height: 1px; background: #e5eaee; }
+.noval-page .noval-divider span { margin: 0 12px; width: 5px; height: 5px; background: #b0bccb; transform: rotate(45deg); }
+.noval-page .noval-links { display: grid; gap: 11px; }
+.noval-page .noval-link {
+  display: flex; align-items: center; gap: 13px; min-height: 72px;
+  padding: 14px 15px; border: 1px solid #e4e9ed;
+  border-radius: 13px; background: #fafbfc; color: var(--noval-ink);
+  text-decoration: none; transition: border-color .18s, background-color .18s, transform .18s;
+}
+.noval-page .noval-link > svg:last-child { margin-left: auto; width: 18px; color: #5d6a7a; flex: none; }
+.noval-page .noval-link-icon {
+  display: grid; place-items: center; flex: none;
+  width: 42px; height: 42px; border-radius: 11px;
+  background: #e8eef3; color: var(--noval-accent);
+}
+.noval-page .noval-link-copy { display: grid; min-width: 0; gap: 3px; text-align: left; }
+.noval-page .noval-link-copy strong { font-size: 13px; font-weight: 700; }
+.noval-page .noval-link-copy small { font-size: 11px; color: #576679; overflow-wrap: anywhere; line-height: 1.4; }
+.noval-page .noval-link:hover { border-color: #95acc1; background: #f4f7fa; transform: translateY(-1px); }
+.noval-page .noval-products {
+  display: flex; gap: 11px; align-items: center; justify-content: center;
+  min-height: 60px; padding: 15px;
+  border-radius: 13px; color: #fff; background: var(--noval-accent);
+  text-decoration: none; font: 700 13px/1.4 "Montserrat", sans-serif;
+  letter-spacing: .015em; transition: transform .18s, background-color .18s;
+}
+.noval-page .noval-products-icon { display: flex; align-items: center; }
+.noval-page .noval-products svg:last-child { width: 18px; flex: none; }
+.noval-page .noval-products:hover { transform: translateY(-1px); background: #102c4a; }
+.noval-page .noval-address { margin-top: 27px; padding: 22px 0 21px; border-top: 1px solid #e5eaee; }
+.noval-page .noval-address-heading { display: flex; align-items: center; gap: 8px; }
+.noval-page .noval-address-icon { display: flex; color: #49637b; }
+.noval-page .noval-address h2 { margin: 0; font: 700 13px "Poppins", sans-serif; }
+.noval-page .noval-address p { margin: 10px 0 12px; color: #516070; font-size: 12px; line-height: 1.9; overflow-wrap: anywhere; }
+.noval-page .noval-address a { display: inline-flex; align-items: center; gap: 4px; color: var(--noval-accent); font-size: 12px; font-weight: 700; text-decoration: none; }
+.noval-page .noval-address a svg { width: 16px; }
+.noval-page .noval-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid #e5eaee; }
+.noval-page .noval-footer span { font-size: 10px; font-weight: 700; letter-spacing: .15em; color: #7b8897; }
+.noval-page .noval-footer button { display: inline-flex; gap: 6px; align-items: center; border: 0; background: transparent; color: var(--noval-accent); font: 600 11px "Poppins", sans-serif; cursor: pointer; padding: 10px; border-radius: 8px; min-height: 44px; }
+.noval-page .noval-footer button svg { width: 16px; }
+.noval-page a:focus-visible, .noval-page button:focus-visible { outline: 3px solid #e69938; outline-offset: 3px; }
+@media (max-width: 540px) {
+  .noval-page { padding: 0; min-height: 100dvh; display: block; }
+  .noval-page .noval-card { border: 0; border-radius: 0; box-shadow: none; min-height: 100dvh; padding: 35px 22px 25px; }
+  .noval-page .noval-avatar { width: 78px; height: 78px; font-size: 39px; }
+  .noval-page .noval-products { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .noval-page *, .noval-page *::before, .noval-page *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

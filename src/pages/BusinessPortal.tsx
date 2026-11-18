@@ -4,6 +4,7 @@ import { Link } from "./BusinessUi";
 import { businessClient, type BusinessSiteRow, type BusinessWorkspace } from "../business/client";
 import { siteDocumentSchema } from "../static/sites";
 import { TemplatePicker } from "../components/TemplatePicker";
+import { BusinessAiConnect } from "../components/BusinessAiConnect";
 import { createSiteFromTemplate, type TemplateKey } from "../static/templateCatalog";
 import { slugSchema } from "../domain/content";
 import "../business.css";
@@ -181,6 +182,7 @@ export function BusinessPortal() {
               </div>,
             )}</div> : <p className="business__empty">Belum ada website. Buat draft pertama untuk mencoba Studio mitra.</p>}
           </section>
+          <BusinessAiConnect key={workspace.id}/>
           {!canCreate && <section className="business__section">
             <h2>Perpanjang Paket Bisnis</h2>
             <p className="business__fineprint">Website yang sudah ada tetap dapat diedit. Untuk membuat website baru lagi, hubungi admin NAMINA melalui WhatsApp.</p>

@@ -55,7 +55,7 @@ export default async function handler(req:Request,res:ServerResponse){
       const generation=await db.from("namina_business_access_keys").select("rotated_at").eq("workspace_id",w.data.id).is("revoked_at",null).maybeSingle();
       const valid=await userDb.rpc("namina_business_session_valid",{p_workspace_id:w.data.id});
       if(generation.error||!generation.data||valid.error||valid.data!==true)return fail("access_denied",403);
-      const redirect=new URL(c.redirect);if(q.has("state"))redirect.searchParams.set("state",q.get("state")!);
+      const redirect=new URL(c.redirect);redirect.searchParams.set("iss",MCP_ISSUER);if(q.has("state"))redirect.searchParams.set("state",q.get("state")!);
       if(q.get("decision")==="deny"){redirect.searchParams.set("error","access_denied");return send(200,{redirect:redirect.toString()});}
       if(q.get("decision")!=="approve")return fail("invalid_request");
       const code=randomBytes(32).toString("base64url");

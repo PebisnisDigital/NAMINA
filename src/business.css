@@ -168,3 +168,10 @@
   .business__create--templates { grid-template-columns: 1fr; }
   .business__create--templates .business__primary { width: 100%; }
 }
+
+.namina-mcp-panel .business__create { grid-template-columns:minmax(0,1fr) auto; margin-top:12px; }
+.namina-mcp-panel .namina-mcp-scope { grid-column:1/-1; border:1px solid #81535d; padding:12px; border-radius:10px; min-width:0; }
+.namina-mcp-panel .namina-mcp-scope label { display:flex; align-items:center; gap:8px; }
+.namina-mcp-panel .namina-mcp-scope input { width:16px; min-height:16px; padding:0; accent-color:#d52e3a; }
+.namina-mcp-panel .business__site { flex-wrap:wrap; overflow-wrap:anywhere; }
+@media(max-width:600px){.namina-mcp-panel .business__create{grid-template-columns:minmax(0,1fr);}}

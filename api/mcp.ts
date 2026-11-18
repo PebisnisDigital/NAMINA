@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { createHash } from "node:crypto";
+import { MCP_METADATA } from "../server/mcp-oauth.js";
 import { siteDocumentSchema, prepareSite } from "../src/static/sites.js";
 
 type Request = IncomingMessage & { body?: unknown };
@@ -27,8 +28,9 @@ export default async function handler(req: Request, res: ServerResponse) {
   if (process.env.NAMINA_MCP_ENABLED !== "true") return send(503, { error: "MCP preview disabled" });
   const origin = req.headers.origin;
   if (origin && origin !== "https://namina.biz.id") return send(403, { error: "Origin denied" });
+  const challenge = process.env.NAMINA_MCP_OAUTH_ENABLED === "true" ? `Bearer resource_metadata="${MCP_METADATA}"` : "Bearer";
   const bearer = req.headers.authorization?.match(/^Bearer (nmn_[A-Za-z0-9_-]{43})$/)?.[1];
-  if (!bearer) { res.setHeader("WWW-Authenticate", "Bearer"); return send(401, { error: "NAMINA agent key required" }); }
+  if (!bearer) { res.setHeader("WWW-Authenticate", challenge); return send(401, { error: "NAMINA agent key required" }); }
   const url = process.env.VITE_SUPABASE_URL;
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !service || (process.env.SUPABASE_URL && process.env.SUPABASE_URL !== url)) return send(503, { error: "MCP unavailable" });
@@ -41,7 +43,7 @@ export default async function handler(req: Request, res: ServerResponse) {
     const auth=await operation("authorize");
     if (auth.error) return send(503,{error:"MCP unavailable"});
     if (auth.data?.error==="rate_limit") { res.setHeader("Retry-After","60"); return send(429,{error:"Rate limit"}); }
-    if (!["read","draft"].includes(auth.data?.scope)) { res.setHeader("WWW-Authenticate","Bearer"); return send(401,{error:"Invalid or expired key"}); }
+    if (!["read","draft"].includes(auth.data?.scope)) { res.setHeader("WWW-Authenticate",challenge); return send(401,{error:"Invalid or expired key"}); }
     const scope=auth.data.scope;
     if (req.method !== "POST") { res.setHeader("Allow", "POST"); return send(405); }
     let body: unknown;

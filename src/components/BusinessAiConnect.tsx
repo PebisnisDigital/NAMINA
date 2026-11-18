@@ -47,7 +47,7 @@ export function BusinessAiConnect() {
     try {await navigator.clipboard.writeText(value);setNotice("Tersalin.");}
     catch {setNotice("Tidak dapat menyalin otomatis. Pilih dan salin teks secara manual.");}
   }
-  return <section className="business__section">
+  return <section className="business__section namina-mcp-panel">
     <h2>AI Connect</h2>
     <p className="business__fineprint">Hubungkan agent yang mendukung MCP dengan kunci Bearer. Agent hanya dapat membuka website workspace ini. Publikasi tetap melalui Studio.</p>
     <button type="button" className="business__primary" disabled={busy} onClick={()=>void run("list")}>{busy?"Memproses…":keys===null?"Buka AI Connect":"Muat Ulang Kunci"}</button>
@@ -59,7 +59,7 @@ export function BusinessAiConnect() {
       </div>
       <form className="business__create" onSubmit={event=>{event.preventDefault();if(!busy)void run("create");}}>
         <label htmlFor="mcp-label">Nama agent<input id="mcp-label" value={label} maxLength={80} required onChange={e=>setLabel(e.target.value)} placeholder="Contoh: Hermes"/></label>
-        <fieldset>
+        <fieldset className="namina-mcp-scope">
           <legend>Hak akses</legend>
           <label><input type="radio" name="mcp-scope" checked={scope==="read"} onChange={()=>setScope("read")}/>Read Only</label>
           <label><input type="radio" name="mcp-scope" checked={scope==="draft"} onChange={()=>setScope("draft")}/>Draft Editor</label>

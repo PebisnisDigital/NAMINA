@@ -26,7 +26,9 @@ export const keySchema=z.discriminatedUnion("action",[
  z.object({action:z.literal("create"),label:z.string().trim().min(1).max(80),scope:scopes}).strict(),
  z.object({action:z.literal("revoke"),id:uuid}).strict(),
  z.object({action:z.literal("requests")}).strict(),
- z.object({action:z.enum(["approve","reject"]),id:uuid}).strict(),
+ z.object({action:z.literal("approve"),id:uuid}).strict(),
+ z.object({action:z.literal("reject"),id:uuid}).strict(),
+ z.object({action:z.literal("review"),id:uuid}).strict(),
 ]);
 export const adminTools=[
  {name:"list_websites",category:"websites",read:true,description:"List central and partner websites and AI drafts.",schema:z.object({limit:z.number().int().min(1).max(100).default(50),offset:z.number().int().min(0).default(0)}).strict()},

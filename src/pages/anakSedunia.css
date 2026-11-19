@@ -88,3 +88,15 @@
 .family-preloaded-scene .family-doa-poster[data-active="true"]{opacity:1}
 .family-site.family-fullscreen .family-stage{background:transparent;z-index:1;isolation:auto}
 @media(prefers-reduced-motion:reduce){.family-media-meter .namina-liquid-loader__fill,.family-preloaded-scene .family-doa-poster{transition:none}}
+
+
+/* Family greeting after the shared loading screen; kept mounted for preloading. */
+.family-site .family-welcome{position:absolute;inset:0;background:#09090d;isolation:isolate;z-index:35;opacity:.001;pointer-events:none;overflow:hidden}
+.family-site .family-welcome[data-visible="true"]{opacity:1;pointer-events:auto}
+.family-site .family-welcome video{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:center;pointer-events:none}
+.family-welcome-shade{position:absolute;inset:0;background:linear-gradient(0deg,#09090d2b,transparent 30%,transparent 70%,#09090d20);pointer-events:none}
+.family-site .family-welcome-button{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:max-content;max-width:calc(100% - 36px);padding:18px clamp(24px,4vw,48px);border:1px solid #ffe6ad;border-radius:999px;background:linear-gradient(135deg,#fff0bb,#d5a257);color:#38250e;font:700 clamp(16px,2.15vw,28px)/1.25 Georgia,serif;box-shadow:0 6px 38px #0006,0 0 30px #edb45844;text-align:center;animation:family-welcome-button-in .85s .6s both}
+.family-site .family-welcome-button:hover{filter:brightness(1.1)}
+.family-site .family-welcome-audio{position:absolute;right:22px;top:calc(18px + env(safe-area-inset-top,0px));padding:8px 14px;border-radius:99px;border:1px solid #ffffff44;background:#08090d55;color:white;font:500 12px system-ui,sans-serif}
+@keyframes family-welcome-button-in{from{opacity:0;transform:translate(-50%,-45%)}to{opacity:1;transform:translate(-50%,-50%)}}
+@media(prefers-reduced-motion:reduce){.family-site .family-welcome-button{animation:none}}

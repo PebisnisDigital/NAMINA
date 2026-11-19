@@ -6,6 +6,7 @@ type Menu = "anak1" | "anak2" | "kenangan" | "doa";
 const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
 const family = {
+  welcomeVideo: "https://www.dropbox.com/scl/fi/qv98rguh4by66dwmze5wz/Family_embracing_in_golden_light_f6b10c09_1080p.mp4?rlkey=a03r5a4s8cwo6hw0nbrmdzfuv&raw=1",
   doaVideo: "",
   doaPoster: photo,
   anak1: { name: "Anak Pertama", job: "", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
@@ -44,7 +45,7 @@ function PageControls({page,total,onChange}:{page:number;total:number;onChange:(
  return <div className="family-pagination" aria-label="Halaman isi"><button aria-label="Sebelumnya" disabled={page===0} onClick={()=>onChange(page-1)}>‹</button><span aria-live="polite">{page+1} / {total}</span><button aria-label="Berikutnya" disabled={page>=total-1} onClick={()=>onChange(page+1)}>›</button></div>;
 }
 export function AnakSedunia(){
- const [stage,setStage]=useState<"loading"|"site">("loading");
+ const [stage,setStage]=useState<"loading"|"welcome"|"site">("loading");
  const [menu,setMenu]=useState<Menu>("anak1");
  const [zoom,setZoom]=useState<string|null>(null);
  const [page,setPage]=useState(0);
@@ -52,13 +53,16 @@ export function AnakSedunia(){
  const [galleryPage,setGalleryPage]=useState(0);
  const touchStart=useRef<number|null>(null);
  useEffect(()=>{const resize=()=>{setPageSize(viewportPageSize());setPage(0);};window.addEventListener("resize",resize);return()=>window.removeEventListener("resize",resize);},[]);
+ const welcomeRef=useRef<HTMLVideoElement|null>(null);
+ const [welcomeSound,setWelcomeSound]=useState(false);
+ const [welcomeFailed,setWelcomeFailed]=useState(false);
  const anak1Ref=useRef<HTMLVideoElement|null>(null);
  const anak2Ref=useRef<HTMLVideoElement|null>(null);
  const doaRef=useRef<HTMLVideoElement|null>(null);
  const [progress,setProgress]=useState(0);
  const [loadNotice,setLoadNotice]=useState(false);
  function warmVideos(){
-   for(const video of [anak1Ref.current,anak2Ref.current,doaRef.current]){
+   for(const video of [welcomeRef.current,anak1Ref.current,anak2Ref.current,doaRef.current]){
      if(!video)continue;
      video.muted=true;
      if(video.paused)void video.play().catch(()=>{});
@@ -71,7 +75,7 @@ export function AnakSedunia(){
    let settled=false;
    const sample=()=>{
      if(settled)return;
-     const videos=[anak1Ref.current,anak2Ref.current,...(family.doaVideo?[doaRef.current]:[])];
+     const videos=[welcomeRef.current,anak1Ref.current,anak2Ref.current,...(family.doaVideo?[doaRef.current]:[])];
      const values=videos.map(video=>{
        if(!video||video.error)return 0;
        const t=video.currentTime;
@@ -89,16 +93,39 @@ export function AnakSedunia(){
      setLoadNotice(elapsed>=10000);
      if(all){
        settled=true;
-       finish=window.setTimeout(()=>setStage("site"),Math.max(350,700-elapsed));
+       finish=window.setTimeout(()=>setStage("welcome"),Math.max(350,700-elapsed));
      }else if(elapsed>=25000){
        settled=true;
-       setStage("site");
+       setStage("welcome");
      }
    };
    warmVideos();sample();
    const timer=window.setInterval(sample,200);
    return ()=>{window.clearInterval(timer);window.clearTimeout(finish);};
  },[stage]);
+ useEffect(()=>{
+   if(stage!=="welcome")return;
+   const video=welcomeRef.current;
+   if(!video)return;
+   video.muted=true;
+   if(video.readyState>=1)video.currentTime=0;
+   void video.play().catch(()=>{});
+ },[stage]);
+ function enterFamily(){
+   welcomeRef.current?.pause();
+   if(welcomeRef.current)welcomeRef.current.muted=true;
+   setWelcomeSound(false);
+   const video=anak1Ref.current;
+   if(video){video.muted=true;void video.play().catch(()=>{});}
+   setMenu("anak1");setPage(0);setStage("site");
+ }
+ function toggleWelcomeSound(){
+   const video=welcomeRef.current;
+   if(!video)return;
+   video.muted=!video.muted;
+   setWelcomeSound(!video.muted);
+   void video.play().catch(()=>{video.muted=true;setWelcomeSound(false);});
+ }
  useEffect(()=>{
    if(stage!=="site")return;
    const video=menu==="anak1"?anak1Ref.current:menu==="anak2"?anak2Ref.current:menu==="doa"?doaRef.current:null;
@@ -111,7 +138,7 @@ export function AnakSedunia(){
    setMenu(target);setPage(0);window.scrollTo({top:0,behavior:"auto"});
  }
  function replayIntro(){
-   setProgress(0);setLoadNotice(false);setStage("loading");setMenu("anak1");setPage(0);
+   setProgress(0);setLoadNotice(false);setWelcomeSound(false);setWelcomeFailed(false);setStage("loading");setMenu("anak1");setPage(0);
  }
  const child=menu==="anak1"?family.anak1:menu==="anak2"?family.anak2:null;
  const label=menus.find(item=>item.id===menu)?.title||"Anak 1";
@@ -125,13 +152,21 @@ export function AnakSedunia(){
     {family.doaVideo?<video ref={doaRef} src={family.doaVideo} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="doa"}/>:<img className="family-doa-poster" src={family.doaPoster} alt="" data-active={menu==="doa"}/>}
     <div className="family-scene-shade"/>
   </div>
-  {stage!=="site"?<div className="family-liquid-intro" role="progressbar" aria-label="Memuat video NAMINA" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+  <div className="family-welcome" data-visible={stage==="welcome"} aria-hidden={stage!=="welcome"}>
+    <video ref={welcomeRef} src={family.welcomeVideo} preload="auto" autoPlay muted={!welcomeSound} loop playsInline disablePictureInPicture onError={()=>setWelcomeFailed(true)} aria-label="Video kenangan keluarga"/>
+    {stage==="welcome"&&<>
+      <div className="family-welcome-shade"/>
+      <button type="button" className="family-welcome-button" onClick={enterFamily}>Selamat Hari Anak Sedunia</button>
+      {!welcomeFailed&&<button type="button" className="family-welcome-audio" onClick={toggleWelcomeSound}>{welcomeSound?"♫ Matikan suara":"♫ Aktifkan suara"}</button>}
+    </>}
+  </div>
+  {stage==="loading"?<div className="family-liquid-intro" role="progressbar" aria-label="Memuat video NAMINA" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
     <span className="namina-liquid-loader family-media-meter" aria-hidden="true">
       <span className="namina-liquid-loader__base"><NaminaLogo variant="hero"/></span>
       <span className="namina-liquid-loader__fill" style={{clipPath:"polygon(0 "+(100-progress)+"%,20% "+Math.max(0,100-progress-(progress===100?0:2))+"%,40% "+Math.min(100,100-progress+(progress===100?0:2))+"%,60% "+Math.max(0,100-progress-(progress===100?0:1))+"%,80% "+Math.min(100,100-progress+(progress===100?0:2))+"%,100% "+(100-progress)+"%,100% 100%,0 100%)"}}><NaminaLogo variant="hero"/></span>
     </span>
     {loadNotice&&<span className="family-loading-hint">Menyiapkan video kenangan…</span>}
-  </div>:<>
+  </div>:stage==="site"?<>
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
    {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
@@ -140,6 +175,6 @@ export function AnakSedunia(){
   </section>
   {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={replayIntro}>Putar ulang intro</button></footer>}
   {zoom&&<div role="dialog" aria-modal="true" aria-label="Foto kenangan" className="family-lightbox" onClick={()=>setZoom(null)}><button aria-label="Tutup foto" onClick={()=>setZoom(null)}>×</button><img src={zoom} alt="Kenangan keluarga" onClick={e=>e.stopPropagation()}/></div>}
- </>}
+ </>:null}
  </main>;
 }

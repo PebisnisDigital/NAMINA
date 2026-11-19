@@ -5,7 +5,7 @@ type Menu = "anak1" | "anak2" | "kenangan" | "doa" | "pesan";
 const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
 const family = {
-  introVideo: "",
+  introVideo: "https://www.dropbox.com/scl/fi/qv98rguh4by66dwmze5wz/Family_embracing_in_golden_light_f6b10c09_1080p.mp4?rlkey=a03r5a4s8cwo6hw0nbrmdzfuv&raw=1",
   doaVideo: "",
   pesanVideo: "",
   doaPoster: photo,
@@ -66,17 +66,19 @@ export function AnakSedunia(){
  const audio=useRef<AudioContext|null>(null);
  const introRef=useRef<HTMLVideoElement|null>(null);
  const hasIntro=Boolean(family.introVideo);
+ const [introPlaying,setIntroPlaying]=useState(false);
+ const [introFailed,setIntroFailed]=useState(false);
  useEffect(()=>{
-   if(stage!=="intro") return;
-   const timer=window.setTimeout(()=>setStage("ready"),hasIntro?20000:8500);
+   if(stage!=="intro"|| (hasIntro&&introPlaying)) return;
+   const timer=window.setTimeout(()=>{if(hasIntro){setIntroFailed(true);introRef.current?.pause();}setStage("ready");},hasIntro?20000:8500);
    return ()=>window.clearTimeout(timer);
- },[stage,hasIntro]);
+ },[stage,hasIntro,introPlaying]);
  useEffect(()=>()=>{void audio.current?.close().catch(()=>{});},[]);
  useEffect(()=>{if(!zoom)return;const close=(e:KeyboardEvent)=>{if(e.key==="Escape")setZoom(null);};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close);},[zoom]);
  function toggleMusic(){
    if(sound){if(audio.current)void audio.current.suspend();if(introRef.current)introRef.current.muted=true;setSound(false);return;}
    try {
-    if(hasIntro&&introRef.current){introRef.current.muted=false;void introRef.current.play().catch(()=>{});setSound(true);return;}
+    if(hasIntro&&introRef.current){const video=introRef.current;video.muted=false;setSound(true);if(!video.ended)void video.play().catch(()=>{video.muted=true;setSound(false);});return;}
     if(audio.current){void audio.current.resume();setSound(true);return;}
     const ctx=new AudioContext();audio.current=ctx;void ctx.resume();
     const melody=[261.63,329.63,392,523.25,440,392,329.63,293.66,349.23,440,587.33,523.25,440,392,329.63,261.63];
@@ -93,7 +95,7 @@ export function AnakSedunia(){
  const scenePoster=child?.poster||(menu==="doa"?family.doaPoster:menu==="pesan"?family.pesanPoster:"");
  const pageTotal=Math.ceil(4/pageSize);
  const galleryItem=family.gallery[galleryPage]||family.gallery[0];
- if(stage!=="site") return <main className="family-cinema family-intro"><div className="family-intro-bg"><img src={photo} alt=""/>{hasIntro&&<video ref={introRef} src={family.introVideo} autoPlay muted playsInline onEnded={()=>setStage("ready")} onError={()=>setStage("ready")}/>}</div><div className="family-intro-shade"/><header className="family-intro-controls"><span className="family-brand">NAMINA</span><button className="family-quiet" onClick={toggleMusic}>{sound?"♫ Matikan musik":"♫ Aktifkan musik"}</button></header><div className="family-intro-copy"><span className="family-kicker">20 NOVEMBER 2026</span><h1><i>Selamat</i>Hari Anak Sedunia</h1><p>Untuk dua anugerah terindah dalam hidup kami.</p><span className="family-sign">Papa & Mama</span>{stage==="ready"?<button className="family-gold" onClick={()=>enter()}>♡ Pesan Cinta <span>›</span></button>:<button className="family-quiet family-skip" onClick={()=>setStage("ready")}>Lewati intro ›</button>}</div></main>;
+ if(stage!=="site") return <main className="family-cinema family-intro"><div className="family-intro-bg"><img src={photo} alt=""/>{hasIntro&&<video ref={introRef} src={family.introVideo} poster={photo} preload="auto" autoPlay muted={!sound} playsInline disablePictureInPicture onPlaying={()=>setIntroPlaying(true)} onEnded={()=>{setSound(false);setStage("ready");}} onError={()=>{setIntroFailed(true);setSound(false);setStage("ready");}} style={{opacity:introFailed?0:1}}/>}</div><div className="family-intro-shade"/><header className="family-intro-controls"><span className="family-brand">NAMINA</span>{stage==="intro"&&!introFailed&&<button className="family-quiet" onClick={toggleMusic}>{sound?"♫ Matikan musik":"♫ Aktifkan musik"}</button>}</header><div className="family-intro-copy"><span className="family-kicker">20 NOVEMBER 2026</span><h1><i>Selamat</i>Hari Anak Sedunia</h1><p>Untuk dua anugerah terindah dalam hidup kami.</p><span className="family-sign">Papa & Mama</span>{stage==="ready"?<button className="family-gold" onClick={()=>enter()}>♡ Pesan Cinta <span>›</span></button>:<button className="family-quiet family-skip" onClick={()=>{introRef.current?.pause();setSound(false);setStage("ready");}}>Lewati intro ›</button>}</div></main>;
  return <main className={"family-cinema"+(cinematic?" family-fullscreen":"")}>
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}>{item.icon} {item.title}</button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
@@ -103,7 +105,7 @@ export function AnakSedunia(){
    :menu==="doa"?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>
    :<div className="family-scene-content"><div className="family-copy family-letter-scene"><span className="family-kicker">SURAT CINTA · 20 NOVEMBER 2026</span><h1>Anak-anakku tercinta,</h1>{letter.slice(page*pageSize,(page+1)*pageSize).map(text=><p key={text}>{text}</p>)}<PageControls page={page} total={pageTotal} onChange={setPage}/>{page===pageTotal-1&&<span className="family-sign">Dengan cinta yang tidak pernah menua,<br/>Papa &amp; Mama.</span>}</div></div>}
   </section>
-  {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={()=>{setStage("intro");setSound(false);}}>Putar ulang intro</button></footer>}
+  {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={()=>{setIntroPlaying(false);setIntroFailed(false);setStage("intro");setSound(false);}}>Putar ulang intro</button></footer>}
   {zoom&&<div role="dialog" aria-modal="true" aria-label="Foto kenangan" className="family-lightbox" onClick={()=>setZoom(null)}><button aria-label="Tutup foto" onClick={()=>setZoom(null)}>×</button><img src={zoom} alt="Kenangan keluarga" onClick={e=>e.stopPropagation()}/></div>}
  </main>;
 }

@@ -100,3 +100,35 @@
 .family-site .family-welcome-audio{position:absolute;right:22px;top:calc(18px + env(safe-area-inset-top,0px));padding:8px 14px;border-radius:99px;border:1px solid #ffffff44;background:#08090d55;color:white;font:500 12px system-ui,sans-serif}
 @keyframes family-welcome-button-in{from{opacity:0;transform:translate(-50%,-45%)}to{opacity:1;transform:translate(-50%,-50%)}}
 @media(prefers-reduced-motion:reduce){.family-site .family-welcome-button{animation:none}}
+
+
+/* Editorial family album with a seamless horizontal loop when multiple photos exist. */
+.family-site.family-gallery-site{min-height:100vh;min-height:100dvh;background:#0a0c13}
+.family-site.family-gallery-site .family-stage{padding:clamp(82px,12vh,115px) 0 18px;min-height:calc(100dvh - 62px);display:flex;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 95%,#76552b38,transparent 64%),linear-gradient(150deg,#101c2a,#0b0c13 75%)}
+.family-editorial-gallery{width:100%;display:grid;gap:clamp(14px,2.5vh,28px);justify-items:center;min-width:0}
+.family-editorial-heading{text-align:center;padding:0 20px;display:grid;gap:8px}
+.family-editorial-heading h1{font-size:clamp(40px,6vw,78px);line-height:1;color:#f1d29b;font-style:italic;font-weight:400}
+.family-editorial-heading p{font-size:clamp(14px,1.3vw,19px)}
+.family-magazine-window{width:100%;overflow:hidden;padding:14px 0;mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.family-magazine-track{display:flex;width:max-content;animation:family-magazine-loop 32s linear infinite;will-change:transform}
+.family-magazine-group{display:flex;align-items:center;justify-content:space-around;gap:clamp(16px,3vw,36px);padding:0 clamp(12px,1.5vw,20px);min-width:100vw;flex:none}
+.family-magazine-card{flex:none;display:flex;flex-direction:column;text-align:left;gap:0;width:clamp(205px,23vw,330px);padding:12px 13px 16px;background:#f3e7d3;color:#33271c;border:1px solid #fff0d6;border-radius:4px;box-shadow:0 13px 34px #0007;transition:transform .3s ease;transform:rotate(-2deg)}
+.family-magazine-card:nth-child(even){transform:rotate(2deg)}
+.family-magazine-card:hover,.family-magazine-card:focus-visible{transform:rotate(0) translateY(-5px)}
+.family-magazine-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #85694d66;padding-bottom:8px;margin-bottom:9px;font:700 9px/1.2 system-ui,sans-serif;letter-spacing:.13em;color:#745839}
+.family-magazine-photo{width:100%;height:clamp(145px,29vh,310px);overflow:hidden;background:#ded2bf}
+.family-magazine-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.family-magazine-copy{display:grid;gap:5px;padding:14px 1px 0}
+.family-magazine-tag{font:600 9px system-ui,sans-serif;letter-spacing:.13em;color:#82613d}
+.family-magazine-copy strong{font:500 clamp(20px,2vw,29px)/1.05 Georgia,serif;letter-spacing:-.025em}
+.family-magazine-copy p{font:400 12px/1.35 Georgia,serif;color:#6a5541;margin:0}
+.family-magazine-window[data-single="true"] .family-magazine-track{width:100%;animation:none}
+.family-magazine-window[data-single="true"] .family-magazine-group{min-width:0;width:100%;justify-content:center}
+.family-magazine-window[data-single="true"] .family-magazine-card{width:min(78vw,360px);animation:family-magazine-float 6s ease-in-out infinite}
+.family-magazine-window[data-paused="true"] .family-magazine-track,.family-magazine-window[data-paused="true"] .family-magazine-card,.family-magazine-window:focus-within .family-magazine-track,.family-magazine-window:hover .family-magazine-track{animation-play-state:paused}
+.family-editorial-controls{display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;padding:0 16px;color:#bfb4a3;font:12px system-ui,sans-serif}
+.family-gallery-motion{background:transparent;color:#f1d29b;border:1px solid #ad8b5966;border-radius:99px;padding:7px 12px;font:500 12px system-ui,sans-serif!important}
+@keyframes family-magazine-loop{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes family-magazine-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(1deg)}}
+@media(max-width:760px){.family-site.family-gallery-site .family-stage{min-height:calc(100dvh - var(--family-nav-bottom) - 52px);padding:65px 0 16px}.family-magazine-card{width:clamp(200px,66vw,280px)}.family-magazine-photo{height:clamp(135px,28vh,260px)}.family-magazine-window{padding-block:12px}.family-editorial-heading h1{font-size:46px}.family-editorial-controls{gap:8px}}
+@media(prefers-reduced-motion:reduce){.family-magazine-window{overflow-x:auto;mask-image:none}.family-magazine-track{animation:none!important;transform:none!important}.family-magazine-group[aria-hidden="true"]{display:none}.family-magazine-card{animation:none!important;transition:none}.family-gallery-motion{display:none}}

@@ -26,8 +26,8 @@ const family = {
 const menus = [
   {id:"anak1", title: "Anak 1", sub:"Profil, perjalanan & doa", icon:"♙"},
   {id:"anak2", title: "Anak 2", sub:"Profil, perjalanan & doa", icon:"♙"},
-  {id:"kenangan", title: "Kenangan", sub:"Galeri perjalanan keluarga", icon:"▧"},
-  {id:"doa", title: "Doa", sub:"Hari ini dan selamanya", icon:"♡"}
+  {id:"doa", title: "Doa", sub:"Hari ini dan selamanya", icon:"♡"},
+  {id:"kenangan", title: "Kenangan", sub:"Galeri perjalanan keluarga", icon:"▧"}
 ] as const;
 const prayers = [
   ["Sehat & bahagia","Semoga Allah menjaga tubuh, hati, dan pikiran kalian."],
@@ -35,6 +35,16 @@ const prayers = [
   ["Rezeki penuh berkah","Semoga rezeki halal, luas, dan bermanfaat selalu menyertai."],
   ["Anak yang saleh","Semoga selalu dekat dengan Allah, rendah hati, dan membawa kebaikan."]
 ];
+function galleryImageUrl(value:string){
+  try{
+    const url=new URL(value);
+    if(url.protocol==="https:"&&["www.dropbox.com","dropbox.com"].includes(url.hostname)){
+      url.searchParams.delete("dl");url.searchParams.delete("st");url.searchParams.set("raw","1");
+      return url.toString();
+    }
+  }catch{/* Local image path. */}
+  return value;
+}
 function viewportPageSize(){
  if(window.innerHeight<440) return 1;
  if(window.innerWidth<=760 || window.innerHeight<690) return 2;
@@ -50,8 +60,7 @@ export function AnakSedunia(){
  const [zoom,setZoom]=useState<string|null>(null);
  const [page,setPage]=useState(0);
  const [pageSize,setPageSize]=useState(viewportPageSize);
- const [galleryPage,setGalleryPage]=useState(0);
- const touchStart=useRef<number|null>(null);
+ const [galleryPaused,setGalleryPaused]=useState(false);
  useEffect(()=>{const resize=()=>{setPageSize(viewportPageSize());setPage(0);};window.addEventListener("resize",resize);return()=>window.removeEventListener("resize",resize);},[]);
  const welcomeRef=useRef<HTMLVideoElement|null>(null);
  const [welcomeSound,setWelcomeSound]=useState(false);
@@ -144,7 +153,7 @@ export function AnakSedunia(){
  const label=menus.find(item=>item.id===menu)?.title||"Anak 1";
  const cinematic=Boolean(child)||menu==="doa";
  const pageTotal=Math.ceil(4/pageSize);
- const galleryItem=family.gallery[galleryPage]||family.gallery[0];
+
  return <main className={"family-cinema family-site"+(stage!=="site"||cinematic?" family-fullscreen":" family-gallery-site")+(child?" family-child-site":"")}>
   <div className="family-preloaded-scene" aria-hidden="true" data-visible={stage==="site"&&Boolean(child||menu==="doa")}>
     <video ref={anak1Ref} src={family.anak1.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak1"}/>
@@ -170,7 +179,21 @@ export function AnakSedunia(){
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
    {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
-   :menu==="kenangan"?<div className="family-gallery"><span className="family-kicker">ALBUM KELUARGA</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p><div className="family-gallery-grid" onTouchStart={e=>{touchStart.current=e.touches[0]?.clientX??null;}} onTouchEnd={e=>{const x=touchStart.current;touchStart.current=null;if(x===null)return;const delta=(e.changedTouches[0]?.clientX??x)-x;if(Math.abs(delta)>45)setGalleryPage(i=>Math.max(0,Math.min(family.gallery.length-1,i+(delta<0?1:-1))));}}><button className="family-gallery-card" onClick={()=>setZoom(galleryItem.src)}><img src={galleryItem.src} alt={galleryItem.title}/><strong>{galleryItem.title}</strong><span>{galleryItem.detail}</span></button></div><PageControls page={galleryPage} total={family.gallery.length} onChange={setGalleryPage}/></div>
+   :menu==="kenangan"?<div className="family-editorial-gallery">
+      <div className="family-editorial-heading"><span className="family-kicker">ALBUM KELUARGA · LOVE LEGACY</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p></div>
+      <div className="family-magazine-window" data-single={family.gallery.length===1} data-paused={galleryPaused||Boolean(zoom)}>
+        <div className="family-magazine-track" style={{animationDuration:Math.max(24,family.gallery.length*6)+"s"}}>
+          {(family.gallery.length>1?[0,1]:[0]).map(copy=><div className="family-magazine-group" key={copy} aria-hidden={copy===1}>
+            {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?-1:0} onClick={()=>setZoom(galleryImageUrl(item.src))}>
+              <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>
+              <div className="family-magazine-photo"><img src={galleryImageUrl(item.src)} alt={copy===1?"":item.title} decoding="async"/></div>
+              <div className="family-magazine-copy"><span className="family-magazine-tag">FAMILY MEMORIES</span><strong>{item.title}</strong><p>{item.detail}</p></div>
+            </button>)}
+          </div>)}
+        </div>
+      </div>
+      <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>setGalleryPaused(v=>!v)} aria-pressed={galleryPaused}>{galleryPaused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><span>Ketuk foto untuk memperbesar</span></div>
+    </div>
    :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>}
   </section>
   {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={replayIntro}>Putar ulang intro</button></footer>}

@@ -65,3 +65,15 @@
 }
 @media(max-height:440px) and (min-width:761px){.family-site .family-header{padding:6px 20px}.family-site .family-scene-content{padding-top:54px}.family-site .family-header nav button{min-height:32px;padding:5px 10px}}
 @media(max-height:560px) and (max-width:760px){.family-site{--family-nav-bottom:calc(53px + env(safe-area-inset-bottom,0px))}.family-site .family-header nav button{min-height:42px;gap:2px}.family-nav-icon svg{width:17px;height:17px}.family-site .family-scene-content{padding-top:38px;padding-bottom:calc(var(--family-nav-bottom) + 7px)}}
+
+
+/* Keep both child video elements mounted through the logo intro and tab switches. */
+.family-site .family-preloaded-scene{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.001;background:#090b11}
+.family-site .family-preloaded-scene[data-visible="true"]{opacity:1}
+.family-preloaded-scene video{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:75% center;opacity:.001;transition:opacity .28s ease}
+.family-preloaded-scene video[data-active="true"]{opacity:1}
+.family-site.family-child-site .family-stage{background:transparent;z-index:1;isolation:auto}
+.family-logo-intro.namina-entry{position:absolute;inset:0;z-index:50;min-height:0;height:100%;width:100%;background:#000;isolation:isolate}
+.family-logo-intro .namina-entry__button{font:700 16px/1.25 Montserrat,system-ui,sans-serif}
+.family-logo-skip{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:20px;z-index:2;color:#fff;background:#0008;border:0;border-radius:20px;padding:8px 12px;font:500 12px system-ui!important}
+@media(prefers-reduced-motion:reduce){.family-preloaded-scene video{transition:none}}

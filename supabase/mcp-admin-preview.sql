@@ -15,7 +15,7 @@ create table public.namina_admin_mcp_drafts (
 create table public.namina_admin_mcp_requests (
  id uuid primary key default gen_random_uuid(), key_id uuid references public.namina_admin_mcp_keys(id) on delete set null,
  owner_id uuid not null references auth.users(id) on delete cascade,
- operation text not null check(operation in ('publish','create_partner','edit_partner','extend_partner','rotate_link','revoke_link','revoke_partner_mcp','set_partner_quota')),
+ operation text not null check(operation in ('publish','create_partner_website','update_partner_website','create_partner','edit_partner','extend_partner','rotate_link','revoke_link','revoke_partner_mcp','set_partner_quota')),
  payload jsonb not null check(jsonb_typeof(payload)='object' and pg_column_size(payload)<=250000),
  status text not null default 'pending' check(status in ('pending','running','completed','failed','rejected')),
  created_at timestamptz not null default now(), decision_at timestamptz, approved_by uuid references auth.users(id) on delete set null,

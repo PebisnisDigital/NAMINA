@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./anakSedunia.css";
 
-type Menu = "home" | "anak1" | "anak2" | "kenangan" | "doa" | "pesan";
+type Menu = "anak1" | "anak2" | "kenangan" | "doa" | "pesan";
 const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
 const family = {
@@ -54,7 +54,7 @@ function PageControls({page,total,onChange}:{page:number;total:number;onChange:(
 }
 export function AnakSedunia(){
  const [stage,setStage]=useState<"intro"|"ready"|"site">("intro");
- const [menu,setMenu]=useState<Menu>("home");
+ const [menu,setMenu]=useState<Menu>("anak1");
  const [sound,setSound]=useState(false);
  const [zoom,setZoom]=useState<string|null>(null);
  const [videoFailed,setVideoFailed]=useState(false);
@@ -84,10 +84,10 @@ export function AnakSedunia(){
     setSound(true);
    }catch{setSound(false);}
  }
- function enter(target:Menu="home"){if(audio.current)void audio.current.close().catch(()=>{});audio.current=null;setSound(false);setMenu(target);setPage(0);setVideoFailed(false);setStage("site");}
+ function enter(target:Menu="anak1"){if(audio.current)void audio.current.close().catch(()=>{});audio.current=null;setSound(false);setMenu(target);setPage(0);setVideoFailed(false);setStage("site");}
  function navigate(target:Menu){setMenu(target);setPage(0);setVideoFailed(false);window.scrollTo({top:0,behavior:"auto"});}
  const child=menu==="anak1"?family.anak1:menu==="anak2"?family.anak2:null;
- const label=menus.find(item=>item.id===menu)?.title||"Beranda";
+ const label=menus.find(item=>item.id===menu)?.title||"Anak 1";
  const cinematic=Boolean(child)||menu==="doa"||menu==="pesan";
  const sceneVideo=child?.video||(menu==="doa"?family.doaVideo:menu==="pesan"?family.pesanVideo:"");
  const scenePoster=child?.poster||(menu==="doa"?family.doaPoster:menu==="pesan"?family.pesanPoster:"");
@@ -95,11 +95,10 @@ export function AnakSedunia(){
  const galleryItem=family.gallery[galleryPage]||family.gallery[0];
  if(stage!=="site") return <main className="family-cinema family-intro"><div className="family-intro-bg"><img src={photo} alt=""/>{hasIntro&&<video ref={introRef} src={family.introVideo} autoPlay muted playsInline onEnded={()=>setStage("ready")} onError={()=>setStage("ready")}/>}</div><div className="family-intro-shade"/><header className="family-intro-controls"><span className="family-brand">NAMINA</span><button className="family-quiet" onClick={toggleMusic}>{sound?"♫ Matikan musik":"♫ Aktifkan musik"}</button></header><div className="family-intro-copy"><span className="family-kicker">20 NOVEMBER 2026</span><h1><i>Selamat</i>Hari Anak Sedunia</h1><p>Untuk dua anugerah terindah dalam hidup kami.</p><span className="family-sign">Papa & Mama</span>{stage==="ready"?<button className="family-gold" onClick={()=>enter()}>♡ Pesan Cinta <span>›</span></button>:<button className="family-quiet family-skip" onClick={()=>setStage("ready")}>Lewati intro ›</button>}</div></main>;
  return <main className={"family-cinema"+(cinematic?" family-fullscreen":"")}>
-  <header className="family-header"><button className="family-brand" onClick={()=>navigate("home")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}>{item.icon} {item.title}</button>)}</nav></header>
+  <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}>{item.icon} {item.title}</button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
    {cinematic&&<div className="family-scene" aria-hidden="true">{scenePoster&&<img src={scenePoster} alt=""/>}{sceneVideo&&!videoFailed&&<video key={sceneVideo} src={sceneVideo} poster={scenePoster||undefined} autoPlay muted loop playsInline disablePictureInPicture onError={()=>setVideoFailed(true)}/>}<div className="family-scene-shade"/></div>}
-   {menu==="home"?<div className="family-home-layout"><div className="family-portrait"><img src={photo} alt="Mama bersama kedua putranya waktu kecil"/><span>Masa kecil bersama Mama</span></div><div className="family-copy"><span className="family-kicker">20 NOVEMBER 2026</span><h1><i>Selamat</i>Hari Anak Sedunia</h1><h2>Untuk dua anugerah terindah dalam hidup kami...</h2><p>Terima kasih telah menjadi sumber kebahagiaan dan kebanggaan Papa dan Mama. Semoga kalian selalu sehat, sukses dalam karier, diberikan rezeki halal dan berkah, serta menjadi pribadi saleh dan bermanfaat.</p><button className="family-gold" onClick={()=>navigate("pesan")}>♡ Pesan Cinta <span>›</span></button></div></div>
-   :child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
+   {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-gallery"><span className="family-kicker">ALBUM KELUARGA</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p><div className="family-gallery-grid" onTouchStart={e=>{touchStart.current=e.touches[0]?.clientX??null;}} onTouchEnd={e=>{const x=touchStart.current;touchStart.current=null;if(x===null)return;const delta=(e.changedTouches[0]?.clientX??x)-x;if(Math.abs(delta)>45)setGalleryPage(i=>Math.max(0,Math.min(family.gallery.length-1,i+(delta<0?1:-1))));}}><button className="family-gallery-card" onClick={()=>setZoom(galleryItem.src)}><img src={galleryItem.src} alt={galleryItem.title}/><strong>{galleryItem.title}</strong><span>{galleryItem.detail}</span></button></div><PageControls page={galleryPage} total={family.gallery.length} onChange={setGalleryPage}/></div>
    :menu==="doa"?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>
    :<div className="family-scene-content"><div className="family-copy family-letter-scene"><span className="family-kicker">SURAT CINTA · 20 NOVEMBER 2026</span><h1>Anak-anakku tercinta,</h1>{letter.slice(page*pageSize,(page+1)*pageSize).map(text=><p key={text}>{text}</p>)}<PageControls page={page} total={pageTotal} onChange={setPage}/>{page===pageTotal-1&&<span className="family-sign">Dengan cinta yang tidak pernah menua,<br/>Papa &amp; Mama.</span>}</div></div>}

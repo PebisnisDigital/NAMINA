@@ -10,13 +10,13 @@ const family = {
   pesanVideo: "",
   doaPoster: photo,
   pesanPoster: photo,
-  anak1: { name: "Anak Pertama", job: "", video: "", poster: "", prayers: [
+  anak1: { name: "Anak Pertama", job: "", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
     ["Kesehatan", "Semoga Allah menjaga kesehatan dan memberi kekuatan di setiap langkahmu."],
     ["Karier", "Semoga pekerjaanmu dimudahkan, ilmu dan kemampuanmu terus berkembang."],
     ["Rezeki", "Semoga setiap ikhtiar membuahkan rezeki halal, luas, dan berkah."],
     ["Akhlak", "Tetap rendah hati, saleh, dan membawa manfaat bagi orang di sekitarmu."]
   ] },
-  anak2: { name: "Anak Kedua", job: "", video: "", poster: "", prayers: [
+  anak2: { name: "Anak Kedua", job: "", video: "https://www.dropbox.com/scl/fi/7phcb70wixrl9hq8blxwp/Man_walking_forward_5f8cf8ab_1080p.mp4?rlkey=vwxgme7rm30hoi181tbpm8yzw&raw=1", poster: "", prayers: [
     ["Kesehatan", "Semoga selalu sehat, bahagia, dan dilindungi Allah di mana pun berada."],
     ["Karier", "Semoga setiap tanggung jawab dan cita-cita mendapat jalan terbaik."],
     ["Rezeki", "Semoga usaha dan kerja kerasmu berbuah rezeki yang halal serta berkah."],
@@ -99,7 +99,7 @@ export function AnakSedunia(){
  return <main className={"family-cinema"+(cinematic?" family-fullscreen":"")}>
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}>{item.icon} {item.title}</button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
-   {cinematic&&<div className="family-scene" aria-hidden="true">{scenePoster&&<img src={scenePoster} alt=""/>}{sceneVideo&&!videoFailed&&<video key={sceneVideo} src={sceneVideo} poster={scenePoster||undefined} autoPlay muted loop playsInline disablePictureInPicture onError={()=>setVideoFailed(true)}/>}<div className="family-scene-shade"/></div>}
+   {cinematic&&<div className="family-scene" aria-hidden="true">{scenePoster&&<img src={scenePoster} alt=""/>}{sceneVideo&&!videoFailed&&<video key={sceneVideo} src={sceneVideo} poster={scenePoster||undefined} style={child?{height:"100%",width:"100%",objectFit:"cover",objectPosition:"75% center"}:undefined} autoPlay muted loop playsInline disablePictureInPicture onError={()=>setVideoFailed(true)}/>}<div className="family-scene-shade"/></div>}
    {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-gallery"><span className="family-kicker">ALBUM KELUARGA</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p><div className="family-gallery-grid" onTouchStart={e=>{touchStart.current=e.touches[0]?.clientX??null;}} onTouchEnd={e=>{const x=touchStart.current;touchStart.current=null;if(x===null)return;const delta=(e.changedTouches[0]?.clientX??x)-x;if(Math.abs(delta)>45)setGalleryPage(i=>Math.max(0,Math.min(family.gallery.length-1,i+(delta<0?1:-1))));}}><button className="family-gallery-card" onClick={()=>setZoom(galleryItem.src)}><img src={galleryItem.src} alt={galleryItem.title}/><strong>{galleryItem.title}</strong><span>{galleryItem.detail}</span></button></div><PageControls page={galleryPage} total={family.gallery.length} onChange={setGalleryPage}/></div>
    :menu==="doa"?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>

@@ -77,3 +77,14 @@
 .family-logo-intro .namina-entry__button{font:700 16px/1.25 Montserrat,system-ui,sans-serif}
 .family-logo-skip{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:20px;z-index:2;color:#fff;background:#0008;border:0;border-radius:20px;padding:8px 12px;font:500 12px system-ui!important}
 @media(prefers-reduced-motion:reduce){.family-preloaded-scene video{transition:none}}
+
+
+/* Original liquid logo, driven by media buffer readiness rather than a fixed intro movie. */
+.family-site .family-liquid-intro{position:absolute;inset:0;z-index:50;display:grid;place-items:center;background:#0a0a0e;isolation:isolate}
+.family-media-meter.namina-liquid-loader::after{display:none;animation:none}
+.family-media-meter .namina-liquid-loader__fill{animation:none!important;transition:clip-path .24s linear;will-change:clip-path}
+.family-loading-hint{position:absolute;top:calc(50% + 145px);left:16px;right:16px;text-align:center;font:500 12px system-ui,sans-serif;color:#e1d7cb}
+.family-preloaded-scene .family-doa-poster{position:absolute;inset:0;object-fit:cover;object-position:75% center;width:100%;height:100%;opacity:0;transition:opacity .28s ease}
+.family-preloaded-scene .family-doa-poster[data-active="true"]{opacity:1}
+.family-site.family-fullscreen .family-stage{background:transparent;z-index:1;isolation:auto}
+@media(prefers-reduced-motion:reduce){.family-media-meter .namina-liquid-loader__fill,.family-preloaded-scene .family-doa-poster{transition:none}}

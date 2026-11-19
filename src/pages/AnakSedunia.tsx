@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { NaminaLogo } from "../components/NaminaLogo";
-import "../intro-landing.css";
 import "./anakSedunia.css";
 
 type Menu = "anak1" | "anak2" | "kenangan" | "doa";
 const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
 const family = {
-  introVideo: "https://www.dropbox.com/scl/fi/r0pk04lqyqgxvlyq6r2wp/Namina_logo_reveal_animation_9149f6a7_1080p.mp4?rlkey=oegcrx65yg2fjmi4xfpt98xf0&raw=1",
   doaVideo: "",
   doaPoster: photo,
   anak1: { name: "Anak Pertama", job: "", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
@@ -46,88 +44,96 @@ function PageControls({page,total,onChange}:{page:number;total:number;onChange:(
  return <div className="family-pagination" aria-label="Halaman isi"><button aria-label="Sebelumnya" disabled={page===0} onClick={()=>onChange(page-1)}>‹</button><span aria-live="polite">{page+1} / {total}</span><button aria-label="Berikutnya" disabled={page>=total-1} onClick={()=>onChange(page+1)}>›</button></div>;
 }
 export function AnakSedunia(){
- const [stage,setStage]=useState<"idle"|"intro"|"handoff"|"site">("idle");
+ const [stage,setStage]=useState<"loading"|"site">("loading");
  const [menu,setMenu]=useState<Menu>("anak1");
  const [zoom,setZoom]=useState<string|null>(null);
- const [videoFailed,setVideoFailed]=useState(false);
  const [page,setPage]=useState(0);
  const [pageSize,setPageSize]=useState(viewportPageSize);
  const [galleryPage,setGalleryPage]=useState(0);
  const touchStart=useRef<number|null>(null);
  useEffect(()=>{const resize=()=>{setPageSize(viewportPageSize());setPage(0);};window.addEventListener("resize",resize);return()=>window.removeEventListener("resize",resize);},[]);
- const introRef=useRef<HTMLVideoElement|null>(null);
  const anak1Ref=useRef<HTMLVideoElement|null>(null);
  const anak2Ref=useRef<HTMLVideoElement|null>(null);
- const [introPlaying,setIntroPlaying]=useState(false);
- const [ready,setReady]=useState({anak1:false,anak2:false});
- const [failed,setFailed]=useState({anak1:false,anak2:false});
+ const doaRef=useRef<HTMLVideoElement|null>(null);
+ const [progress,setProgress]=useState(0);
+ const [loadNotice,setLoadNotice]=useState(false);
  function warmVideos(){
-   for(const video of [anak1Ref.current,anak2Ref.current]){
+   for(const video of [anak1Ref.current,anak2Ref.current,doaRef.current]){
      if(!video)continue;
      video.muted=true;
-     void video.play().catch(()=>{});
+     if(video.paused)void video.play().catch(()=>{});
    }
  }
- function startIntro(){
-   setMenu("anak1");setPage(0);setIntroPlaying(false);setStage("intro");
-   warmVideos();
-   const video=introRef.current;
-   if(!video){setStage("handoff");return;}
-   video.muted=false;video.volume=1;video.currentTime=0;
-   void video.play().catch(()=>{video.muted=true;void video.play().catch(()=>setStage("handoff"));});
- }
- function finishIntro(){
-   introRef.current?.pause();
-   setStage(old=>old==="site"?"site":"handoff");
- }
  useEffect(()=>{
-   if(stage!=="intro")return;
-   const timeout=window.setTimeout(()=>{introRef.current?.pause();setStage("handoff");},introPlaying?45000:18000);
-   return ()=>window.clearTimeout(timeout);
- },[stage,introPlaying]);
- useEffect(()=>{
-   if(stage!=="handoff")return;
-   if((ready.anak1||failed.anak1)&&(ready.anak2||failed.anak2)){setStage("site");return;}
-   const timeout=window.setTimeout(()=>setStage("site"),4500);
-   return ()=>window.clearTimeout(timeout);
- },[stage,ready,failed]);
+   if(stage!=="loading")return;
+   const started=performance.now();
+   let finish:number|undefined;
+   let settled=false;
+   const sample=()=>{
+     if(settled)return;
+     const videos=[anak1Ref.current,anak2Ref.current,...(family.doaVideo?[doaRef.current]:[])];
+     const values=videos.map(video=>{
+       if(!video||video.error)return 0;
+       const t=video.currentTime;
+       let ahead=0;
+       for(let i=0;i<video.buffered.length;i++){
+         if(video.buffered.start(i)<=t+.1&&video.buffered.end(i)>=t)ahead=Math.max(ahead,video.buffered.end(i)-t);
+       }
+       const target=Number.isFinite(video.duration)?Math.max(.25,Math.min(3,video.duration-t)):3;
+       const playable=video.readyState>=4||(video.readyState>=3&&ahead>=Math.min(1.5,target));
+       return playable?1:Math.min(.96,Math.max(video.readyState>=2?.35:video.readyState>=1?.12:0,.9*ahead/target));
+     });
+     const all=values.every(value=>value===1);
+     const elapsed=performance.now()-started;
+     setProgress(Math.round(values.reduce((x,y)=>x+y,0)/values.length*100));
+     setLoadNotice(elapsed>=10000);
+     if(all){
+       settled=true;
+       finish=window.setTimeout(()=>setStage("site"),Math.max(350,700-elapsed));
+     }else if(elapsed>=25000){
+       settled=true;
+       setStage("site");
+     }
+   };
+   warmVideos();sample();
+   const timer=window.setInterval(sample,200);
+   return ()=>{window.clearInterval(timer);window.clearTimeout(finish);};
+ },[stage]);
  useEffect(()=>{
    if(stage!=="site")return;
-   const video=menu==="anak1"?anak1Ref.current:menu==="anak2"?anak2Ref.current:null;
+   const video=menu==="anak1"?anak1Ref.current:menu==="anak2"?anak2Ref.current:menu==="doa"?doaRef.current:null;
    if(video){video.muted=true;void video.play().catch(()=>{});}
  },[stage,menu]);
  useEffect(()=>{if(!zoom)return;const close=(e:KeyboardEvent)=>{if(e.key==="Escape")setZoom(null);};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close);},[zoom]);
  function navigate(target:Menu){
-   const video=target==="anak1"?anak1Ref.current:target==="anak2"?anak2Ref.current:null;
+   const video=target==="anak1"?anak1Ref.current:target==="anak2"?anak2Ref.current:target==="doa"?doaRef.current:null;
    if(video){video.muted=true;void video.play().catch(()=>{});}
-   setMenu(target);setPage(0);setVideoFailed(false);window.scrollTo({top:0,behavior:"auto"});
+   setMenu(target);setPage(0);window.scrollTo({top:0,behavior:"auto"});
  }
  function replayIntro(){
-   setIntroPlaying(false);setStage("idle");setMenu("anak1");setPage(0);
+   setProgress(0);setLoadNotice(false);setStage("loading");setMenu("anak1");setPage(0);
  }
  const child=menu==="anak1"?family.anak1:menu==="anak2"?family.anak2:null;
  const label=menus.find(item=>item.id===menu)?.title||"Anak 1";
  const cinematic=Boolean(child)||menu==="doa";
- const sceneVideo=menu==="doa"?family.doaVideo:"";
- const scenePoster=menu==="doa"?family.doaPoster:"";
  const pageTotal=Math.ceil(4/pageSize);
  const galleryItem=family.gallery[galleryPage]||family.gallery[0];
  return <main className={"family-cinema family-site"+(stage!=="site"||cinematic?" family-fullscreen":" family-gallery-site")+(child?" family-child-site":"")}>
-  <div className="family-preloaded-scene" aria-hidden="true" data-visible={stage==="site"&&Boolean(child)}>
-    <video ref={anak1Ref} src={family.anak1.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak1"} onCanPlay={()=>setReady(old=>old.anak1?old:{...old,anak1:true})} onPlaying={()=>setReady(old=>old.anak1?old:{...old,anak1:true})} onError={()=>setFailed(old=>({...old,anak1:true}))}/>
-    <video ref={anak2Ref} src={family.anak2.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak2"} onCanPlay={()=>setReady(old=>old.anak2?old:{...old,anak2:true})} onPlaying={()=>setReady(old=>old.anak2?old:{...old,anak2:true})} onError={()=>setFailed(old=>({...old,anak2:true}))}/>
+  <div className="family-preloaded-scene" aria-hidden="true" data-visible={stage==="site"&&Boolean(child||menu==="doa")}>
+    <video ref={anak1Ref} src={family.anak1.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak1"}/>
+    <video ref={anak2Ref} src={family.anak2.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak2"}/>
+    {family.doaVideo?<video ref={doaRef} src={family.doaVideo} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="doa"}/>:<img className="family-doa-poster" src={family.doaPoster} alt="" data-active={menu==="doa"}/>}
     <div className="family-scene-shade"/>
   </div>
-  {stage!=="site"?<div className="namina-entry family-logo-intro" aria-label="Intro NAMINA">
-    <video ref={introRef} src={family.introVideo} preload="auto" playsInline disablePictureInPicture className={"namina-entry__video"+(introPlaying?" namina-entry__video--visible":"")} onPlaying={()=>setIntroPlaying(true)} onEnded={finishIntro} onError={()=>{if(stage==="intro")finishIntro();}}/>
-    {stage==="idle"&&<button type="button" className="namina-entry__button" onClick={startIntro}>BUKA NAMINA</button>}
-    {stage==="intro"&&!introPlaying&&<div className="namina-entry__loading" role="status"><span className="namina-entry__spinner" aria-hidden="true"/><span>MEMBUKA NAMINA</span></div>}
-    {stage==="handoff"&&!introPlaying&&<NaminaLogo variant="hero"/>}
-    {stage!=="idle"&&<button className="family-logo-skip" type="button" onClick={()=>{warmVideos();introRef.current?.pause();setStage("site");}}>Lewati intro ›</button>}
+  {stage!=="site"?<div className="family-liquid-intro" role="progressbar" aria-label="Memuat video NAMINA" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+    <span className="namina-liquid-loader family-media-meter" aria-hidden="true">
+      <span className="namina-liquid-loader__base"><NaminaLogo variant="hero"/></span>
+      <span className="namina-liquid-loader__fill" style={{clipPath:"polygon(0 "+(100-progress)+"%,20% "+Math.max(0,100-progress-(progress===100?0:2))+"%,40% "+Math.min(100,100-progress+(progress===100?0:2))+"%,60% "+Math.max(0,100-progress-(progress===100?0:1))+"%,80% "+Math.min(100,100-progress+(progress===100?0:2))+"%,100% "+(100-progress)+"%,100% 100%,0 100%)"}}><NaminaLogo variant="hero"/></span>
+    </span>
+    {loadNotice&&<span className="family-loading-hint">Menyiapkan video kenangan…</span>}
   </div>:<>
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
-   {menu==="doa"&&<div className="family-scene" aria-hidden="true">{scenePoster&&<img src={scenePoster} alt=""/>}{sceneVideo&&!videoFailed&&<video key={sceneVideo} src={sceneVideo} poster={scenePoster||undefined} autoPlay muted loop playsInline disablePictureInPicture onError={()=>setVideoFailed(true)}/>}<div className="family-scene-shade"/></div>}
    {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-gallery"><span className="family-kicker">ALBUM KELUARGA</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p><div className="family-gallery-grid" onTouchStart={e=>{touchStart.current=e.touches[0]?.clientX??null;}} onTouchEnd={e=>{const x=touchStart.current;touchStart.current=null;if(x===null)return;const delta=(e.changedTouches[0]?.clientX??x)-x;if(Math.abs(delta)>45)setGalleryPage(i=>Math.max(0,Math.min(family.gallery.length-1,i+(delta<0?1:-1))));}}><button className="family-gallery-card" onClick={()=>setZoom(galleryItem.src)}><img src={galleryItem.src} alt={galleryItem.title}/><strong>{galleryItem.title}</strong><span>{galleryItem.detail}</span></button></div><PageControls page={galleryPage} total={family.gallery.length} onChange={setGalleryPage}/></div>
    :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>}

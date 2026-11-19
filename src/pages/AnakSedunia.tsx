@@ -188,7 +188,7 @@ export function AnakSedunia(){
    :menu==="kenangan"?<div className="family-editorial-gallery">
       <div className="family-editorial-heading"><span className="family-kicker">ALBUM KELUARGA · LOVE LEGACY</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p></div>
       <div className="family-magazine-window" data-single={family.gallery.length===1} data-paused={galleryPaused||Boolean(zoom)}>
-        <div className="family-magazine-track" style={{animationDuration:Math.max(24,family.gallery.length*6)+"s"}}>
+        <div className="family-magazine-track" >
           {(family.gallery.length>1?[0,1]:[0]).map(copy=><div className="family-magazine-group" key={copy} aria-hidden={copy===1}>
             {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?-1:0} onClick={()=>setZoom(galleryImageUrl(item.src))}>
               <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>

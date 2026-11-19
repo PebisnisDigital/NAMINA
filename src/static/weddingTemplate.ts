@@ -1,5 +1,5 @@
-import { cloneViniTemplate, type SiteDocument } from "./sites";
-import { setWeddingAppearance } from "./doctorTemplate";
+import { cloneViniTemplate, type SiteDocument } from "./sites.js";
+import { setWeddingAppearance } from "./doctorTemplate.js";
 
 /** Editable fictitious wedding invitation. Locations and dates are placeholders. */
 export function createWeddingTemplate(slug: string): SiteDocument {

@@ -31,7 +31,26 @@ export default async function handler(req:Req,res:ServerResponse){
    const key=checked(await db.from("namina_admin_mcp_keys").update({revoked_at:new Date().toISOString()}).eq("owner_id",owner).eq("id",a.id).select("id").maybeSingle());
    return send(key?200:404,key?{revoked:true}:{error:"Kunci tidak ditemukan."});
   }
-  if(a.action==="requests")return send(200,{requests:checked(await db.from("namina_admin_mcp_requests").select("id,operation,payload,status,created_at,decision_at,result").eq("owner_id",owner).order("created_at",{ascending:false}).limit(100))});
+  if(a.action==="requests"){
+   const rows=checked(await db.from("namina_admin_mcp_requests").select("id,operation,payload,status,created_at,decision_at,result").eq("owner_id",owner).order("created_at",{ascending:false}).limit(100));
+   return send(200,{requests:rows});
+  }
+  if(a.action==="review"){
+   const q=checked(await db.from("namina_admin_mcp_requests").select("operation,payload").eq("owner_id",owner).eq("id",a.id).eq("status","pending").maybeSingle());
+   if(!q)return send(404,{error:"Permintaan tidak tersedia."});
+   if(q.operation==="publish"){
+    const p=operationSchemas.publish.parse(q.payload);
+    const draft=checked(await db.from("namina_admin_mcp_drafts").select("document,base_sha").eq("slug",p.slug).eq("updated_at",p.updated_at).maybeSingle());
+    return send(draft?200:409,draft?{review:draft}:{error:"Draft berubah. Minta agent mengajukan ulang."});
+   }
+   if(q.operation!=="create_partner"){
+    const p=operationSchemas.rotate_link.safeParse({workspace_id:q.payload.workspace_id});
+    if(!p.success)return send(400,{error:"ID mitra tidak valid."});
+    const w=checked(await db.from("namina_business_workspaces").select("id,display_name,whatsapp_number,subscription_status,max_sites,current_period_end").eq("id",p.data.workspace_id).maybeSingle());
+    return send(w?200:404,w?{review:w}:{error:"Mitra tidak ditemukan."});
+   }
+   return send(200,{review:q.payload});
+  }
   const request=checked(await db.from("namina_admin_mcp_requests").select("*").eq("id",a.id).eq("owner_id",owner).eq("status","pending").maybeSingle());
   if(!request)return send(409,{error:"Permintaan tidak tersedia atau sudah diproses."});
   if(a.action==="reject"){

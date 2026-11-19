@@ -4,6 +4,7 @@ import {z} from "zod";
 import {adminDb,checked,legacySite,legacySlugs} from "../server/mcp-admin-db.js";
 import {adminTools,allowed,isOperation,operationSchemas,operationCategory,scopes,saveDraftSchema} from "../server/mcp-admin.js";
 import {blankSite,prepareSite,siteDocumentSchema} from "../src/static/sites.js";
+import {createSiteFromTemplate,templateCatalog,type TemplateKey} from "../src/static/templateCatalog.js";
 import {findAdminPublication} from "./_supabase-publisher.js";
 
 type Req=IncomingMessage&{body?:unknown};
@@ -69,6 +70,8 @@ export default async function handler(req:Req,res:ServerResponse){
    const r=a.updated_at===null?await db.from("namina_admin_mcp_drafts").insert({slug,...values}).select("slug,updated_at").maybeSingle():await db.from("namina_admin_mcp_drafts").update(values).eq("slug",slug).eq("updated_at",a.updated_at).select("slug,updated_at").maybeSingle();
    return r.error||!r.data?content({error:"Draft changed or exists; reload"},true):content(r.data);
   }
+  if(tool.name==="list_templates")return content(templateCatalog.map(({id,name,description})=>({id,name,description})));
+  if(tool.name==="get_template")return content({document:await createSiteFromTemplate(String(input.slug),input.template as TemplateKey),warning:"Sample data only. Replace all identity, contacts and assets."});
   if(tool.name==="get_original_template")return content({document:blankSite(String(input.slug)),warning:"Sample data only. Replace all identity, contacts and assets."});
   if(tool.name==="list_partners"){
    const lo=Number(input.offset),hi=lo+Number(input.limit)-1;

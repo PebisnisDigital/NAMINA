@@ -131,7 +131,7 @@
 @keyframes family-magazine-loop{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes family-magazine-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(1deg)}}
 @media(max-width:760px){.family-site.family-gallery-site .family-stage{min-height:calc(100dvh - var(--family-nav-bottom) - 52px);padding:65px 0 16px}.family-magazine-card{width:clamp(200px,66vw,280px)}.family-magazine-photo{height:clamp(135px,28vh,260px)}.family-magazine-window{padding-block:12px}.family-editorial-heading h1{font-size:46px}.family-editorial-controls{gap:8px}}
-@media(prefers-reduced-motion:reduce){.family-magazine-window{overflow-x:auto;mask-image:none}.family-magazine-track{animation:none!important;transform:none!important}.family-magazine-group[aria-hidden="true"]{display:none}.family-magazine-card{animation:none!important;transition:none}.family-gallery-motion{display:none}}
+@media(prefers-reduced-motion:reduce){.family-magazine-card{transition:none}}
 
 
 /* Portrait PNGs retain their complete silhouette in each editorial card. */
@@ -141,3 +141,13 @@
 
 /* Continuous memory carousel: pause only by explicit control or photo preview. */
 @media(max-width:760px){.family-magazine-track{animation-duration:24s}}
+
+/* Explicit auto-play carousel; JS controls pixel movement and wrap, not CSS animations. */
+.family-site .family-draggable-gallery{width:100%;max-width:100%;min-width:0;overflow:hidden!important;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;overscroll-behavior-x:contain;scrollbar-width:none}
+.family-site .family-draggable-gallery::-webkit-scrollbar{display:none}
+.family-site .family-draggable-gallery:active{cursor:grabbing}
+.family-site .family-draggable-gallery .family-magazine-track{animation:none!important;display:flex;flex-wrap:nowrap;gap:0;width:max-content;max-width:none;will-change:transform}
+.family-site .family-draggable-gallery .family-magazine-group{display:flex!important;flex:0 0 auto;min-width:100vw;width:max-content;box-sizing:border-box}
+.family-site .family-draggable-gallery .family-magazine-card{cursor:inherit;animation:none!important}
+.family-site .family-draggable-gallery img{user-select:none;-webkit-user-drag:none}
+.family-site .family-editorial-controls .family-gallery-motion{display:inline-flex;align-items:center;justify-content:center;min-height:32px}

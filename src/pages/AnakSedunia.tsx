@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { NaminaLogo } from "../components/NaminaLogo";
 import "./anakSedunia.css";
 
@@ -60,13 +60,90 @@ function PageControls({page,total,onChange}:{page:number;total:number;onChange:(
  if(total<=1)return null;
  return <div className="family-pagination" aria-label="Halaman isi"><button aria-label="Sebelumnya" disabled={page===0} onClick={()=>onChange(page-1)}>‹</button><span aria-live="polite">{page+1} / {total}</span><button aria-label="Berikutnya" disabled={page>=total-1} onClick={()=>onChange(page+1)}>›</button></div>;
 }
+function MemoryCarousel({zoomed,onOpen}:{zoomed:boolean;onOpen:(src:string)=>void}){
+ const [paused,setPaused]=useState(false);
+ const viewport=useRef<HTMLDivElement|null>(null);
+ const track=useRef<HTMLDivElement|null>(null);
+ const group=useRef<HTMLDivElement|null>(null);
+ const offset=useRef(0);
+ const width=useRef(0);
+ const hold=useRef(0);
+ const stopped=useRef(false);
+ const drag=useRef<{id:number;x:number;start:number;moved:boolean}|null>(null);
+ const suppressClick=useRef(false);
+ function paint(){
+   if(!track.current||!width.current)return;
+   offset.current=((offset.current%width.current)+width.current)%width.current;
+   track.current.style.transform="translate3d("+(-width.current-offset.current)+"px,0,0)";
+ }
+ useEffect(()=>{stopped.current=paused||zoomed;},[paused,zoomed]);
+ useEffect(()=>{
+   const element=group.current;
+   if(!element)return;
+   const measure=()=>{width.current=element.getBoundingClientRect().width;paint();};
+   measure();
+   const observer=new ResizeObserver(measure);
+   observer.observe(element);
+   if(viewport.current)observer.observe(viewport.current);
+   let frame=0,last=performance.now();
+   const tick=(now:number)=>{
+     const dt=Math.min(50,Math.max(0,now-last))/1000;last=now;
+     if(!stopped.current&&!drag.current&&now>=hold.current&&width.current){
+       offset.current+=dt*(window.innerWidth<=760?48:58);
+       paint();
+     }
+     frame=requestAnimationFrame(tick);
+   };
+   frame=requestAnimationFrame(tick);
+   return()=>{cancelAnimationFrame(frame);observer.disconnect();};
+ },[]);
+ function pointerDown(e:ReactPointerEvent<HTMLDivElement>){
+   if(!e.isPrimary||e.button!==0)return;
+   suppressClick.current=false;
+   drag.current={id:e.pointerId,x:e.clientX,start:offset.current,moved:false};
+   const target=e.target instanceof Element?e.target.closest("button"):null;
+   (target||e.currentTarget).setPointerCapture(e.pointerId);
+ }
+ function pointerMove(e:ReactPointerEvent<HTMLDivElement>){
+   const d=drag.current;
+   if(!d||d.id!==e.pointerId)return;
+   const dx=e.clientX-d.x;
+   if(Math.abs(dx)>5)d.moved=true;
+   if(d.moved){suppressClick.current=true;offset.current=d.start-dx;paint();e.preventDefault();}
+ }
+ function pointerEnd(e:ReactPointerEvent<HTMLDivElement>){
+   if(drag.current?.id!==e.pointerId)return;
+   if(drag.current.moved)hold.current=performance.now()+700;
+   drag.current=null;
+ }
+ function nudge(direction:number){
+   offset.current+=direction*Math.min(330,(viewport.current?.clientWidth||330)*.7);
+   paint();hold.current=performance.now()+700;
+ }
+ return <>
+   <div ref={viewport} className="family-magazine-window family-draggable-gallery" role="region" aria-label="Galeri foto keluarga, geser ke kiri atau kanan"
+      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={pointerEnd}
+      onClickCapture={e=>{if(suppressClick.current&&e.detail!==0){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}
+      onWheel={e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){offset.current+=e.deltaX;paint();hold.current=performance.now()+700;}}}>
+     <div ref={track} className="family-magazine-track" style={{transform:"translate3d(0,0,0)"}}>
+       {[0,1,2].map(copy=><div ref={copy===0?group:undefined} className="family-magazine-group" key={copy} aria-hidden={copy!==1}>
+         {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?0:-1} onClick={()=>onOpen(galleryImageUrl(item.src))}>
+           <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>
+           <div className="family-magazine-photo" data-portrait={item.portrait}><img src={galleryImageUrl(item.src)} alt={item.title} decoding="async" draggable={false}/></div>
+           <div className="family-magazine-copy"><span className="family-magazine-tag">FAMILY MEMORIES</span><strong>{item.title}</strong><p>{item.detail}</p></div>
+         </button>)}
+       </div>)}
+     </div>
+   </div>
+   <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>nudge(-1)} aria-label="Geser foto ke kanan">‹</button><button type="button" className="family-gallery-motion" onClick={()=>setPaused(v=>!v)} aria-pressed={paused}>{paused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><button type="button" className="family-gallery-motion" onClick={()=>nudge(1)} aria-label="Geser foto ke kiri">›</button><span>Geser atau ketuk foto untuk memperbesar</span></div>
+ </>;
+}
 export function AnakSedunia(){
  const [stage,setStage]=useState<"loading"|"welcome"|"site">("loading");
  const [menu,setMenu]=useState<Menu>("anak1");
  const [zoom,setZoom]=useState<string|null>(null);
  const [page,setPage]=useState(0);
  const [pageSize,setPageSize]=useState(viewportPageSize);
- const [galleryPaused,setGalleryPaused]=useState(false);
  useEffect(()=>{const resize=()=>{setPageSize(viewportPageSize());setPage(0);};window.addEventListener("resize",resize);return()=>window.removeEventListener("resize",resize);},[]);
  const welcomeRef=useRef<HTMLVideoElement|null>(null);
  const [welcomeSound,setWelcomeSound]=useState(false);
@@ -187,18 +264,7 @@ export function AnakSedunia(){
    {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>{child.name}, di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-editorial-gallery">
       <div className="family-editorial-heading"><span className="family-kicker">ALBUM KELUARGA · LOVE LEGACY</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p></div>
-      <div className="family-magazine-window" data-single={family.gallery.length===1} data-paused={galleryPaused||Boolean(zoom)}>
-        <div className="family-magazine-track" >
-          {(family.gallery.length>1?[0,1]:[0]).map(copy=><div className="family-magazine-group" key={copy} aria-hidden={copy===1}>
-            {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?-1:0} onClick={()=>setZoom(galleryImageUrl(item.src))}>
-              <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>
-              <div className="family-magazine-photo" data-portrait={item.portrait}><img src={galleryImageUrl(item.src)} alt={copy===1?"":item.title} decoding="async"/></div>
-              <div className="family-magazine-copy"><span className="family-magazine-tag">FAMILY MEMORIES</span><strong>{item.title}</strong><p>{item.detail}</p></div>
-            </button>)}
-          </div>)}
-        </div>
-      </div>
-      <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>setGalleryPaused(v=>!v)} aria-pressed={galleryPaused}>{galleryPaused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><span>Ketuk foto untuk memperbesar</span></div>
+      <MemoryCarousel zoomed={Boolean(zoom)} onOpen={setZoom}/>
     </div>
    :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Anak-anakku, meski kalian telah dewasa, doa Papa dan Mama tak pernah berhenti menyertai setiap langkah kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin. — Papa &amp; Mama</span></div></div>}
   </section>

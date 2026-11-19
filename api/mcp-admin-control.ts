@@ -76,7 +76,9 @@ export default async function handler(req:Req,res:ServerResponse){
     if(!draft)throw Error("Draft changed");
     const document=siteDocumentSchema.parse(draft.document);
     const sha=await publishAdminToDatabase(document,draft.base_sha,async()=>(await legacySite(p.slug))?.sha??null);
-    result={sha,url:"https://namina.biz.id/"+p.slug};
+    // Advance the saved draft baseline only if it has not changed during publication.
+    const advanced=await db.from("namina_admin_mcp_drafts").update({base_sha:sha,updated_at:new Date().toISOString()}).eq("slug",p.slug).eq("updated_at",p.updated_at);
+    result={sha,url:"https://namina.biz.id/"+p.slug,draft_baseline_updated:!advanced.error};
    }else if(operation==="create_partner_website"||operation==="update_partner_website"){
     const p=operation==="create_partner_website"?operationSchemas.create_partner_website.parse(payload.data):operationSchemas.update_partner_website.parse(payload.data);
     const document=siteDocumentSchema.parse(prepareSite(p.document));
@@ -86,6 +88,11 @@ export default async function handler(req:Req,res:ServerResponse){
     if(changed.error||!changed.data)throw Error("Partner draft change rejected");
     result={...changed.data,workspace_id:p.workspace_id};
    }else if(request.operation==="create_partner"||request.operation==="rotate_link"||request.operation==="revoke_link"){
+    if(operation==="create_partner"){
+     const p=operationSchemas.create_partner.parse(payload.data);
+     const profile=checked(await db.from("namana_profiles").select("user_id").eq("email",p.email.trim().toLowerCase()).maybeSingle());
+     if(profile&&checked(await db.from("namina_business_workspaces").select("id").eq("owner_id",profile.user_id).maybeSingle()))throw Error("Partner exists; use edit or rotate");
+    }
     const body=request.operation==="create_partner"?{action:"create",...operationSchemas.create_partner.parse(payload.data)}:{action:request.operation==="rotate_link"?"rotate":"revoke",workspaceId:operationSchemas.rotate_link.parse(payload.data).workspace_id};
     const url=process.env.VITE_SUPABASE_URL!;
     const response=await fetch(url+"/functions/v1/namina-business-magic-link",{method:"POST",headers:{Authorization:"Bearer "+bearer,apikey:process.env.VITE_SUPABASE_PUBLISHABLE_KEY||process.env.VITE_SUPABASE_ANON_KEY||"",Origin:"https://namina.biz.id","Content-Type":"application/json"},body:JSON.stringify(body)});

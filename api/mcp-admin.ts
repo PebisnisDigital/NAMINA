@@ -3,7 +3,7 @@ import {createHash} from "node:crypto";
 import {z} from "zod";
 import {adminDb,checked,legacySite,legacySlugs} from "../server/mcp-admin-db.js";
 import {adminTools,allowed,isOperation,operationSchemas,operationCategory,scopes,saveDraftSchema} from "../server/mcp-admin.js";
-import {prepareSite,siteDocumentSchema} from "../src/static/sites.js";
+import {blankSite,prepareSite,siteDocumentSchema} from "../src/static/sites.js";
 import {findAdminPublication} from "./_supabase-publisher.js";
 
 type Req=IncomingMessage&{body?:unknown};
@@ -69,6 +69,7 @@ export default async function handler(req:Req,res:ServerResponse){
    const r=a.updated_at===null?await db.from("namina_admin_mcp_drafts").insert({slug,...values}).select("slug,updated_at").maybeSingle():await db.from("namina_admin_mcp_drafts").update(values).eq("slug",slug).eq("updated_at",a.updated_at).select("slug,updated_at").maybeSingle();
    return r.error||!r.data?content({error:"Draft changed or exists; reload"},true):content(r.data);
   }
+  if(tool.name==="get_original_template")return content({document:blankSite(String(input.slug)),warning:"Sample data only. Replace all identity, contacts and assets."});
   if(tool.name==="list_partners"){
    const lo=Number(input.offset),hi=lo+Number(input.limit)-1;
    return content(checked(await db.from("namina_business_workspaces").select("id,display_name,whatsapp_number,subscription_status,max_sites,current_period_end,updated_at").order("created_at",{ascending:false}).range(lo,hi)));
@@ -79,6 +80,7 @@ export default async function handler(req:Req,res:ServerResponse){
   }
   if(isOperation(tool.name)&&allowed(scope.data,operationCategory(tool.name))){
    const payload=operationSchemas[tool.name].parse(input);
+   if(Buffer.byteLength(JSON.stringify(payload))>245000)return content({error:"Payload too large"},true);
    if(tool.name==="publish"){
     const a=operationSchemas.publish.parse(payload);
     const draft=checked(await db.from("namina_admin_mcp_drafts").select("slug").eq("slug",a.slug).eq("updated_at",a.updated_at).maybeSingle());

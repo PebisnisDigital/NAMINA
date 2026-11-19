@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AnakSedunia } from "./pages/AnakSedunia";
 import { Legal } from "./pages/Landing";
 import { IntroLanding } from "./pages/IntroLanding";
 import { StudioV2 } from "./pages/StudioV2";
@@ -30,6 +31,7 @@ function App() {
   const demoTheme = getDemoTheme(path.slice(1));
   let page;
   if (path === "/") page = <IntroLanding />;
+  else if (path === "/anaksedunia") page = <AnakSedunia />;
   else if (path === "/dokter") page = <DoctorSite />;
   else if (path === "/chibi") page = <ChibiSite />;
   else if (path === "/wedding") page = <WeddingSite />;

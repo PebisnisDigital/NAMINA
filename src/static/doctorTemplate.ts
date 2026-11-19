@@ -1,5 +1,5 @@
-import { siteDocumentSchema, cloneViniTemplate, type SiteDocument } from "./sites";
-import { originalStyleDefaults } from "./originalStyle";
+import { siteDocumentSchema, cloneViniTemplate, type SiteDocument } from "./sites.js";
+import { originalStyleDefaults } from "./originalStyle.js";
 
 /** Appearance tokens only. The /vini layout, content and media never change. */
 const medicalSkin = {

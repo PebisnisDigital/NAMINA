@@ -21,7 +21,13 @@ const family = {
     ["Rezeki", "Semoga usaha dan kerja kerasmu berbuah rezeki yang halal serta berkah."],
     ["Akhlak", "Jadilah pribadi saleh, jujur, penyayang, dan bermanfaat bagi sesama."]
   ] },
-  gallery: [{src: photo, title: "Masa kecil bersama Mama", detail: "Kenangan sederhana yang selalu hangat di hati."}]
+  gallery: [
+    {"src":"https://www.dropbox.com/scl/fi/9ftptfd79dd4w60680pm1/Smiling-Man-in-Beige-Suit-with-Rabbit-Patterned-Tie.png?rlkey=i5gw7dgnz9zswcizkg7w3whwe&raw=1","title":"Papa","detail":"Teladan kasih dan kekuatan dalam keluarga.","portrait":true},
+    {"src":"https://www.dropbox.com/scl/fi/md2f7pvlz7jdg8gm4q7s2/Elegant-Mother-with-Blush-Bouquet.png?rlkey=jsk2k1dk7qry318gjykff4k0x&raw=1","title":"Mama","detail":"Pelukan hangat dan doa yang tidak pernah putus.","portrait":true},
+    {"src":"https://www.dropbox.com/scl/fi/mcv63ju006jnl1fylrz6r/Traditional-Batik-Clad-Man-Portrait.png?rlkey=5bzdf4pep9as8rxqcdi1bz23o&raw=1","title":"Anak Pertama","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
+    {"src":"https://www.dropbox.com/scl/fi/obkp3ng9f6kvwt7qtvf84/Full-Body-Teal-Uniform-Portrait.png?rlkey=wmsvtkjkmma1ek9a645enlkbs&raw=1","title":"Anak Kedua","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
+    {src: photo, title: "Masa kecil bersama Mama", detail: "Kenangan sederhana yang selalu hangat di hati.", portrait: false}
+  ]
 };
 const menus = [
   {id:"anak1", title: "Anak 1", sub:"Profil, perjalanan & doa", icon:"♙"},
@@ -186,7 +192,7 @@ export function AnakSedunia(){
           {(family.gallery.length>1?[0,1]:[0]).map(copy=><div className="family-magazine-group" key={copy} aria-hidden={copy===1}>
             {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?-1:0} onClick={()=>setZoom(galleryImageUrl(item.src))}>
               <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>
-              <div className="family-magazine-photo"><img src={galleryImageUrl(item.src)} alt={copy===1?"":item.title} decoding="async"/></div>
+              <div className="family-magazine-photo" data-portrait={item.portrait}><img src={galleryImageUrl(item.src)} alt={copy===1?"":item.title} decoding="async"/></div>
               <div className="family-magazine-copy"><span className="family-magazine-tag">FAMILY MEMORIES</span><strong>{item.title}</strong><p>{item.detail}</p></div>
             </button>)}
           </div>)}

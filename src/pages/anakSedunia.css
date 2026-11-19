@@ -132,3 +132,9 @@
 @keyframes family-magazine-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(1deg)}}
 @media(max-width:760px){.family-site.family-gallery-site .family-stage{min-height:calc(100dvh - var(--family-nav-bottom) - 52px);padding:65px 0 16px}.family-magazine-card{width:clamp(200px,66vw,280px)}.family-magazine-photo{height:clamp(135px,28vh,260px)}.family-magazine-window{padding-block:12px}.family-editorial-heading h1{font-size:46px}.family-editorial-controls{gap:8px}}
 @media(prefers-reduced-motion:reduce){.family-magazine-window{overflow-x:auto;mask-image:none}.family-magazine-track{animation:none!important;transform:none!important}.family-magazine-group[aria-hidden="true"]{display:none}.family-magazine-card{animation:none!important;transition:none}.family-gallery-motion{display:none}}
+
+
+/* Portrait PNGs retain their complete silhouette in each editorial card. */
+.family-magazine-photo[data-portrait="true"]{background:radial-gradient(ellipse at 50% 40%,#fff4e3,#cebca5)}
+.family-magazine-photo[data-portrait="true"] img{object-fit:contain;object-position:center bottom}
+.family-lightbox img{background:radial-gradient(ellipse at center,#e5d4be,#a99680);border-radius:4px}

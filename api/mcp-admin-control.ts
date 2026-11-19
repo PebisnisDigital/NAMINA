@@ -2,7 +2,7 @@ import type {IncomingMessage,ServerResponse} from "node:http";
 import {createHash,randomBytes} from "node:crypto";
 import {adminDb,userDb,checked,legacySite} from "../server/mcp-admin-db.js";
 import {keySchema,isOperation,operationSchemas,operationCategory,allowed,scopes} from "../server/mcp-admin.js";
-import {siteDocumentSchema} from "../src/static/sites.js";
+import {prepareSite,siteDocumentSchema} from "../src/static/sites.js";
 import {publishAdminToDatabase} from "./_supabase-publisher.js";
 type Req=IncomingMessage&{body?:unknown};
 export default async function handler(req:Req,res:ServerResponse){
@@ -57,12 +57,13 @@ export default async function handler(req:Req,res:ServerResponse){
    const rejected=checked(await db.from("namina_admin_mcp_requests").update({status:"rejected",decision_at:new Date().toISOString(),approved_by:owner}).eq("id",a.id).eq("owner_id",owner).eq("status","pending").select("id").maybeSingle());
    return send(rejected?200:409,rejected?{status:"rejected"}:{error:"Permintaan sudah diproses."});
   }
-  if(a.action!=="approve"||!isOperation(request.operation))return send(400,{error:"Aksi tidak valid."});
+  const operation:unknown=request.operation;
+  if(a.action!=="approve"||!isOperation(operation))return send(400,{error:"Aksi tidak valid."});
   if(Date.now()-new Date(request.created_at).getTime()>86400000)return send(409,{error:"Permintaan kedaluwarsa. Minta agent membuat permintaan baru."});
   const agent=checked(await db.from("namina_admin_mcp_keys").select("scope").eq("id",request.key_id).eq("owner_id",owner).is("revoked_at",null).gt("expires_at",new Date().toISOString()).maybeSingle());
   const scope=scopes.safeParse(agent?.scope);
-  if(!scope.success||!allowed(scope.data,operationCategory(request.operation)))return send(403,{error:"Akses agent sudah tidak berlaku."});
-  const payload=operationSchemas[request.operation].safeParse(request.payload);
+  if(!scope.success||!allowed(scope.data,operationCategory(operation)))return send(403,{error:"Akses agent sudah tidak berlaku."});
+  const payload=operationSchemas[operation].safeParse(request.payload);
   if(!payload.success)return send(400,{error:"Isi permintaan tidak valid."});
   const claim=checked(await db.from("namina_admin_mcp_requests").update({status:"running",decision_at:new Date().toISOString(),approved_by:owner}).eq("id",a.id).eq("owner_id",owner).eq("status","pending").select("id").maybeSingle());
   if(!claim)return send(409,{error:"Permintaan sudah diproses."});
@@ -76,6 +77,13 @@ export default async function handler(req:Req,res:ServerResponse){
     const document=siteDocumentSchema.parse(draft.document);
     const sha=await publishAdminToDatabase(document,draft.base_sha,async()=>(await legacySite(p.slug))?.sha??null);
     result={sha,url:"https://namina.biz.id/"+p.slug};
+   }else if(operation==="create_partner_website"||operation==="update_partner_website"){
+    const p=operation==="create_partner_website"?operationSchemas.create_partner_website.parse(payload.data):operationSchemas.update_partner_website.parse(payload.data);
+    const document=siteDocumentSchema.parse(prepareSite(p.document));
+    if(Buffer.byteLength(JSON.stringify(document))>245000)throw Error("Document too large");
+    const changed="id" in p?await db.from("namina_business_sites").update({document,updated_at:new Date().toISOString()}).eq("workspace_id",p.workspace_id).eq("id",p.id).eq("slug",document.slug).eq("updated_at",p.updated_at).select("id,slug,updated_at").maybeSingle():await db.from("namina_business_sites").insert({workspace_id:p.workspace_id,slug:document.slug,document}).select("id,slug,updated_at").single();
+    if(changed.error||!changed.data)throw Error("Partner draft change rejected");
+    result={...changed.data,workspace_id:p.workspace_id};
    }else if(request.operation==="create_partner"||request.operation==="rotate_link"||request.operation==="revoke_link"){
     const body=request.operation==="create_partner"?{action:"create",...operationSchemas.create_partner.parse(payload.data)}:{action:request.operation==="rotate_link"?"rotate":"revoke",workspaceId:operationSchemas.rotate_link.parse(payload.data).workspace_id};
     const url=process.env.VITE_SUPABASE_URL!;

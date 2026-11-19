@@ -9,29 +9,29 @@ const family = {
   welcomeVideo: "https://www.dropbox.com/scl/fi/qv98rguh4by66dwmze5wz/Family_embracing_in_golden_light_f6b10c09_1080p.mp4?rlkey=a03r5a4s8cwo6hw0nbrmdzfuv&raw=1",
   doaVideo: "https://www.dropbox.com/scl/fi/0thyx9dydjilp2lnb78zj/Family_portrait_video_creation_49f27e46_1080p.mp4?rlkey=fns406p8c0ixjm3nr372jsm3f&raw=1",
   doaPoster: photo,
-  anak1: { name: "Anak Pertama", job: "", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
+  anak1: { name: "Edo", job: "Auditor di Direktorat Jenderal Pajak", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
     ["Kesehatan", "Semoga Allah menjaga kesehatan dan memberi kekuatan di setiap langkahmu."],
-    ["Karier", "Semoga pekerjaanmu dimudahkan, ilmu dan kemampuanmu terus berkembang."],
+    ["Karier", "Semoga Allah memudahkan tugasmu sebagai auditor, menjaga integritasmu, dan memberkahi setiap pengabdianmu."],
     ["Rezeki", "Semoga setiap ikhtiar membuahkan rezeki halal, luas, dan berkah."],
     ["Akhlak", "Tetap rendah hati, saleh, dan membawa manfaat bagi orang di sekitarmu."]
   ] },
-  anak2: { name: "Anak Kedua", job: "", video: "https://www.dropbox.com/scl/fi/7phcb70wixrl9hq8blxwp/Man_walking_forward_5f8cf8ab_1080p.mp4?rlkey=vwxgme7rm30hoi181tbpm8yzw&raw=1", poster: "", prayers: [
+  anak2: { name: "Yuda", job: "TNI", video: "https://www.dropbox.com/scl/fi/7phcb70wixrl9hq8blxwp/Man_walking_forward_5f8cf8ab_1080p.mp4?rlkey=vwxgme7rm30hoi181tbpm8yzw&raw=1", poster: "", prayers: [
     ["Kesehatan", "Semoga selalu sehat, bahagia, dan dilindungi Allah di mana pun berada."],
-    ["Karier", "Semoga setiap tanggung jawab dan cita-cita mendapat jalan terbaik."],
+    ["Karier", "Semoga Allah melindungimu dalam setiap penugasan, menguatkan keberanianmu, dan memberkahimu dalam pengabdian kepada bangsa."],
     ["Rezeki", "Semoga usaha dan kerja kerasmu berbuah rezeki yang halal serta berkah."],
     ["Akhlak", "Jadilah pribadi saleh, jujur, penyayang, dan bermanfaat bagi sesama."]
   ] },
   gallery: [
     {"src":"https://www.dropbox.com/scl/fi/9ftptfd79dd4w60680pm1/Smiling-Man-in-Beige-Suit-with-Rabbit-Patterned-Tie.png?rlkey=i5gw7dgnz9zswcizkg7w3whwe&raw=1","title":"Papa","detail":"Teladan kasih dan kekuatan dalam keluarga.","portrait":true},
     {"src":"https://www.dropbox.com/scl/fi/md2f7pvlz7jdg8gm4q7s2/Elegant-Mother-with-Blush-Bouquet.png?rlkey=jsk2k1dk7qry318gjykff4k0x&raw=1","title":"Mama","detail":"Pelukan hangat dan doa yang tidak pernah putus.","portrait":true},
-    {"src":"https://www.dropbox.com/scl/fi/mcv63ju006jnl1fylrz6r/Traditional-Batik-Clad-Man-Portrait.png?rlkey=5bzdf4pep9as8rxqcdi1bz23o&raw=1","title":"Anak Pertama","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
-    {"src":"https://www.dropbox.com/scl/fi/obkp3ng9f6kvwt7qtvf84/Full-Body-Teal-Uniform-Portrait.png?rlkey=wmsvtkjkmma1ek9a645enlkbs&raw=1","title":"Anak Kedua","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
+    {"src":"https://www.dropbox.com/scl/fi/mcv63ju006jnl1fylrz6r/Traditional-Batik-Clad-Man-Portrait.png?rlkey=5bzdf4pep9as8rxqcdi1bz23o&raw=1","title":"Edo","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
+    {"src":"https://www.dropbox.com/scl/fi/obkp3ng9f6kvwt7qtvf84/Full-Body-Teal-Uniform-Portrait.png?rlkey=wmsvtkjkmma1ek9a645enlkbs&raw=1","title":"Yuda","detail":"Putra tercinta, kebanggaan Papa dan Mama.","portrait":true},
     {src: photo, title: "Masa kecil bersama Mama", detail: "Kenangan sederhana yang selalu hangat di hati.", portrait: false}
   ]
 };
 const menus = [
-  {id:"anak1", title: "Anak 1", sub:"Profil, perjalanan & doa", icon:"♙"},
-  {id:"anak2", title: "Anak 2", sub:"Profil, perjalanan & doa", icon:"♙"},
+  {id:"anak1", title: "Edo", sub:"Profil, perjalanan & doa", icon:"♙"},
+  {id:"anak2", title: "Yuda", sub:"Profil, perjalanan & doa", icon:"♙"},
   {id:"doa", title: "Doa", sub:"Hari ini dan selamanya", icon:"♡"},
   {id:"kenangan", title: "Kenangan", sub:"Galeri perjalanan keluarga", icon:"▧"}
 ] as const;
@@ -156,7 +156,7 @@ export function AnakSedunia(){
    setProgress(0);setLoadNotice(false);setWelcomeSound(false);setWelcomeFailed(false);setStage("loading");setMenu("anak1");setPage(0);
  }
  const child=menu==="anak1"?family.anak1:menu==="anak2"?family.anak2:null;
- const label=menus.find(item=>item.id===menu)?.title||"Anak 1";
+ const label=menus.find(item=>item.id===menu)?.title||"Edo";
  const cinematic=Boolean(child)||menu==="doa";
  const pageTotal=Math.ceil(4/pageSize);
 
@@ -184,7 +184,7 @@ export function AnakSedunia(){
   </div>:stage==="site"?<>
   <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
-   {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>Di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
+   {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>{child.name}, di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-editorial-gallery">
       <div className="family-editorial-heading"><span className="family-kicker">ALBUM KELUARGA · LOVE LEGACY</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p></div>
       <div className="family-magazine-window" data-single={family.gallery.length===1} data-paused={galleryPaused||Boolean(zoom)}>

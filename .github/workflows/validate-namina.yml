@@ -18,7 +18,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: npx tsx --test tests/vini-template.test.ts tests/mobile-video-preview.test.ts tests/admin-publish-no-deploy.test.ts tests/video-studio-upload.test.ts tests/wedding2-design.test.ts tests/template-catalog.test.ts tests/mcp-preview.test.ts tests/mcp-key-isolation.test.ts tests/mcp-oauth.test.ts
+      - run: npx tsx --test tests/vini-template.test.ts tests/mobile-video-preview.test.ts tests/admin-publish-no-deploy.test.ts tests/video-studio-upload.test.ts tests/wedding2-design.test.ts tests/template-catalog.test.ts tests/mcp-preview.test.ts tests/mcp-key-isolation.test.ts tests/mcp-oauth.test.ts tests/mcp-admin.test.ts
       - run: npm run build
 
   studio-template-browser:

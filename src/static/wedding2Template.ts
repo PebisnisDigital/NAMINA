@@ -1,6 +1,6 @@
-import { createWeddingTemplate } from "./weddingTemplate";
-import { siteDocumentSchema, type SiteDocument } from "./sites";
-import { defaultWeddingDesign } from "./weddingDesign";
+import { createWeddingTemplate } from "./weddingTemplate.js";
+import { siteDocumentSchema, type SiteDocument } from "./sites.js";
+import { defaultWeddingDesign } from "./weddingDesign.js";
 
 /** Independent Living Paper wedding sample. All personal data and venues are fictional. */
 export function createWedding2Template(slug: string): SiteDocument {

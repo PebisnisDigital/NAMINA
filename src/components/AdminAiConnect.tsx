@@ -8,7 +8,7 @@ async function call(body:object){
  const r=await fetch("/api/mcp-admin-control",{method:"POST",cache:"no-store",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify(body)});
  const data=await r.json();if(!r.ok)throw Error(data.error||"Permintaan gagal.");return data;
 }
-const labels:Record<string,string>={publish:"Publikasikan website",create_partner:"Tambah mitra",edit_partner:"Edit mitra",extend_partner:"Aktifkan / perpanjang mitra",rotate_link:"Ganti Magic Link",revoke_link:"Cabut Magic Link",revoke_partner_mcp:"Cabut MCP mitra",set_partner_quota:"Ubah kuota"};
+const labels:Record<string,string>={create_partner_website:"Buat website mitra",update_partner_website:"Edit website mitra",publish:"Publikasikan website",create_partner:"Tambah mitra",edit_partner:"Edit mitra",extend_partner:"Aktifkan / perpanjang mitra",rotate_link:"Ganti Magic Link",revoke_link:"Cabut Magic Link",revoke_partner_mcp:"Cabut MCP mitra",set_partner_quota:"Ubah kuota"};
 export function AdminAiConnect({onChanged}:{onChanged:()=>Promise<void>}){
  const [keys,setKeys]=useState<Key[]|null>(null),[requests,setRequests]=useState<RequestRow[]>([]);
  const [name,setName]=useState("Hermes"),[scope,setScope]=useState("websites"),[secret,setSecret]=useState(""),[privateLink,setPrivateLink]=useState("");

@@ -30,3 +30,38 @@
 @media(max-height:690px) and (min-width:761px){.family-fullscreen .family-header{padding-block:8px}.family-scene-content{padding-block:12px}.family-scene-content h1{font-size:clamp(30px,5vw,56px)}.family-scene-content .family-copy{gap:9px}.family-scene-content .family-points{margin-top:5px}.family-scene-content p{font-size:14px}}
 @media(max-height:440px){.family-fullscreen .family-header{padding-block:4px}.family-fullscreen .family-brand{font-size:16px!important}.family-fullscreen .family-header nav button{padding-block:4px}.family-scene-content{padding-block:7px}.family-scene-content .family-copy{gap:5px}.family-scene-content h1{font-size:clamp(23px,5vw,38px)}.family-scene-content .family-kicker{padding:4px 9px}.family-scene-content p{font-size:12px;line-height:1.35}.family-scene-content .family-points{grid-template-columns:1fr;margin-top:1px}.family-pagination button{height:27px}.family-scene-content .family-sign{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.family-scene video,.family-scene img,.family-scene-content{animation:none}}
+
+
+/* Transparent overlay navigation, with a persistent four-tab mobile bar. */
+.family-site{--family-nav-bottom:0px}
+.family-site.family-fullscreen{display:block;height:100vh;height:100dvh;min-height:0;overflow:hidden}
+.family-site .family-header{position:absolute;inset:0 0 auto;z-index:10;background:transparent;border:0;padding:clamp(12px,2.3vh,24px) clamp(20px,7.8vw,140px);pointer-events:none;min-width:0;align-items:center;flex-direction:row}
+.family-site .family-header .family-brand,.family-site .family-header nav{pointer-events:auto}
+.family-site .family-header .family-brand,.family-site .family-header nav button{text-shadow:0 1px 7px #000b}
+.family-site .family-header nav{width:auto;display:flex;gap:8px;overflow:visible}
+.family-site .family-header nav button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 16px;background:transparent}
+.family-site .family-header nav button[aria-current]{background:#d0a86424;border-color:#d8b575}
+.family-nav-icon{display:grid;place-items:center;flex-shrink:0}
+.family-nav-icon svg{width:17px;height:17px;display:block}
+.family-site.family-fullscreen .family-stage{height:100%;width:100%;padding:0;min-height:0}
+.family-site .family-scene-content{padding-top:clamp(78px,12vh,120px)}
+.family-site .family-scene img{width:100%;height:100%;object-position:75% center}
+.family-site .family-scene video{width:100%;height:100%}
+.family-site.family-gallery-site .family-stage{padding-top:100px}
+@media(max-width:760px){
+.family-site{--family-nav-bottom:calc(67px + env(safe-area-inset-bottom,0px))}
+.family-site .family-header{padding:14px 18px;align-items:flex-start;flex-direction:row;gap:0}
+.family-site .family-header .family-brand{font-size:18px!important}
+.family-site .family-header nav{position:fixed;bottom:0;left:0;right:0;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:5px 10px calc(7px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#08090d00,#08090d80 36%,#08090db3);border:0;z-index:20}
+.family-site .family-header nav button{margin:0;min-width:0;min-height:55px;flex-direction:column;gap:5px;padding:5px 2px;font-size:11px!important;line-height:1.15;white-space:normal;border-radius:11px}
+.family-site .family-header nav button[aria-current]{background:#d0a86420;border-color:#d8b57566;color:#ffe1a5}
+.family-nav-icon svg{width:21px;height:21px}
+.family-site .family-scene-content{padding:52px 18px calc(var(--family-nav-bottom) + 14px);align-items:end}
+.family-site .family-scene img,.family-site .family-scene video{height:100%;width:100%}
+.family-site .family-scene-shade{background:linear-gradient(0deg,#08090deb 3%,#08090dce 20%,#08090d70 43%,#08090d08 73%),linear-gradient(90deg,#08090d20,transparent)}
+.family-site.family-gallery-site .family-stage{padding-top:68px}
+.family-site.family-gallery-site{padding-bottom:var(--family-nav-bottom)}
+.family-site .family-header nav button:focus-visible{outline-offset:-2px}
+}
+@media(max-height:440px) and (min-width:761px){.family-site .family-header{padding:6px 20px}.family-site .family-scene-content{padding-top:54px}.family-site .family-header nav button{min-height:32px;padding:5px 10px}}
+@media(max-height:560px) and (max-width:760px){.family-site{--family-nav-bottom:calc(53px + env(safe-area-inset-bottom,0px))}.family-site .family-header nav button{min-height:42px;gap:2px}.family-nav-icon svg{width:17px;height:17px}.family-site .family-scene-content{padding-top:38px;padding-bottom:calc(var(--family-nav-bottom) + 7px)}}

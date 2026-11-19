@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { businessClient, type BusinessWorkspace } from "../business/client";
 import "../business.css";
+import { AdminAiConnect } from "../components/AdminAiConnect";
 
 type Partner = BusinessWorkspace & { sites?: number; whatsapp_number?: string };
 type PrivateLink = { link: string; name: string; email: string; whatsapp: string; workspaceId: string };
@@ -200,6 +201,7 @@ export function BusinessAdmin() {
           <button type="button" className="business__primary" onClick={() => void logOut()}>Ganti Akun</button>
         </section>
       : <>
+          <AdminAiConnect onChanged={refresh}/>
           <section className="business__section">
             <div className="business__section-head"><h2>+ Tambah Mitra Baru</h2><span>Pendaftaran lewat WA</span></div>
             <form className="business__invite-form" onSubmit={(e) => { e.preventDefault(); void issueLink("create"); }}>

@@ -395,13 +395,16 @@ export function StudioV2() {
 
   const setAppearance = (presentation: TemplateKey) => {
     if (!site || working) return;
-    setSite(current => {
-      if (!current) return null;
-      const next = switchSiteTemplate(current, presentation);
+    try {
+      const next = switchSiteTemplate(site, presentation);
       try { localStorage.setItem(draftKey(next.slug), JSON.stringify(next)); }
       catch { /* Draft stays editable in this Studio session. */ }
-      return next;
-    });
+      setSite(next);
+    } catch (cause) {
+      setError("Template gagal dimuat: " + (cause instanceof Error ? cause.message : String(cause)));
+      setTemplateOpen(false);
+      return;
+    }
     setScreen(presentation === "wedding2" ? "mobile" : "desktop");
     sendFrame({ type: "WEDDING2_STAGE", stage: "page" });
     setWeddingSelection("");

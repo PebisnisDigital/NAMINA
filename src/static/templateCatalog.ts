@@ -4,6 +4,7 @@ import { createWeddingTemplate } from "./weddingTemplate.js";
 import { createWedding2Template } from "./wedding2Template.js";
 import { createFamilyTemplate } from "./familyTemplate.js";
 import { defaultFamilyDesign } from "./familyDesign.js";
+import { createFamilySample } from "./familySample.js";
 import { blankSite, loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites.js";
 
 export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2" | "hari-anak-sedunia";
@@ -86,7 +87,7 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
     case "chibi": return setChibiAppearance(site);
     case "wedding": return setWeddingAppearance(site);
     case "wedding2": return siteDocumentSchema.parse({ ...setWeddingAppearance(site), presentation: "wedding2" });
-    case "hari-anak-sedunia": return siteDocumentSchema.parse({...site,presentation:id,familyDesign:site.familyDesign||defaultFamilyDesign()});
+    case "hari-anak-sedunia": return siteDocumentSchema.parse({...site,presentation:id,familyDesign:site.familyDesign||createFamilySample()});
     case "original": return setOriginalAppearance(site);
     case "original-white": return setOriginalWhiteAppearance(site);
   }
@@ -101,7 +102,11 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
  */
 export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDocument {
   const current = selectedTemplate(site);
-  if (current === id) return siteDocumentSchema.parse(structuredClone(site));
+  if (current === id) {
+    const copy=structuredClone(site);
+    if(id==="hari-anak-sedunia"&&(!copy.familyDesign||JSON.stringify(copy.familyDesign)===JSON.stringify(defaultFamilyDesign())))copy.familyDesign=createFamilySample();
+    return siteDocumentSchema.parse(copy);
+  }
   const snapshot = (source: SiteDocument) => siteTemplateSnapshotSchema.parse({
     presentation: source.presentation,
     content: structuredClone(source.content),
@@ -114,6 +119,7 @@ export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDoc
     const archives={...site.templateSnapshots,[category(current)]:snapshot(site)};
     const stored=archives[category(id)];
     const target=stored?siteDocumentSchema.parse({...structuredClone(stored),slug:site.slug}):id==="hari-anak-sedunia"?createFamilyTemplate(site.slug):id==="wedding2"?createWedding2Template(site.slug):blankSite(site.slug);
+    if(id==="hari-anak-sedunia"&&(!target.familyDesign||JSON.stringify(target.familyDesign)===JSON.stringify(defaultFamilyDesign())))target.familyDesign=createFamilySample();
     const next=id==="hari-anak-sedunia"||id==="wedding2"?target:applySiteAppearance(target,id);
     return siteDocumentSchema.parse({...next,templateSnapshots:archives});
   }

@@ -400,7 +400,7 @@ export function BusinessVisualStudio() {
        onChange={change} onStageChange={stage=>send({type:"WEDDING2_STAGE",stage})}/>}
     {templateOpen&&site&&<StudioTemplateDialog value={selectedTemplate(site)}
       onChange={id=>{
-        setSite(current=>current?switchSiteTemplate(current,id):null);
+        try {setSite(switchSiteTemplate(site,id));} catch(cause){setError("Template gagal dimuat: "+(cause instanceof Error?cause.message:String(cause)));setTemplateOpen(false);return;}
         setMobile(id==="wedding2");
         send({type:"WEDDING2_STAGE",stage:"page"});
         setWeddingSelection("");

@@ -7,7 +7,7 @@ const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
 const family = {
   welcomeVideo: "https://www.dropbox.com/scl/fi/qv98rguh4by66dwmze5wz/Family_embracing_in_golden_light_f6b10c09_1080p.mp4?rlkey=a03r5a4s8cwo6hw0nbrmdzfuv&raw=1",
-  doaVideo: "",
+  doaVideo: "https://www.dropbox.com/scl/fi/0thyx9dydjilp2lnb78zj/Family_portrait_video_creation_49f27e46_1080p.mp4?rlkey=fns406p8c0ixjm3nr372jsm3f&raw=1",
   doaPoster: photo,
   anak1: { name: "Anak Pertama", job: "", video: "https://www.dropbox.com/scl/fi/ttprcuzss21fqbn5xxc6m/Man_walking_toward_camera_48834515_1080p.mp4?rlkey=nubc6859t0oacsdw8rfsmi7yw&raw=1", poster: "", prayers: [
     ["Kesehatan", "Semoga Allah menjaga kesehatan dan memberi kekuatan di setiap langkahmu."],
@@ -30,10 +30,10 @@ const menus = [
   {id:"kenangan", title: "Kenangan", sub:"Galeri perjalanan keluarga", icon:"▧"}
 ] as const;
 const prayers = [
-  ["Sehat & bahagia","Semoga Allah menjaga tubuh, hati, dan pikiran kalian."],
-  ["Sukses dalam karier","Semoga setiap usaha dan cita-cita dimudahkan."],
-  ["Rezeki penuh berkah","Semoga rezeki halal, luas, dan bermanfaat selalu menyertai."],
-  ["Anak yang saleh","Semoga selalu dekat dengan Allah, rendah hati, dan membawa kebaikan."]
+  ["Sehat dalam lindungan-Nya","Ya Allah, jagalah kedua putra kami. Sehatkan tubuh dan hati mereka, lindungi setiap langkahnya."],
+  ["Karier yang penuh berkah","Mudahkan setiap tugas dan perjuangan mereka. Jadikan keberhasilannya jalan untuk berbuat baik."],
+  ["Rezeki & kebahagiaan","Limpahkan rezeki yang halal, berkah, dan cukup. Hadirkan ketenangan serta kebahagiaan dalam hidup mereka."],
+  ["Putra yang saleh","Teguhkan iman mereka, lembutkan hatinya, dan jadikan mereka anak yang saleh serta bermanfaat bagi sesama."]
 ];
 function galleryImageUrl(value:string){
   try{
@@ -194,7 +194,7 @@ export function AnakSedunia(){
       </div>
       <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>setGalleryPaused(v=>!v)} aria-pressed={galleryPaused}>{galleryPaused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><span>Ketuk foto untuk memperbesar</span></div>
     </div>
-   :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Semoga Allah senantiasa menyertai setiap perjalanan kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin.</span></div></div>}
+   :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Anak-anakku, meski kalian telah dewasa, doa Papa dan Mama tak pernah berhenti menyertai setiap langkah kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin. — Papa &amp; Mama</span></div></div>}
   </section>
   {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={replayIntro}>Putar ulang intro</button></footer>}
   {zoom&&<div role="dialog" aria-modal="true" aria-label="Foto kenangan" className="family-lightbox" onClick={()=>setZoom(null)}><button aria-label="Tutup foto" onClick={()=>setZoom(null)}>×</button><img src={zoom} alt="Kenangan keluarga" onClick={e=>e.stopPropagation()}/></div>}

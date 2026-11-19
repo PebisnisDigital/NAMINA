@@ -81,7 +81,8 @@ export default async function handler(req:Req,res:ServerResponse){
     const p=operation==="create_partner_website"?operationSchemas.create_partner_website.parse(payload.data):operationSchemas.update_partner_website.parse(payload.data);
     const document=siteDocumentSchema.parse(prepareSite(p.document));
     if(Buffer.byteLength(JSON.stringify(document))>245000)throw Error("Document too large");
-    const changed="id" in p?await db.from("namina_business_sites").update({document,updated_at:new Date().toISOString()}).eq("workspace_id",p.workspace_id).eq("id",p.id).eq("slug",document.slug).eq("updated_at",p.updated_at).select("id,slug,updated_at").maybeSingle():await db.from("namina_business_sites").insert({workspace_id:p.workspace_id,slug:document.slug,document}).select("id,slug,updated_at").single();
+    const edit=operation==="update_partner_website"?operationSchemas.update_partner_website.parse(payload.data):null;
+    const changed=edit?await db.from("namina_business_sites").update({document,updated_at:new Date().toISOString()}).eq("workspace_id",edit.workspace_id).eq("id",edit.id).eq("slug",document.slug).eq("updated_at",edit.updated_at).select("id,slug,updated_at").maybeSingle():await db.from("namina_business_sites").insert({workspace_id:p.workspace_id,slug:document.slug,document}).select("id,slug,updated_at").single();
     if(changed.error||!changed.data)throw Error("Partner draft change rejected");
     result={...changed.data,workspace_id:p.workspace_id};
    }else if(request.operation==="create_partner"||request.operation==="rotate_link"||request.operation==="revoke_link"){

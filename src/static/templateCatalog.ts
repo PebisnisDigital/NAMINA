@@ -1,8 +1,8 @@
-import { createDoctorTemplate, setDoctorAppearance, setChibiAppearance, setWeddingAppearance, setOriginalAppearance, setOriginalWhiteAppearance } from "./doctorTemplate";
-import { createChibiTemplate } from "./chibiTemplate";
-import { createWeddingTemplate } from "./weddingTemplate";
-import { createWedding2Template } from "./wedding2Template";
-import { loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites";
+import { createDoctorTemplate, setDoctorAppearance, setChibiAppearance, setWeddingAppearance, setOriginalAppearance, setOriginalWhiteAppearance } from "./doctorTemplate.js";
+import { createChibiTemplate } from "./chibiTemplate.js";
+import { createWeddingTemplate } from "./weddingTemplate.js";
+import { createWedding2Template } from "./wedding2Template.js";
+import { loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites.js";
 
 export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2";
 

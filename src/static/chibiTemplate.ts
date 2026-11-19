@@ -1,5 +1,5 @@
-import { cloneViniTemplate, type SiteDocument } from "./sites";
-import { setChibiAppearance } from "./doctorTemplate";
+import { cloneViniTemplate, type SiteDocument } from "./sites.js";
+import { setChibiAppearance } from "./doctorTemplate.js";
 
 /** Fictional, editable sample; media uses NAMINA's temporary repo video. */
 export function createChibiTemplate(slug: string): SiteDocument {

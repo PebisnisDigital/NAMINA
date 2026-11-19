@@ -11,7 +11,7 @@ type Props = {
 
 export function TemplatePicker({ value, onChange, compact = false, disabled = false }: Props) {
   return <div className={"namina-template-picker" + (compact ? " namina-template-picker--compact" : "")}
-    role="group" aria-label="Pilih salah satu dari enam template NAMINA">
+    role="group" aria-label="Pilih template NAMINA">
     {templateCatalog.map(template => {
       const selected = value === template.id;
       const previewStyle = {

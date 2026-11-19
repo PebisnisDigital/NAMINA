@@ -1,0 +1,33 @@
+import {useState} from "react";
+import type {SiteDocument} from "../static/sites";
+import {defaultFamilyDesign,type FamilyDesign,type FamilyView} from "../static/familyDesign";
+import "./FamilyStudioPanel.css";
+type Props={site:SiteDocument;onChange:(fn:(draft:SiteDocument)=>void)=>void;onPreview:(view:FamilyView)=>void};
+type Tab=FamilyView|"desain";
+function Field({label,value,change,multi=false}:{label:string;value:string;change:(v:string)=>void;multi?:boolean}){return <label className="family-panel-field"><span>{label}</span>{multi?<textarea rows={3} maxLength={1200} value={value} onChange={e=>change(e.target.value)}/>:<input maxLength={2000} value={value} onChange={e=>change(e.target.value)}/>}</label>}
+export function FamilyStudioPanel({site,onChange,onPreview}:Props){
+ const [tab,setTab]=useState<Tab>("anak1");
+ const [minimized,setMinimized]=useState(false);
+ const d=site.familyDesign||defaultFamilyDesign();
+ const change=(fn:(next:FamilyDesign)=>void)=>onChange(next=>{next.familyDesign||=defaultFamilyDesign();fn(next.familyDesign);});
+ const field=(key:Exclude<{[K in keyof FamilyDesign]:FamilyDesign[K] extends string?K:never}[keyof FamilyDesign],undefined>,label:string,multi=false)=><Field key={key} label={label} value={d[key]} multi={multi} change={v=>change(n=>{n[key]=v;})}/>;
+ const select=(t:Tab)=>{setTab(t);if(t!=="desain")onPreview(t);};
+ const pointEditor=(key:"anak1"|"anak2"|"doa")=>{
+  const items=key==="doa"?d.prayers:d[key].prayers;
+  const update=(fn:(items:string[][])=>void)=>change(n=>fn(key==="doa"?n.prayers:n[key].prayers));
+  return <><h3>Poin doa</h3>{items.map((p,i)=><div className="family-panel-item" key={i}><Field label="Judul" value={p[0]} change={v=>update(a=>{a[i][0]=v;})}/><Field label="Isi doa" value={p[1]} multi change={v=>update(a=>{a[i][1]=v;})}/><div className="family-panel-actions"><button type="button" disabled={i===0} onClick={()=>update(a=>{[a[i-1],a[i]]=[a[i],a[i-1]];})}>↑</button><button type="button" disabled={i===items.length-1} onClick={()=>update(a=>{[a[i],a[i+1]]=[a[i+1],a[i]];})}>↓</button><button type="button" onClick={()=>update(a=>{a.splice(i,1);})}>Hapus</button></div></div>)}<button type="button" disabled={items.length>=30} onClick={()=>update(a=>a.push(["Doa baru",""]))}>+ Tambah doa</button></>;
+ };
+ const childEditor=(key:"anak1"|"anak2")=><>{(["name","menu","job","kicker","intro","video","poster"] as const).map((k,i)=><Field key={k} label={["Nama anak","Nama menu","Profesi","Kalimat pembuka","Pesan orang tua","URL video HTTPS / Dropbox","URL foto cadangan"][i]} value={d[key][k]} multi={k==="intro"} change={v=>change(n=>{n[key][k]=v;})}/>)}{pointEditor(key)}</>;
+ return <aside className={"family-studio-panel"+(minimized?" is-minimized":"")} aria-label="Editor Hari Anak Sedunia">
+  <header><div><small>FAMILY LEGACY</small><strong>HARI ANAK SEDUNIA</strong></div><button type="button" onClick={()=>setMinimized(v=>!v)}>{minimized?"Buka":"−"}</button></header>
+  {!minimized&&<><nav>{([["welcome","Intro"],["anak1","Anak 1"],["anak2","Anak 2"],["doa","Doa"],["kenangan","Kenangan"],["desain","Desain"]] as [Tab,string][]).map(([k,label])=><button type="button" key={k} aria-pressed={tab===k} onClick={()=>select(k)}>{label}</button>)}</nav>
+  <div className="family-panel-body">
+   {tab==="welcome"&&<>{field("brand","Nama brand")}{field("brandLogo","URL gambar logo")}{field("welcomeVideo","URL video intro")}{field("welcomePoster","URL foto intro cadangan")}{field("welcomeButton","Teks tombol ucapan")}{field("loadingText","Teks loading")}</>}
+   {tab==="anak1"&&childEditor("anak1")}{tab==="anak2"&&childEditor("anak2")}
+   {tab==="doa"&&<>{field("doaMenu","Nama menu")}{field("doaKicker","Kalimat pembuka")}{field("doaTitle","Judul")}{field("doaIntro","Pesan",true)}{field("doaVideo","URL video keluarga")}{field("doaPoster","URL foto cadangan")}{pointEditor("doa")}{field("doaClosing","Doa penutup",true)}</>}
+   {tab==="kenangan"&&<>{field("galleryMenu","Nama menu")}{field("galleryKicker","Label atas")}{field("galleryTitle","Judul")}{field("galleryIntro","Deskripsi")}{field("galleryBrand","Label kartu")}{field("galleryTag","Label foto")}{field("galleryHint","Petunjuk galeri")}{field("footer","Teks footer")}{field("replayLabel","Teks putar intro")}{d.gallery.map((item,i)=><div key={i} className="family-panel-item"><Field label={"Foto "+(i+1)+" · URL"} value={item.src} change={v=>change(n=>{n.gallery[i].src=v;})}/><Field label="Judul" value={item.title} change={v=>change(n=>{n.gallery[i].title=v;})}/><Field label="Caption" value={item.detail} multi change={v=>change(n=>{n.gallery[i].detail=v;})}/><label><input type="checkbox" checked={item.portrait} onChange={e=>change(n=>{n.gallery[i].portrait=e.target.checked;})}/> Pertahankan proporsi potret</label><div className="family-panel-actions"><button type="button" disabled={!i} onClick={()=>change(n=>{[n.gallery[i-1],n.gallery[i]]=[n.gallery[i],n.gallery[i-1]];})}>↑</button><button type="button" disabled={i===d.gallery.length-1} onClick={()=>change(n=>{[n.gallery[i+1],n.gallery[i]]=[n.gallery[i],n.gallery[i+1]];})}>↓</button><button type="button" onClick={()=>change(n=>{n.gallery.splice(i,1);})}>Hapus</button></div></div>)}<button type="button" disabled={d.gallery.length>=50} onClick={()=>change(n=>{n.gallery.push({src:"",title:"Foto baru",detail:"",portrait:false});})}>+ Tambah foto</button></>}
+   {tab==="desain"&&<>{(["background","accent","text","muted","card","cardInk"] as const).map((k,i)=><label key={k} className="family-panel-field"><span>{["Latar","Aksen","Teks","Teks sekunder","Kartu","Teks kartu"][i]}</span><input type="color" value={d.style[k]} onChange={e=>change(n=>{n.style[k]=e.target.value;})}/></label>)}<label className="family-panel-field">Font<select value={d.style.font} onChange={e=>change(n=>{n.style.font=e.target.value as FamilyDesign["style"]["font"];})}><option value="classic">Classic Serif</option><option value="modern">Modern Sans</option></select></label>{(["overlay","speed","headingScale"] as const).map((k,i)=><label key={k} className="family-panel-field"><span>{["Gelap video","Kecepatan slide","Ukuran judul"][i]} · {d.style[k]}</span><input type="range" min={[0,15,.7][i]} max={[1,150,1.4][i]} step={[.05,1,.05][i]} value={d.style[k]} onChange={e=>change(n=>{n.style[k]=Number(e.target.value);})}/></label>)}<button type="button" onClick={()=>change(n=>{n.style=defaultFamilyDesign().style;})}>Reset desain</button></>}
+   <p className="family-panel-note">Gunakan tautan HTTPS publik. Perubahan mengikuti penyimpanan draft Studio; terbitkan hanya setelah diperiksa.</p>
+  </div></>}
+ </aside>;
+}

@@ -1,5 +1,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { ViniCinematic } from "../components/ViniCinematic";
+import { AnakSedunia } from "./AnakSedunia";
+import type { FamilyView } from "../static/familyDesign";
 import { Wedding2Site } from "./Wedding2Site";
 import { siteDocumentSchema, type SiteDocument } from "../static/sites";
 import type { AssetUrls } from "../domain/content";
@@ -29,6 +31,7 @@ export function StudioV2Canvas() {
   const [activeMenu, setActiveMenu] = useState<VisualMenu>("Nama");
   const [selected, setSelected] = useState("");
   const [weddingStage, setWeddingStage] = useState<"cover"|"film"|"page">("page");
+  const [familyView,setFamilyView]=useState<FamilyView>("anak1");
   const [inline, setInline] = useState<InlineEdit | null>(null);
 
   useEffect(() => {
@@ -47,6 +50,7 @@ export function StudioV2Canvas() {
       }
       if (message.type === "NAMINA_V2_SELECT" && typeof message.key === "string") setSelected(message.key);
       if (message.type === "NAMINA_V2_CLOSE_EDITOR") setInline(null);
+      if(message.type==="FAMILY_VIEW"&&["welcome","anak1","anak2","doa","kenangan"].includes(String(message.view)))setFamilyView(message.view as FamilyView);
       if (message.type === "WEDDING2_FOCUS" && typeof message.id === "string") setSelected(message.id);
       if (message.type === "WEDDING2_STAGE" && (message.stage === "cover" || message.stage === "film" || message.stage === "page")) setWeddingStage(message.stage);
     };
@@ -121,7 +125,7 @@ export function StudioV2Canvas() {
 
   return <main className="studio-v2-canvas">
     {data ? <div className="studio-v2-canvas__interact" onClickCapture={selectElement}>
-      {data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview editorMode selectedId={selected} studioStage={weddingStage} /> : <ViniCinematic
+      {data.site.presentation === "hari-anak-sedunia" ? <AnakSedunia key={data.site.slug} design={data.site.familyDesign} studioPreview previewView={familyView}/> : data.site.presentation === "wedding2" ? <Wedding2Site document={data.site} studioPreview editorMode selectedId={selected} studioStage={weddingStage} /> : <ViniCinematic
         presentation={data.site.presentation}
         content={data.site.content}
         assetUrls={data.assets}

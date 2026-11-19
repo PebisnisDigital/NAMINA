@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
+import { FamilyStudioPanel } from "../components/FamilyStudioPanel";
 import { WeddingStudioPanel } from "../components/WeddingStudioPanel";
 import { slugSchema, type OriginalStyle, type OriginalMenuIcon } from "../domain/content";
 import { blankOriginal, viniOriginal } from "../static/originalSeed";
@@ -775,7 +776,7 @@ export function StudioV2() {
     </div>;
   }
 
-  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (createPanelOpen ? " studio-v2--picker-open" : "") + (site?.presentation === "wedding2" ? " w2-studio-open" : "")}>
+  return <main className={"studio-v2 studio-v2--fullscreen" + (immersive ? " studio-v2--immersive" : "") + (createPanelOpen ? " studio-v2--picker-open" : "") + ((site?.presentation === "wedding2" || site?.presentation === "hari-anak-sedunia") ? " w2-studio-open" : "")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a href="/" className="studio-v2__logo" aria-label="NAMINA beranda">NAMINA<span>STUDIO</span></a>
@@ -793,7 +794,7 @@ export function StudioV2() {
             setCreatePanelOpen(event.currentTarget.open);
             if (event.currentTarget.open) setNewTemplateChosen(false);
           }}>
-          <summary title="Buat website dari salah satu dari 6 template">+ Klien · 6 Template</summary>
+          <summary title="Buat website dari salah satu dari 7 template">+ Klien · 7 Template</summary>
           <div className="studio-v2__create-panel">
             <div className="studio-v2__create-panel-head">
               <div>
@@ -815,7 +816,7 @@ export function StudioV2() {
                   newTemplate === "original-white" ? "Original · Putih" :
                   newTemplate === "doctor" ? "Dokter · Medical Teal" :
                   newTemplate === "chibi" ? "Chibi · Candy Pastel" :
-                  newTemplate === "wedding2" ? "Wedding · Living Paper" : "Wedding · Royal Ivory"}</strong></span>
+                  newTemplate === "hari-anak-sedunia" ? "HARI ANAK SEDUNIA" : newTemplate === "wedding2" ? "Wedding · Living Paper" : "Wedding · Royal Ivory"}</strong></span>
                 <button type="button" onClick={() => setNewTemplateChosen(false)}>Ganti Template</button>
               </div>
             )}
@@ -881,6 +882,7 @@ export function StudioV2() {
       </div>
     </div>
 
+    {site?.presentation === "hari-anak-sedunia" && <FamilyStudioPanel key={site.slug} site={site} onChange={change} onPreview={view=>sendFrame({type:"FAMILY_VIEW",view})}/>}
     {site?.presentation === "wedding2" && <WeddingStudioPanel site={site} selectedId={weddingSelection}
       onSelect={id=>{setWeddingSelection(id);sendFrame({type:"WEDDING2_FOCUS",id});}}
       onChange={change} onStageChange={stage=>sendFrame({type:"WEDDING2_STAGE",stage})} />}
@@ -891,7 +893,7 @@ export function StudioV2() {
       onClose={() => setTemplateOpen(false)}
     />}
     {immersive && <button type="button" className="studio-v2__immersive-exit" onClick={() => setImmersive(false)}>↙ Kembali ke Studio</button>}
-    {popupOpen && site && site.presentation !== "wedding2" && <div ref={inspectorRef} className="studio-v2__inline-popover"
+    {popupOpen && site && site.presentation !== "wedding2" && site.presentation !== "hari-anak-sedunia" && <div ref={inspectorRef} className="studio-v2__inline-popover"
       style={{ left: popupCoordinates.left, top: popupCoordinates.top }} role="dialog" aria-modal="false" aria-label={"Edit " + labelForSelection()}>
       <div className="studio-v2__inline-popover-header">
         <div><small>{showDesign ? "KUSTOMISASI" : "UBAH LANGSUNG"}</small><strong>{labelForSelection()}</strong></div>

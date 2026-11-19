@@ -151,3 +151,18 @@
 .family-site .family-draggable-gallery .family-magazine-card{cursor:inherit;animation:none!important}
 .family-site .family-draggable-gallery img{user-select:none;-webkit-user-drag:none}
 .family-site .family-editorial-controls .family-gallery-motion{display:inline-flex;align-items:center;justify-content:center;min-height:32px}
+
+/* Editable family template theme; scoped so the historical demo retains its appearance. */
+.family-site.family-custom,.family-site.family-custom.family-gallery-site,.family-site.family-custom .family-preloaded-scene,.family-site.family-custom .family-welcome{background:var(--family-bg);color:var(--family-text)}
+.family-site.family-custom .family-kicker,.family-site.family-custom .family-sign,.family-site.family-custom h1,.family-site.family-custom .family-profession,.family-site.family-custom .family-brand{color:var(--gold)}
+.family-site.family-custom .family-copy p,.family-site.family-custom .family-editorial-heading p{color:var(--muted)}
+.family-site.family-custom .family-scene-shade{opacity:var(--family-overlay)}
+.family-site.family-custom.family-gallery-site .family-stage{background:radial-gradient(ellipse at 50% 95%,color-mix(in srgb,var(--gold) 18%,transparent),transparent 65%),var(--family-bg)}
+.family-site.family-custom .family-magazine-card{background:var(--family-card);color:var(--family-card-ink)}
+.family-site.family-custom .family-magazine-copy strong,.family-site.family-custom .family-magazine-copy p{color:var(--family-card-ink)}
+.family-site.family-custom .family-copy h1,.family-site.family-custom .family-editorial-heading h1{font-size:clamp(calc(32px * var(--family-heading-scale)),calc(5.2vw * var(--family-heading-scale)),calc(84px * var(--family-heading-scale)))}
+.family-site.family-custom .family-welcome-button{background:var(--gold);border-color:var(--gold)}
+.family-site.family-custom .family-header nav button[aria-current]{border-color:var(--gold);color:var(--gold)}
+.family-site .family-custom-logo{display:block;max-width:140px;max-height:48px;object-fit:contain}
+.family-site .family-welcome-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.family-image-placeholder{display:grid;place-items:center;height:100%;font:500 12px system-ui;color:#795b3b}

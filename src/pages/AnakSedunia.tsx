@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type CSSProperties } from "react";
+import { defaultFamilyDesign, type FamilyDesign, type FamilyView } from "../static/familyDesign";
 import { NaminaLogo } from "../components/NaminaLogo";
 import "./anakSedunia.css";
 
 type Menu = "anak1" | "anak2" | "kenangan" | "doa";
 const photo = "/clients/anaksedunia/mama.webp";
 // Set these to the approved family media URLs when available.
-const family = {
+const demoFamily = {
   welcomeVideo: "https://www.dropbox.com/scl/fi/qv98rguh4by66dwmze5wz/Family_embracing_in_golden_light_f6b10c09_1080p.mp4?rlkey=a03r5a4s8cwo6hw0nbrmdzfuv&raw=1",
   doaVideo: "https://www.dropbox.com/scl/fi/0thyx9dydjilp2lnb78zj/Family_portrait_video_creation_49f27e46_1080p.mp4?rlkey=fns406p8c0ixjm3nr372jsm3f&raw=1",
   doaPoster: photo,
@@ -29,13 +30,13 @@ const family = {
     {src: photo, title: "Masa kecil bersama Mama", detail: "Kenangan sederhana yang selalu hangat di hati.", portrait: false}
   ]
 };
-const menus = [
+const menuDefinitions = [
   {id:"anak1", title: "Edo", sub:"Profil, perjalanan & doa", icon:"♙"},
   {id:"anak2", title: "Yuda", sub:"Profil, perjalanan & doa", icon:"♙"},
   {id:"doa", title: "Doa", sub:"Hari ini dan selamanya", icon:"♡"},
   {id:"kenangan", title: "Kenangan", sub:"Galeri perjalanan keluarga", icon:"▧"}
 ] as const;
-const prayers = [
+const demoPrayers = [
   ["Sehat dalam lindungan-Nya","Ya Allah, jagalah kedua putra kami. Sehatkan tubuh dan hati mereka, lindungi setiap langkahnya."],
   ["Karier yang penuh berkah","Mudahkan setiap tugas dan perjuangan mereka. Jadikan keberhasilannya jalan untuk berbuat baik."],
   ["Rezeki & kebahagiaan","Limpahkan rezeki yang halal, berkah, dan cukup. Hadirkan ketenangan serta kebahagiaan dalam hidup mereka."],
@@ -60,8 +61,9 @@ function PageControls({page,total,onChange}:{page:number;total:number;onChange:(
  if(total<=1)return null;
  return <div className="family-pagination" aria-label="Halaman isi"><button aria-label="Sebelumnya" disabled={page===0} onClick={()=>onChange(page-1)}>‹</button><span aria-live="polite">{page+1} / {total}</span><button aria-label="Berikutnya" disabled={page>=total-1} onClick={()=>onChange(page+1)}>›</button></div>;
 }
-function MemoryCarousel({zoomed,onOpen}:{zoomed:boolean;onOpen:(src:string)=>void}){
+function MemoryCarousel({zoomed,onOpen,design}:{zoomed:boolean;onOpen:(src:string)=>void;design:FamilyDesign}){
  const [paused,setPaused]=useState(false);
+ const speed=useRef(design.style.speed);speed.current=design.style.speed;
  const viewport=useRef<HTMLDivElement|null>(null);
  const track=useRef<HTMLDivElement|null>(null);
  const group=useRef<HTMLDivElement|null>(null);
@@ -89,7 +91,7 @@ function MemoryCarousel({zoomed,onOpen}:{zoomed:boolean;onOpen:(src:string)=>voi
    const tick=(now:number)=>{
      const dt=Math.min(50,Math.max(0,now-last))/1000;last=now;
      if(!stopped.current&&!drag.current&&now>=hold.current&&width.current){
-       offset.current+=dt*(window.innerWidth<=760?48:58);
+       offset.current+=dt*speed.current*(window.innerWidth<=760?.83:1);
        paint();
      }
      frame=requestAnimationFrame(tick);
@@ -127,20 +129,25 @@ function MemoryCarousel({zoomed,onOpen}:{zoomed:boolean;onOpen:(src:string)=>voi
       onWheel={e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){offset.current+=e.deltaX;paint();hold.current=performance.now()+700;}}}>
      <div ref={track} className="family-magazine-track" style={{transform:"translate3d(0,0,0)"}}>
        {[0,1,2].map(copy=><div ref={copy===0?group:undefined} className="family-magazine-group" key={copy} aria-hidden={copy!==1}>
-         {family.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?0:-1} onClick={()=>onOpen(galleryImageUrl(item.src))}>
-           <div className="family-magazine-top"><span>LOVE LEGACY</span><span>{String(i+1).padStart(2,"0")}</span></div>
-           <div className="family-magazine-photo" data-portrait={item.portrait}><img src={galleryImageUrl(item.src)} alt={item.title} decoding="async" draggable={false}/></div>
-           <div className="family-magazine-copy"><span className="family-magazine-tag">FAMILY MEMORIES</span><strong>{item.title}</strong><p>{item.detail}</p></div>
+         {design.gallery.map((item,i)=><button type="button" className="family-magazine-card" key={i} tabIndex={copy===1?0:-1} onClick={()=>{if(item.src)onOpen(galleryImageUrl(item.src));}}>
+           <div className="family-magazine-top"><span>{design.galleryBrand}</span><span>{String(i+1).padStart(2,"0")}</span></div>
+           <div className="family-magazine-photo" data-portrait={item.portrait}>{item.src?<img src={galleryImageUrl(item.src)} alt={item.title} decoding="async" draggable={false}/>:<span className="family-image-placeholder">Tambahkan foto</span>}</div>
+           <div className="family-magazine-copy"><span className="family-magazine-tag">{design.galleryTag}</span><strong>{item.title}</strong><p>{item.detail}</p></div>
          </button>)}
        </div>)}
      </div>
    </div>
-   <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>nudge(-1)} aria-label="Geser foto ke kanan">‹</button><button type="button" className="family-gallery-motion" onClick={()=>setPaused(v=>!v)} aria-pressed={paused}>{paused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><button type="button" className="family-gallery-motion" onClick={()=>nudge(1)} aria-label="Geser foto ke kiri">›</button><span>Geser atau ketuk foto untuk memperbesar</span></div>
+   <div className="family-editorial-controls"><button type="button" className="family-gallery-motion" onClick={()=>nudge(-1)} aria-label="Geser foto ke kanan">‹</button><button type="button" className="family-gallery-motion" onClick={()=>setPaused(v=>!v)} aria-pressed={paused}>{paused?"▶ Lanjutkan animasi":"Ⅱ Jeda animasi"}</button><button type="button" className="family-gallery-motion" onClick={()=>nudge(1)} aria-label="Geser foto ke kiri">›</button><span>{design.galleryHint}</span></div>
  </>;
 }
-export function AnakSedunia(){
- const [stage,setStage]=useState<"loading"|"welcome"|"site">("loading");
+const defaultDemo:FamilyDesign={...defaultFamilyDesign(),...demoFamily,anak1:{...defaultFamilyDesign().anak1,...demoFamily.anak1,menu:"Edo",intro:"Edo, di setiap langkahmu, ada doa Papa dan Mama."},anak2:{...defaultFamilyDesign().anak2,...demoFamily.anak2,menu:"Yuda",intro:"Yuda, di setiap langkahmu, ada doa Papa dan Mama."},prayers:demoPrayers,doaIntro:"Anak-anakku, meski kalian telah dewasa, doa Papa dan Mama tak pernah berhenti menyertai setiap langkah kalian."};
+export function AnakSedunia({design,studioPreview=false,previewView="anak1"}:{design?:FamilyDesign;studioPreview?:boolean;previewView?:FamilyView}={}){
+ const family=design|| (studioPreview?defaultFamilyDesign():defaultDemo);
+ const menus=menuDefinitions.map(item=>({...item,title:item.id==="anak1"?family.anak1.menu:item.id==="anak2"?family.anak2.menu:item.id==="doa"?family.doaMenu:family.galleryMenu}));
+ const prayers=family.prayers;
+ const [stage,setStage]=useState<"loading"|"welcome"|"site">(studioPreview?"site":"loading");
  const [menu,setMenu]=useState<Menu>("anak1");
+ useEffect(()=>{if(!studioPreview)return;setStage(previewView==="welcome"?"welcome":"site");if(previewView!=="welcome")setMenu(previewView);setPage(0);},[studioPreview,previewView]);
  const [zoom,setZoom]=useState<string|null>(null);
  const [page,setPage]=useState(0);
  const [pageSize,setPageSize]=useState(viewportPageSize);
@@ -167,7 +174,7 @@ export function AnakSedunia(){
    let settled=false;
    const sample=()=>{
      if(settled)return;
-     const videos=[welcomeRef.current,anak1Ref.current,anak2Ref.current,...(family.doaVideo?[doaRef.current]:[])];
+     const videos=[welcomeRef.current,anak1Ref.current,anak2Ref.current,doaRef.current].filter(Boolean);
      const values=videos.map(video=>{
        if(!video||video.error)return 0;
        const t=video.currentTime;
@@ -181,7 +188,7 @@ export function AnakSedunia(){
      });
      const all=values.every(value=>value===1);
      const elapsed=performance.now()-started;
-     setProgress(Math.round(values.reduce((x,y)=>x+y,0)/values.length*100));
+     setProgress(Math.round(values.length?values.reduce((x,y)=>x+y,0)/values.length*100:100));
      setLoadNotice(elapsed>=10000);
      if(all){
        settled=true;
@@ -235,21 +242,23 @@ export function AnakSedunia(){
  const child=menu==="anak1"?family.anak1:menu==="anak2"?family.anak2:null;
  const label=menus.find(item=>item.id===menu)?.title||"Edo";
  const cinematic=Boolean(child)||menu==="doa";
- const pageTotal=Math.ceil(4/pageSize);
+ const pageTotal=Math.max(1,Math.ceil((child?.prayers.length||prayers.length)/pageSize));
+ const visiblePage=Math.min(page,pageTotal-1);
+ const themeStyle=design||studioPreview?({"--family-bg":family.style.background,"--gold":family.style.accent,"--family-text":family.style.text,"--muted":family.style.muted,"--family-card":family.style.card,"--family-card-ink":family.style.cardInk,"--family-overlay":family.style.overlay,"--family-heading-scale":family.style.headingScale,fontFamily:family.style.font==="modern"?"system-ui,sans-serif":"Georgia,serif"} as CSSProperties):undefined;
 
- return <main className={"family-cinema family-site"+(stage!=="site"||cinematic?" family-fullscreen":" family-gallery-site")+(child?" family-child-site":"")}>
+ return <main style={themeStyle} className={"family-cinema family-site"+(themeStyle?" family-custom":"")+(stage!=="site"||cinematic?" family-fullscreen":" family-gallery-site")+(child?" family-child-site":"")}>
   <div className="family-preloaded-scene" aria-hidden="true" data-visible={stage==="site"&&Boolean(child||menu==="doa")}>
-    <video ref={anak1Ref} src={family.anak1.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak1"}/>
-    <video ref={anak2Ref} src={family.anak2.video} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak2"}/>
-    {family.doaVideo?<video ref={doaRef} src={family.doaVideo} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="doa"}/>:<img className="family-doa-poster" src={family.doaPoster} alt="" data-active={menu==="doa"}/>}
+    {family.anak1.video?<video ref={anak1Ref} src={galleryImageUrl(family.anak1.video)} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak1"}/>:family.anak1.poster?<img className="family-doa-poster" src={galleryImageUrl(family.anak1.poster)} alt="" data-active={menu==="anak1"}/>:null}
+    {family.anak2.video?<video ref={anak2Ref} src={galleryImageUrl(family.anak2.video)} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="anak2"}/>:family.anak2.poster?<img className="family-doa-poster" src={galleryImageUrl(family.anak2.poster)} alt="" data-active={menu==="anak2"}/>:null}
+    {family.doaVideo?<video ref={doaRef} src={galleryImageUrl(family.doaVideo)} preload="auto" autoPlay muted loop playsInline disablePictureInPicture data-active={menu==="doa"}/>:family.doaPoster?<img className="family-doa-poster" src={galleryImageUrl(family.doaPoster)} alt="" data-active={menu==="doa"}/>:null}
     <div className="family-scene-shade"/>
   </div>
   <div className="family-welcome" data-visible={stage==="welcome"} aria-hidden={stage!=="welcome"}>
-    <video ref={welcomeRef} src={family.welcomeVideo} preload="auto" autoPlay muted={!welcomeSound} loop playsInline disablePictureInPicture onError={()=>setWelcomeFailed(true)} aria-label="Video kenangan keluarga"/>
+    {family.welcomeVideo?<video ref={welcomeRef} src={galleryImageUrl(family.welcomeVideo)} preload="auto" autoPlay muted={!welcomeSound} loop playsInline disablePictureInPicture onError={()=>setWelcomeFailed(true)} aria-label="Video kenangan keluarga"/>:family.welcomePoster?<img className="family-welcome-poster" src={galleryImageUrl(family.welcomePoster)} alt=""/>:null}
     {stage==="welcome"&&<>
       <div className="family-welcome-shade"/>
-      <button type="button" className="family-welcome-button" onClick={enterFamily}>Selamat Hari Anak Sedunia</button>
-      {!welcomeFailed&&<button type="button" className="family-welcome-audio" onClick={toggleWelcomeSound}>{welcomeSound?"♫ Matikan suara":"♫ Aktifkan suara"}</button>}
+      <button type="button" className="family-welcome-button" onClick={enterFamily}>{family.welcomeButton}</button>
+      {family.welcomeVideo&&!welcomeFailed&&<button type="button" className="family-welcome-audio" onClick={toggleWelcomeSound}>{welcomeSound?"♫ Matikan suara":"♫ Aktifkan suara"}</button>}
     </>}
   </div>
   {stage==="loading"?<div className="family-liquid-intro" role="progressbar" aria-label="Memuat video NAMINA" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
@@ -257,18 +266,18 @@ export function AnakSedunia(){
       <span className="namina-liquid-loader__base"><NaminaLogo variant="hero"/></span>
       <span className="namina-liquid-loader__fill" style={{clipPath:"polygon(0 "+(100-progress)+"%,20% "+Math.max(0,100-progress-(progress===100?0:2))+"%,40% "+Math.min(100,100-progress+(progress===100?0:2))+"%,60% "+Math.max(0,100-progress-(progress===100?0:1))+"%,80% "+Math.min(100,100-progress+(progress===100?0:2))+"%,100% "+(100-progress)+"%,100% 100%,0 100%)"}}><NaminaLogo variant="hero"/></span>
     </span>
-    {loadNotice&&<span className="family-loading-hint">Menyiapkan video kenangan…</span>}
+    {loadNotice&&<span className="family-loading-hint">{family.loadingText}</span>}
   </div>:stage==="site"?<>
-  <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>NAMINA</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
+  <header className="family-header"><button className="family-brand" onClick={()=>navigate("anak1")}>{family.brandLogo?<img className="family-custom-logo" src={galleryImageUrl(family.brandLogo)} alt={family.brand}/>:family.brand}</button><nav aria-label="Menu keluarga">{menus.map(item=><button key={item.id} aria-current={menu===item.id?"page":undefined} onClick={()=>navigate(item.id)}><span className="family-nav-icon" aria-hidden="true">{item.id==="kenangan"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg>:item.id==="doa"?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.8 4.9c-2.4-2.3-6.2-1.8-8.8 1.6C9.4 3.1 5.6 2.6 3.2 4.9c-2.8 2.7-2.3 6.9 1 10.2L12 22l7.8-6.9c3.3-3.3 3.8-7.5 1-10.2Z"/></svg>:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-2.5a7 7 0 0 1 14 0V20"/></svg>}</span><span>{item.title}</span></button>)}</nav></header>
   <section className={"family-stage family-"+menu} key={menu} aria-label={label}>
-   {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">UNTUK PUTRA TERCINTA</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>{child.name}, di setiap langkahmu, ada doa Papa dan Mama.</p><div className="family-points">{child.prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/></div></div>
+   {child?<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">{child.kicker}</span><h1>{child.name}</h1>{child.job&&<h2 className="family-profession">{child.job}</h2>}<p>{child.intro}</p><div className="family-points">{child.prayers.slice(visiblePage*pageSize,(visiblePage+1)*pageSize).map(([title,detail])=><article key={title}><span>✦</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={visiblePage} total={pageTotal} onChange={setPage}/></div></div>
    :menu==="kenangan"?<div className="family-editorial-gallery">
-      <div className="family-editorial-heading"><span className="family-kicker">ALBUM KELUARGA · LOVE LEGACY</span><h1>Kenangan</h1><p>Waktu berlalu, cinta tidak.</p></div>
-      <MemoryCarousel zoomed={Boolean(zoom)} onOpen={setZoom}/>
+      <div className="family-editorial-heading"><span className="family-kicker">{family.galleryKicker}</span><h1>{family.galleryTitle}</h1><p>{family.galleryIntro}</p></div>
+      {family.gallery.length?<MemoryCarousel zoomed={Boolean(zoom)} onOpen={setZoom} design={family}/>:<p>Belum ada foto.</p>}
     </div>
-   :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">HARI INI DAN SELAMANYA</span><h1>Doa &amp; Harapan</h1><p>Anak-anakku, meski kalian telah dewasa, doa Papa dan Mama tak pernah berhenti menyertai setiap langkah kalian.</p><div className="family-points">{prayers.slice(page*pageSize,(page+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={page} total={pageTotal} onChange={setPage}/><span className="family-sign">Aamiin ya Rabbal Alamin. — Papa &amp; Mama</span></div></div>}
+   :<div className="family-scene-content"><div className="family-copy"><span className="family-kicker">{family.doaKicker}</span><h1>{family.doaTitle}</h1><p>{family.doaIntro}</p><div className="family-points">{prayers.slice(visiblePage*pageSize,(visiblePage+1)*pageSize).map(([title,detail])=><article key={title}><span>♡</span><div><h3>{title}</h3><p>{detail}</p></div></article>)}</div><PageControls page={visiblePage} total={pageTotal} onChange={setPage}/><span className="family-sign">{family.doaClosing}</span></div></div>}
   </section>
-  {!cinematic&&<footer className="family-footer"><span>LOVE LEGACY · NAMINA</span><button className="family-quiet" onClick={replayIntro}>Putar ulang intro</button></footer>}
+  {!cinematic&&<footer className="family-footer"><span>{family.footer}</span><button className="family-quiet" onClick={replayIntro}>{family.replayLabel}</button></footer>}
   {zoom&&<div role="dialog" aria-modal="true" aria-label="Foto kenangan" className="family-lightbox" onClick={()=>setZoom(null)}><button aria-label="Tutup foto" onClick={()=>setZoom(null)}>×</button><img src={zoom} alt="Kenangan keluarga" onClick={e=>e.stopPropagation()}/></div>}
  </>:null}
  </main>;

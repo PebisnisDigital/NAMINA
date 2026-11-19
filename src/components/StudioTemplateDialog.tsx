@@ -25,7 +25,7 @@ export function StudioTemplateDialog({
         <div>
           <span>PILIH TAMPILAN WEB</span>
           <h2 id="studio-templates-title">Template NAMINA</h2>
-          <p>Enam gaya. Satu Studio. Personal dan undangan pernikahan.</p>
+          <p>Tujuh gaya. Personal, keluarga, dan undangan pernikahan.</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Tutup pilihan template">×</button>
       </header>
@@ -33,7 +33,7 @@ export function StudioTemplateDialog({
         <TemplatePicker value={value} onChange={onChange} />
         <p className="studio-v2__template-dialog-note" role="status">
           Template akan langsung mengganti desain website yang sedang dibuka, termasuk /vini.
-          Data personal dan Wedding tersimpan terpisah saat berganti kategori.
+          Data personal, keluarga, dan Wedding tersimpan terpisah saat berganti kategori.
           Website publik baru berubah setelah tombol Publikasikan ditekan.
         </p>
       </div>

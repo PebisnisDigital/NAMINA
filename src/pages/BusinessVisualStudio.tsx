@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { businessClient } from "../business/client";
 import { PublishSuccessModal } from "../components/PublishSuccessModal";
 import { VideoStudioPanel } from "../components/VideoStudioPanel";
+import { FamilyStudioPanel } from "../components/FamilyStudioPanel";
 import { WeddingStudioPanel } from "../components/WeddingStudioPanel";
 import { loadViniTemplate, prepareSite, resolveMedia, siteDocumentSchema, type SiteDocument } from "../static/sites";
 import { originalStyleDefaults } from "../static/originalStyle";
@@ -353,7 +354,7 @@ export function BusinessVisualStudio() {
   if(loading)return <main className="business business__loading">Memuat Studio Mitra…</main>;
   if(error&&!site)return <main className="business business__loading"><p>{error}</p><a href="/studio">Kembali ke dashboard</a></main>;
 
-  return <main className={"studio-v2 studio-v2--fullscreen business__visual-editor" + (immersive ? " studio-v2--immersive" : "") + (site?.presentation==="wedding2"?" w2-studio-open":"")}>
+  return <main className={"studio-v2 studio-v2--fullscreen business__visual-editor" + (immersive ? " studio-v2--immersive" : "") + ((site?.presentation==="wedding2"||site?.presentation==="hari-anak-sedunia")?" w2-studio-open":"")}>
     <header className="studio-v2__workbar">
       <div className="studio-v2__workbar-left">
         <a className="studio-v2__logo" href="/studio">NAMINA<span>MITRA STUDIO</span></a>
@@ -393,6 +394,7 @@ export function BusinessVisualStudio() {
       </div>
       <div className="studio-v2__canvas-indicator"><span>{dirty?"Ada perubahan belum disimpan":"Draft tersimpan"}</span><span>·</span><span>{publishedSha?"Website telah terbit":"Belum dipublikasikan"}</span></div>
     </div>
+    {site?.presentation==="hari-anak-sedunia"&&<FamilyStudioPanel key={site.slug} site={site} onChange={change} onPreview={view=>send({type:"FAMILY_VIEW",view})}/>}
     {site?.presentation==="wedding2"&&<WeddingStudioPanel site={site} siteId={rowId} selectedId={weddingSelection}
        onSelect={id=>{setWeddingSelection(id);send({type:"WEDDING2_FOCUS",id});}}
        onChange={change} onStageChange={stage=>send({type:"WEDDING2_STAGE",stage})}/>}
@@ -411,7 +413,7 @@ export function BusinessVisualStudio() {
       onClose={()=>setTemplateOpen(false)} />}
     {immersive&&<button type="button" className="studio-v2__immersive-exit" onClick={()=>setImmersive(false)}>↙ Kembali ke Studio</button>}
     {publishedLink && <PublishSuccessModal url={publishedLink} onClose={() => setPublishedLink(null)} />}
-    {popup&&site&&site.presentation!=="wedding2"&&<div className="studio-v2__inline-popover" style={{left:popupPosition.left,top:popupPosition.top}}>
+    {popup&&site&&site.presentation!=="wedding2"&&site.presentation!=="hari-anak-sedunia"&&<div className="studio-v2__inline-popover" style={{left:popupPosition.left,top:popupPosition.top}}>
       <div className="studio-v2__inline-popover-header"><div><small>STUDIO MITRA</small><strong>{design?"Desain":selected.startsWith("menu:")?"Pengaturan menu":"Edit elemen"}</strong></div>
         <button type="button" onClick={()=>{setPopup(false);setDesign(false)}} aria-label="Tutup">×</button>
       </div>

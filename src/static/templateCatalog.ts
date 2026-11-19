@@ -2,9 +2,11 @@ import { createDoctorTemplate, setDoctorAppearance, setChibiAppearance, setWeddi
 import { createChibiTemplate } from "./chibiTemplate.js";
 import { createWeddingTemplate } from "./weddingTemplate.js";
 import { createWedding2Template } from "./wedding2Template.js";
-import { loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites.js";
+import { createFamilyTemplate } from "./familyTemplate.js";
+import { defaultFamilyDesign } from "./familyDesign.js";
+import { blankSite, loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites.js";
 
-export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2";
+export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2" | "hari-anak-sedunia";
 
 export type TemplateInfo = {
   id: TemplateKey;
@@ -15,11 +17,12 @@ export type TemplateInfo = {
   headline: string;
   subtitle: string;
   palette: { background: string; accent: string; text: string };
-  menus: readonly [string, string, string, string, string];
+  menus: readonly string[];
 };
 
 /** Available templates are shared by administrator and partner Studio. */
 export const templateCatalog: readonly TemplateInfo[] = [
+  {id:"hari-anak-sedunia",name:"HARI ANAK SEDUNIA",category:"Family Legacy",description:"Intro video keluarga, dua profil sinematik, doa dan galeri foto looping.",demo:"/anaksedunia",headline:"HARI ANAK SEDUNIA",subtitle:"LOVE LEGACY",palette:{background:"#10151e",accent:"#f3d495",text:"#fff8ea"},menus:["Anak 1","Anak 2","Doa","Kenangan"]},
   {
     id: "original", name: "Original · Gelap", category: "Personal Branding",
     description: "Hitam-merah sinematik untuk profil profesional, bisnis, dan kreator.",
@@ -70,6 +73,7 @@ export async function createSiteFromTemplate(slug: string, id: TemplateKey): Pro
     case "chibi": return createChibiTemplate(slug);
     case "wedding": return createWeddingTemplate(slug);
     case "wedding2": return createWedding2Template(slug);
+    case "hari-anak-sedunia": return createFamilyTemplate(slug);
     case "original": return setOriginalAppearance(await loadViniTemplate(slug));
     case "original-white": return setOriginalWhiteAppearance(await loadViniTemplate(slug));
   }
@@ -82,6 +86,7 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
     case "chibi": return setChibiAppearance(site);
     case "wedding": return setWeddingAppearance(site);
     case "wedding2": return siteDocumentSchema.parse({ ...setWeddingAppearance(site), presentation: "wedding2" });
+    case "hari-anak-sedunia": return siteDocumentSchema.parse({...site,presentation:id,familyDesign:site.familyDesign||defaultFamilyDesign()});
     case "original": return setOriginalAppearance(site);
     case "original-white": return setOriginalWhiteAppearance(site);
   }
@@ -102,7 +107,16 @@ export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDoc
     content: structuredClone(source.content),
     media: structuredClone(source.media),
     ...(source.weddingDesign ? { weddingDesign: structuredClone(source.weddingDesign) } : {}),
+    ...(source.familyDesign ? { familyDesign: structuredClone(source.familyDesign) } : {}),
   });
+  if(id==="hari-anak-sedunia"||current==="hari-anak-sedunia") {
+    const category=(key:TemplateKey)=>key==="hari-anak-sedunia"?"family":key==="wedding2"?"wedding":"personal";
+    const archives={...site.templateSnapshots,[category(current)]:snapshot(site)};
+    const stored=archives[category(id)];
+    const target=stored?siteDocumentSchema.parse({...structuredClone(stored),slug:site.slug}):id==="hari-anak-sedunia"?createFamilyTemplate(site.slug):id==="wedding2"?createWedding2Template(site.slug):blankSite(site.slug);
+    const next=id==="hari-anak-sedunia"||id==="wedding2"?target:applySiteAppearance(target,id);
+    return siteDocumentSchema.parse({...next,templateSnapshots:archives});
+  }
   if (id === "wedding2") {
     const archives = {
       ...site.templateSnapshots,

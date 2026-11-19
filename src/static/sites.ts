@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { weddingDesignSchema } from "./weddingDesign.js";
+import { familyDesignSchema } from "./familyDesign.js";
 import { contentSchema, slugSchema, type AssetUrls, type SiteContent } from "../domain/content.js";
 import { originalProfileTabs } from "./originalProfileTabs.js";
 import { viniOriginal } from "./originalSeed.js";
@@ -17,7 +18,7 @@ const mediaUrl = z.string().max(2000).refine((value) => {
   }
 }, "Gunakan URL HTTPS, misalnya tautan Dropbox dengan raw=1.");
 
-const presentationSchema = z.enum(["original", "original-white", "doctor", "chibi", "wedding", "wedding2"]);
+const presentationSchema = z.enum(["original", "original-white", "doctor", "chibi", "wedding", "wedding2", "hari-anak-sedunia"]);
 const siteMediaSchema = z.object({
   desktopVideo: mediaUrl,
   mobileVideo: mediaUrl,
@@ -33,6 +34,7 @@ export const siteTemplateSnapshotSchema = z.object({
   presentation: presentationSchema.optional(),
   content: contentSchema,
   weddingDesign: weddingDesignSchema.optional(),
+  familyDesign: familyDesignSchema.optional(),
   media: siteMediaSchema,
 }).strict();
 
@@ -41,6 +43,7 @@ export const siteDocumentSchema = siteTemplateSnapshotSchema.extend({
   templateSnapshots: z.object({
     personal: siteTemplateSnapshotSchema.optional(),
     wedding: siteTemplateSnapshotSchema.optional(),
+    family: siteTemplateSnapshotSchema.optional(),
   }).strict().optional(),
 }).strict();
 

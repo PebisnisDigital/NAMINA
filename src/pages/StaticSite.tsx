@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { businessClient } from "../business/client";
 import { slugSchema } from "../domain/content";
 import { ViniCinematic } from "../components/ViniCinematic";
+import { defaultFamilyDesign } from "../static/familyDesign";
+import { AnakSedunia } from "./AnakSedunia";
 import { Wedding2Site } from "./Wedding2Site";
 import { NaminaIntroStage } from "../components/NaminaLogo";
 import { createNaminaIntroSound } from "../components/naminaIntroSound";
@@ -82,7 +84,7 @@ export function StaticSite({ slug }: { slug: string }) {
   }, [state]);
 
   if (state.status === "ready") {
-    return state.document.presentation === "wedding2" ? <Wedding2Site key={slug} document={state.document} /> : <ViniCinematic key={slug} presentation={state.document.presentation} content={state.document.content} assetUrls={resolveMedia(state.document)} introStartedAt={introStart ?? undefined} fallbackOriginal={slug === "vini" ? viniOriginal : undefined} />;
+    return state.document.presentation === "hari-anak-sedunia" ? <AnakSedunia key={slug} design={state.document.familyDesign||defaultFamilyDesign()} /> : state.document.presentation === "wedding2" ? <Wedding2Site key={slug} document={state.document} /> : <ViniCinematic key={slug} presentation={state.document.presentation} content={state.document.content} assetUrls={resolveMedia(state.document)} introStartedAt={introStart ?? undefined} fallbackOriginal={slug === "vini" ? viniOriginal : undefined} />;
   }
 
   if (slug === "vini" && state.status === "loading") {

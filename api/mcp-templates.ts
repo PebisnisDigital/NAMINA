@@ -2,7 +2,7 @@ import type {IncomingMessage,ServerResponse} from "node:http";
 import {createHash,randomBytes} from "node:crypto";
 import {z} from "zod";
 import {adminDb,userDb,checked} from "../server/mcp-admin-db.js";
-import {factorySpecSchema,factorySlug,factoryEntry,instantiateFactory,factoryKeySchema,type FactoryKey} from "../src/static/factoryTemplates.js";
+import {factorySpecSchema,factorySlug,factoryEntry} from "../src/static/factoryTemplates.js";
 import {defaultContent,slugSchema} from "../src/domain/content.js";
 import {blankOriginal} from "../src/static/originalSeed.js";
 import {originalStyleDefaults} from "../src/static/originalStyle.js";
@@ -39,9 +39,9 @@ export default async function handler(req:Req,res:ServerResponse){
  const db=adminDb();
  if(req.method==="GET"&&(action==="catalog"||action==="demo")){
   if(action==="catalog"){
-   const rows=checked(await db.from("namina_factory_templates").select("slug,version,spec").eq("status","published").order("version",{ascending:false}).limit(500))||[];
+   const rows=checked(await db.from("namina_factory_templates").select("slug,version,spec,status").in("status",["published","archived"]).order("version",{ascending:false}).limit(500))||[];
    const latest=new Map<string,ReturnType<typeof factoryEntry>>();
-   for(const row of rows){const spec=factorySpecSchema.safeParse(row.spec);if(spec.success&&!latest.has(row.slug))latest.set(row.slug,factoryEntry(spec.data,row.version));}
+   const seen=new Set<string>();for(const row of rows){if(seen.has(row.slug))continue;seen.add(row.slug);const spec=factorySpecSchema.safeParse(row.spec);if(spec.success&&row.status==="published")latest.set(row.slug,factoryEntry(spec.data,row.version));}
    return send(200,{templates:[...latest.values()]});
   }
   const id=identity.safeParse({slug:url.searchParams.get("slug"),version:Number(url.searchParams.get("version"))});

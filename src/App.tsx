@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import {TemplateFactory,FactoryDemo} from "./pages/TemplateFactory";
 import { AnakSedunia } from "./pages/AnakSedunia";
 import { Legal } from "./pages/Landing";
 import { IntroLanding } from "./pages/IntroLanding";
@@ -43,6 +44,8 @@ function App() {
   else if (path === "/mitra/studio") page = <BusinessVisualStudio />;
   else if (path === "/mitra/admin" || path === "/studio/admin") page = <BusinessAdmin />;
   // The Visual Studio is the only supported editor. Legacy V1 URLs return to it.
+  else if (path === "/studio/templates") page = <TemplateFactory />;
+  else if (/^\/template-demo\/[a-z0-9-]+\/[1-9][0-9]*$/.test(path)) page = <FactoryDemo slug={path.split("/")[2]} version={path.split("/")[3]}/>;
   else if (path === "/studio/oauth") page = <McpConsent />;
   else if (path === "/studio") page = <StudioGateway />;
   else if (path === "/studio-v2") page = <StudioV2 />;

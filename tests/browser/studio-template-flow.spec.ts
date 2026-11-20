@@ -27,10 +27,10 @@ async function openAdminStudio(page: Page) {
 test("new-client template picker selects, returns to catalog, creates a draft, and closes", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openAdminStudio(page);
-  await page.locator("summary", { hasText: "+ Klien · 6 Template" }).click();
+  await page.locator("summary", { hasText: "+ Klien · Template" }).click();
   const panel = page.locator(".studio-v2__create-panel");
   await expect(panel).toBeVisible();
-  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(6);
+  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(7);
 
   await panel.locator(".namina-template-picker__item")
     .filter({ hasText: "Dokter · Medical Teal" })
@@ -41,7 +41,7 @@ test("new-client template picker selects, returns to catalog, creates a draft, a
   await expect(panel.locator(".namina-template-picker__item")).toHaveCount(0);
 
   await panel.getByRole("button", { name: "Ganti Template" }).click();
-  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(6);
+  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(7);
   await panel.locator(".namina-template-picker__item")
     .filter({ hasText: "Original · Putih" })
     .locator(".namina-template-picker__option").click();
@@ -58,7 +58,7 @@ for (const width of [390, 1440]) {
   test(`new-client popup closes via X, Escape, and outside click at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await openAdminStudio(page);
-    const summary = page.locator("summary", { hasText: "+ Klien · 6 Template" });
+    const summary = page.locator("summary", { hasText: "+ Klien · Template" });
     const panel = page.locator(".studio-v2__create-panel");
 
     await summary.click();
@@ -109,4 +109,29 @@ test("V1 controls are gone and legacy generator URLs lead to the official Studio
     await page.goto(oldPath);
     await expect.poll(() => new URL(page.url()).pathname).toBe("/studio");
   }
+});
+
+test("approved Factory template is selectable and saved with its own pinned version",async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ const document=cloneViniTemplate("executive-demo");
+ document.presentation="original";
+ document.content.identity.displayName="Executive Demo";
+ document.content.original!.style={...document.content.original!.style!,backgroundColor:"#171717"};
+ const spec={slug:"executive-demo",name:"Executive Demo",category:"Professional",description:"Fictional executive template for test.",document};
+ await page.route("**/api/mcp-templates?*",async route=>{
+  const url=new URL(route.request().url());
+  const body=url.searchParams.get("action")==="catalog"?{templates:[{id:"factory:executive-demo:1",name:spec.name,category:spec.category,description:spec.description,demo:"/template-demo/executive-demo/1",headline:"Executive Demo",subtitle:"Professional",palette:{background:"#171717",accent:"#c9a66b",text:"#ffffff"},menus:["Nama","Karir","Skill","Karya","Produk"],style:document.content.original!.style}]}:{spec};
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(body)});
+ });
+ await openAdminStudio(page);
+ await page.locator("summary",{hasText:"+ Klien · Template"}).click();
+ const panel=page.locator(".studio-v2__create-panel");
+ await expect(panel.locator(".namina-template-picker__item")).toHaveCount(8);
+ await panel.locator(".namina-template-picker__item").filter({hasText:"Executive Demo"}).locator(".namina-template-picker__option").click();
+ await page.getByLabel("Nama link klien baru").fill("factory-qa-client");
+ await panel.getByRole("button",{name:"Buat Website dengan Template Ini"}).click();
+ await expect(page.locator(".studio-v2__canvas-indicator")).toContainText("factory-qa-client");
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem("namina:studio-v2:draft:factory-qa-client")||"{}"));
+ expect(saved.factoryTemplate).toBe("factory:executive-demo:1");
+ expect(saved.content.original.style.backgroundColor).toBe("#171717");
 });

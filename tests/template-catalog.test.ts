@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { templateCatalog, createSiteFromTemplate, applySiteAppearance, switchSiteTemplate, selectedTemplate } from "../src/static/templateCatalog.ts";
 import { cloneViniTemplate, prepareSite, siteDocumentSchema } from "../src/static/sites.ts";
 
-test("the same six template choices are available to admin and partner Studios", () => {
-  assert.deepEqual(templateCatalog.map(item => item.id), ["original", "original-white", "doctor", "chibi", "wedding2", "wedding"]);
-  assert.deepEqual(templateCatalog.map(item => item.demo), ["/vini", "", "/dokter", "/chibi", "/wedding2", "/wedding"]);
-  assert.equal(new Set(templateCatalog.map(item => item.id)).size, 6);
-  assert.deepEqual(templateCatalog[4].menus, ["Mempelai", "Acara", "Kisah", "Galeri", "Hadiah"]);
-  assert.deepEqual(templateCatalog[5].menus, ["Mempelai", "Acara", "Kisah", "Amplop", "Love Story"]);
+test("the same seven built-in template choices are available to admin and partner Studios", () => {
+  assert.deepEqual(templateCatalog.map(item => item.id), ["hari-anak-sedunia","original", "original-white", "doctor", "chibi", "wedding2", "wedding"]);
+  assert.deepEqual(templateCatalog.map(item => item.demo), ["/anaksedunia","/vini", "", "/dokter", "/chibi", "/wedding2", "/wedding"]);
+  assert.equal(new Set(templateCatalog.map(item => item.id)).size, 7);
+  assert.deepEqual(templateCatalog[5].menus, ["Mempelai", "Acara", "Kisah", "Galeri", "Hadiah"]);
+  assert.deepEqual(templateCatalog[6].menus, ["Mempelai", "Acara", "Kisah", "Amplop", "Love Story"]);
 });
 
 test("new websites use their selected template seed instead of always copying /vini", async () => {

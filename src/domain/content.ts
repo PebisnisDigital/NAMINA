@@ -23,6 +23,7 @@ export const reservedSlugs = new Set([
   "support",
   "gaya",
   "templates",
+  "template-demo",
   "formulir",
   "dokter",
   "chibi",

@@ -32,6 +32,7 @@ const siteMediaSchema = z.object({
 // documents or relying on browser-local backups when a published website changes.
 export const siteTemplateSnapshotSchema = z.object({
   presentation: presentationSchema.optional(),
+  factoryTemplate: z.string().regex(/^factory:[a-z0-9][a-z0-9-]{2,38}[a-z0-9]:[1-9][0-9]{0,5}$/).optional(),
   content: contentSchema,
   weddingDesign: weddingDesignSchema.optional(),
   familyDesign: familyDesignSchema.optional(),

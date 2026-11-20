@@ -104,7 +104,7 @@ export async function createSiteFromTemplate(slug: string, id: TemplateKey): Pro
 export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDocument {
   if(isFactoryKey(id)){
     const entry=factoryRegistry.get(id);
-    if(!entry)throw Error("Muat ulang katalog Template Factory terlebih dahulu.");
+    if(!entry){if(site.factoryTemplate===id)return siteDocumentSchema.parse(structuredClone(site));throw Error("Muat ulang katalog Template Factory terlebih dahulu.");}
     const next=setOriginalAppearance(site);if(!next.content.original)throw Error("Original editor required");
     next.content.original.style=structuredClone(entry.style);next.factoryTemplate=id;
     return siteDocumentSchema.parse(next);

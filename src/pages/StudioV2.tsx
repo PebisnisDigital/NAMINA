@@ -8,7 +8,7 @@ import { blankOriginal, viniOriginal } from "../static/originalSeed";
 import { originalStyleDefaults } from "../static/originalStyle";
 import { TemplatePicker } from "../components/TemplatePicker";
 import { StudioTemplateDialog } from "../components/StudioTemplateDialog";
-import { createSiteFromTemplate, switchSiteTemplate, applySiteAppearance, selectedTemplate, type TemplateKey } from "../static/templateCatalog";
+import { createSiteFromTemplate, switchSiteTemplate, applySiteAppearance, selectedTemplate, templateName, type TemplateKey } from "../static/templateCatalog";
 import { ClientLogoSettings } from "../components/ClientSiteLogo";
 import { blankSite, loadViniTemplate, playableDropboxMediaUrl, prepareSite, resolveMedia, retryDropboxImage, siteDocumentSchema, upgradeViniLegacyContact, viniSeed, type SiteDocument } from "../static/sites";
 import "../studio-v2.css";
@@ -797,7 +797,7 @@ export function StudioV2() {
             setCreatePanelOpen(event.currentTarget.open);
             if (event.currentTarget.open) setNewTemplateChosen(false);
           }}>
-          <summary title="Buat website dari salah satu dari 7 template">+ Klien · 7 Template</summary>
+          <summary title="Buat website dari katalog template">+ Klien · Template</summary>
           <div className="studio-v2__create-panel">
             <div className="studio-v2__create-panel-head">
               <div>
@@ -815,11 +815,7 @@ export function StudioV2() {
                 onChange={(template) => { setNewTemplate(template); setNewTemplateChosen(true); }} />
             ) : (
               <div className="studio-v2__create-panel-selection">
-                <span>Template dipilih: <strong>{newTemplate === "original" ? "Original · Gelap" :
-                  newTemplate === "original-white" ? "Original · Putih" :
-                  newTemplate === "doctor" ? "Dokter · Medical Teal" :
-                  newTemplate === "chibi" ? "Chibi · Candy Pastel" :
-                  newTemplate === "hari-anak-sedunia" ? "HARI ANAK SEDUNIA" : newTemplate === "wedding2" ? "Wedding · Living Paper" : "Wedding · Royal Ivory"}</strong></span>
+                <span>Template dipilih: <strong>{templateName(newTemplate)}</strong></span>
                 <button type="button" onClick={() => setNewTemplateChosen(false)}>Ganti Template</button>
               </div>
             )}

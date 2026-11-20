@@ -16,7 +16,7 @@ async function control(body:object){
 }
 function Demo({spec}:{spec:Spec}){
  const doc=normalizeSite(spec.document);
- return <ViniCinematic key={doc.slug} presentation={doc.presentation} content={doc.content} assetUrls={resolveMedia(doc)}/>;
+ return <ViniCinematic key={doc.slug} presentation="original" content={doc.content} assetUrls={resolveMedia(doc)}/>;
 }
 export function FactoryDemo({slug,version}:{slug:string;version:string}){
  const [spec,setSpec]=useState<Spec|null>(null),[error,setError]=useState("");

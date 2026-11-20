@@ -2,7 +2,7 @@ import {useEffect,useState} from "react";
 import {businessClient} from "../business/client";
 import {ViniCinematic} from "../components/ViniCinematic";
 import {resolveMedia,normalizeSite} from "../static/sites";
-import {factorySpecSchema,type FactoryEntry} from "../static/factoryTemplates";
+import {factorySpecSchema} from "../static/factoryTemplates";
 import type {z} from "zod";
 import "../business.css";
 type Spec=z.infer<typeof factorySpecSchema>;

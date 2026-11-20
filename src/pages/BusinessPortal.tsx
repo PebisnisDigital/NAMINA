@@ -194,7 +194,7 @@ export function BusinessPortal() {
           </section>}
           <section className="business__section">
             <h2>+ Buat website baru</h2>
-            <p className="business__fineprint">Enam template tersedia, termasuk Wedding Living Paper. Pilih gaya, lihat demo, kemudian buat website klien.</p>
+            <p className="business__fineprint">Pilih dari katalog template NAMINA. Pilih gaya, lihat demo, kemudian buat website klien.</p>
             <form className="business__create business__create--templates" onSubmit={(event) => void createSite(event)}>
               <div className="business__create-templates">
                 <strong>1. Pilih template</strong>

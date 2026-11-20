@@ -25,7 +25,7 @@ export function StudioTemplateDialog({
         <div>
           <span>PILIH TAMPILAN WEB</span>
           <h2 id="studio-templates-title">Template NAMINA</h2>
-          <p>Tujuh gaya. Personal, keluarga, dan undangan pernikahan.</p>
+          <p>Pilih gaya personal, keluarga, undangan, atau koleksi Template Factory.</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Tutup pilihan template">×</button>
       </header>

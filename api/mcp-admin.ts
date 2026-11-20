@@ -5,6 +5,7 @@ import {adminDb,checked,legacySite,legacySlugs} from "../server/mcp-admin-db.js"
 import {adminTools,allowed,isOperation,operationSchemas,operationCategory,scopes,saveDraftSchema} from "../server/mcp-admin.js";
 import {blankSite,prepareSite,siteDocumentSchema} from "../src/static/sites.js";
 import {createSiteFromTemplate,templateCatalog,type TemplateKey} from "../src/static/templateCatalog.js";
+import {factorySpecSchema,factoryEntry,isFactoryKey,instantiateFactory} from "../src/static/factoryTemplates.js";
 import {findAdminPublication} from "./_supabase-publisher.js";
 
 type Req=IncomingMessage&{body?:unknown};
@@ -70,8 +71,25 @@ export default async function handler(req:Req,res:ServerResponse){
    const r=a.updated_at===null?await db.from("namina_admin_mcp_drafts").insert({slug,...values}).select("slug,updated_at").maybeSingle():await db.from("namina_admin_mcp_drafts").update(values).eq("slug",slug).eq("updated_at",a.updated_at).select("slug,updated_at").maybeSingle();
    return r.error||!r.data?content({error:"Draft changed or exists; reload"},true):content(r.data);
   }
-  if(tool.name==="list_templates")return content(templateCatalog.map(({id,name,description})=>({id,name,description})));
-  if(tool.name==="get_template")return content({document:await createSiteFromTemplate(String(input.slug),input.template as TemplateKey),warning:"Sample data only. Replace all identity, contacts and assets."});
+  if(tool.name==="list_templates"){
+   const builtin=templateCatalog.map(({id,name,description})=>({id,name,description}));
+   if(process.env.NAMINA_TEMPLATE_MCP_ENABLED!=="true")return content(builtin);
+   const rows=checked(await db.from("namina_factory_templates").select("slug,version,spec,status").in("status",["published","archived"]).order("version",{ascending:false}).limit(500))||[];
+   const seen=new Set<string>(),entries=[];
+   for(const row of rows){if(seen.has(row.slug))continue;seen.add(row.slug);if(row.status!=="published")continue;const spec=factorySpecSchema.parse(row.spec);entries.push(factoryEntry(spec,row.version));}
+   return content([...builtin,...entries.map(({id,name,description})=>({id,name,description}))]);
+  }
+  if(tool.name==="get_template"){
+   const key=String(input.template);
+   if(isFactoryKey(key)){
+    if(process.env.NAMINA_TEMPLATE_MCP_ENABLED!=="true")return content({error:"Factory disabled"},true);
+    const [,slug,v]=key.split(":");
+    const row=checked(await db.from("namina_factory_templates").select("spec").eq("slug",slug).eq("version",Number(v)).eq("status","published").maybeSingle());
+    if(!row)return content({error:"Template not available"},true);
+    return content({document:instantiateFactory(factorySpecSchema.parse(row.spec).document,String(input.slug),key),warning:"Sample only. Replace identity, contacts and assets."});
+   }
+   return content({document:await createSiteFromTemplate(String(input.slug),key as TemplateKey),warning:"Sample data only. Replace all identity, contacts and assets."});
+  }
   if(tool.name==="get_original_template")return content({document:blankSite(String(input.slug)),warning:"Sample data only. Replace all identity, contacts and assets."});
   if(tool.name==="list_partners"){
    const lo=Number(input.offset),hi=lo+Number(input.limit)-1;

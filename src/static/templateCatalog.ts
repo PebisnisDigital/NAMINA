@@ -7,7 +7,10 @@ import { defaultFamilyDesign } from "./familyDesign.js";
 import { createFamilySample } from "./familySample.js";
 import { blankSite, loadViniTemplate, siteDocumentSchema, siteTemplateSnapshotSchema, type SiteDocument } from "./sites.js";
 
-export type TemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2" | "hari-anak-sedunia";
+import {factoryCatalogEntrySchema,factorySpecSchema,isFactoryKey,instantiateFactory,type FactoryKey,type FactoryEntry} from "./factoryTemplates.js";
+import {z} from "zod";
+export type BuiltInTemplateKey = "original" | "original-white" | "doctor" | "chibi" | "wedding" | "wedding2" | "hari-anak-sedunia";
+export type TemplateKey = BuiltInTemplateKey | FactoryKey;
 
 export type TemplateInfo = {
   id: TemplateKey;
@@ -20,6 +23,15 @@ export type TemplateInfo = {
   palette: { background: string; accent: string; text: string };
   menus: readonly string[];
 };
+
+const factoryRegistry=new Map<FactoryKey,FactoryEntry>();
+export const templateName=(id:TemplateKey)=>templateCatalog.find(t=>t.id===id)?.name||(isFactoryKey(id)?factoryRegistry.get(id)?.name:undefined)||id;
+export async function loadFactoryCatalog():Promise<TemplateInfo[]>{
+ const response=await fetch("/api/mcp-templates?action=catalog",{cache:"no-store"});
+ if(!response.ok)throw Error("Factory catalog unavailable");
+ const data=z.object({templates:z.array(factoryCatalogEntrySchema)}).parse(await response.json());
+ return data.templates.filter(t=>isFactoryKey(t.id)).map(t=>{const id=t.id as FactoryKey;factoryRegistry.set(id,t);return {...t,id};});
+}
 
 /** Available templates are shared by administrator and partner Studio. */
 export const templateCatalog: readonly TemplateInfo[] = [
@@ -69,6 +81,13 @@ export const templateCatalog: readonly TemplateInfo[] = [
 ];
 
 export async function createSiteFromTemplate(slug: string, id: TemplateKey): Promise<SiteDocument> {
+  if(isFactoryKey(id)){
+    const [,key,version]=id.split(":");
+    const response=await fetch("/api/mcp-templates?action=demo&slug="+encodeURIComponent(key)+"&version="+encodeURIComponent(version),{cache:"no-store"});
+    if(!response.ok)throw Error("Template Factory tidak tersedia.");
+    const spec=z.object({spec:factorySpecSchema}).parse(await response.json()).spec;
+    return instantiateFactory(spec.document,slug,id);
+  }
   switch (id) {
     case "doctor": return createDoctorTemplate(slug);
     case "chibi": return createChibiTemplate(slug);
@@ -77,11 +96,20 @@ export async function createSiteFromTemplate(slug: string, id: TemplateKey): Pro
     case "hari-anak-sedunia": return createFamilyTemplate(slug);
     case "original": return setOriginalAppearance(await loadViniTemplate(slug));
     case "original-white": return setOriginalWhiteAppearance(await loadViniTemplate(slug));
+    default: throw Error("Unknown template");
   }
 }
 
 /** Changing a client's appearance preserves their copy, photo, video, and gallery. */
 export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDocument {
+  if(isFactoryKey(id)){
+    const entry=factoryRegistry.get(id);
+    if(!entry)throw Error("Muat ulang katalog Template Factory terlebih dahulu.");
+    const next=setOriginalAppearance(site);if(!next.content.original)throw Error("Original editor required");
+    next.content.original.style=structuredClone(entry.style);next.factoryTemplate=id;
+    return siteDocumentSchema.parse(next);
+  }
+  site=structuredClone(site);delete site.factoryTemplate;
   switch (id) {
     case "doctor": return setDoctorAppearance(site);
     case "chibi": return setChibiAppearance(site);
@@ -90,6 +118,7 @@ export function applySiteAppearance(site: SiteDocument, id: TemplateKey): SiteDo
     case "hari-anak-sedunia": return siteDocumentSchema.parse({...site,presentation:id,familyDesign:site.familyDesign||createFamilySample()});
     case "original": return setOriginalAppearance(site);
     case "original-white": return setOriginalWhiteAppearance(site);
+    default: throw Error("Unknown template");
   }
 }
 
@@ -109,6 +138,7 @@ export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDoc
   }
   const snapshot = (source: SiteDocument) => siteTemplateSnapshotSchema.parse({
     presentation: source.presentation,
+    ...(source.factoryTemplate ? {factoryTemplate:source.factoryTemplate}:{}),
     content: structuredClone(source.content),
     media: structuredClone(source.media),
     ...(source.weddingDesign ? { weddingDesign: structuredClone(source.weddingDesign) } : {}),
@@ -149,6 +179,7 @@ export function switchSiteTemplate(site: SiteDocument, id: TemplateKey): SiteDoc
 
 /** Old manual white-mode sites should show the matching template selection. */
 export function selectedTemplate(site: SiteDocument): TemplateKey {
+  if (site.factoryTemplate && isFactoryKey(site.factoryTemplate) && site.presentation==="original") return site.factoryTemplate;
   if (site.presentation && site.presentation !== "original") return site.presentation;
   return site.content.original?.style?.backgroundColor?.toLowerCase() === "#ffffff"
     ? "original-white" : "original";

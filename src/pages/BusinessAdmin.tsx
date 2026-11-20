@@ -202,6 +202,7 @@ export function BusinessAdmin() {
         </section>
       : <>
           <AdminAiConnect onChanged={refresh}/>
+          <section className="business__section"><h2>Template Factory · R&amp;D</h2><p>Kelola agent pembuat template, demo, dan persetujuan rilis.</p><a className="business__primary" href="/studio/templates">Buka Template Factory</a></section>
           <section className="business__section">
             <div className="business__section-head"><h2>+ Tambah Mitra Baru</h2><span>Pendaftaran lewat WA</span></div>
             <form className="business__invite-form" onSubmit={(e) => { e.preventDefault(); void issueLink("create"); }}>

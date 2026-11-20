@@ -27,10 +27,10 @@ async function openAdminStudio(page: Page) {
 test("new-client template picker selects, returns to catalog, creates a draft, and closes", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openAdminStudio(page);
-  await page.locator("summary", { hasText: "+ Klien · 6 Template" }).click();
+  await page.locator("summary", { hasText: "+ Klien · Template" }).click();
   const panel = page.locator(".studio-v2__create-panel");
   await expect(panel).toBeVisible();
-  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(6);
+  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(7);
 
   await panel.locator(".namina-template-picker__item")
     .filter({ hasText: "Dokter · Medical Teal" })
@@ -41,7 +41,7 @@ test("new-client template picker selects, returns to catalog, creates a draft, a
   await expect(panel.locator(".namina-template-picker__item")).toHaveCount(0);
 
   await panel.getByRole("button", { name: "Ganti Template" }).click();
-  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(6);
+  await expect(panel.locator(".namina-template-picker__item")).toHaveCount(7);
   await panel.locator(".namina-template-picker__item")
     .filter({ hasText: "Original · Putih" })
     .locator(".namina-template-picker__option").click();
@@ -58,7 +58,7 @@ for (const width of [390, 1440]) {
   test(`new-client popup closes via X, Escape, and outside click at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await openAdminStudio(page);
-    const summary = page.locator("summary", { hasText: "+ Klien · 6 Template" });
+    const summary = page.locator("summary", { hasText: "+ Klien · Template" });
     const panel = page.locator(".studio-v2__create-panel");
 
     await summary.click();

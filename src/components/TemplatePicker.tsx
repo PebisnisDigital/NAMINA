@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
-import { templateCatalog, type TemplateKey } from "../static/templateCatalog";
+import {useEffect,useState,type CSSProperties} from "react";
+import { templateCatalog,loadFactoryCatalog,type TemplateInfo, type TemplateKey } from "../static/templateCatalog";
 import "./TemplatePicker.css";
 
 type Props = {
@@ -10,9 +10,11 @@ type Props = {
 };
 
 export function TemplatePicker({ value, onChange, compact = false, disabled = false }: Props) {
+  const [factory,setFactory]=useState<TemplateInfo[]>([]);
+  useEffect(()=>{let live=true;void loadFactoryCatalog().then(x=>{if(live)setFactory(x);}).catch(()=>{});return()=>{live=false;};},[]);
   return <div className={"namina-template-picker" + (compact ? " namina-template-picker--compact" : "")}
     role="group" aria-label="Pilih template NAMINA">
-    {templateCatalog.map(template => {
+    {[...templateCatalog,...factory].map(template => {
       const selected = value === template.id;
       const previewStyle = {
         "--template-bg": template.palette.background,
